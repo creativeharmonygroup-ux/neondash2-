@@ -262,6 +262,14 @@
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     pointer-events: none; opacity: 0; border-radius: 20px; transition: opacity 0.05s; z-index: 5;
   }
+  #fluctNotif {
+    position: absolute; top: 44%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 18px; font-weight: 900; letter-spacing: 5px;
+    pointer-events: none; z-index: 7; white-space: nowrap;
+    opacity: 0; transition: opacity 0.35s ease;
+  }
+  #fluctNotif.show { opacity: 1; }
+
   #speedNotif {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
     font-size: 14px; font-weight: 700; color: var(--neon-yellow);
@@ -347,6 +355,7 @@
 
   <div id="flashOverlay"></div>
   <div id="speedNotif">\u26a1 SPEED UP!</div>
+  <div id="fluctNotif"></div>
 
   <!-- START -->
   <div class="screen" id="startScreen">
@@ -607,8 +616,15 @@ function resize() { canvas.width = wrapper.clientWidth; canvas.height = wrapper.
 resize();
 
 let state = 'start';
-let score = 0, frame = 0, speed = 3.5, combo = 0;
+let score = 0, frame = 0, speed = 4.55, combo = 0;
 let coinsThisRun = 0;
+
+// Speed fluctuation
+let speedMult = 1.0, targetSpeedMult = 1.0;
+let fluctState = 'idle'; // 'idle' | 'slow' | 'fast'
+let fluctTimer = 0;
+let nextFluctFrame = 500 + Math.floor(Math.random() * 200);
+const fluctNotif = document.getElementById('fluctNotif');
 let screenShake = { x:0, y:0, power:0 };
 
 // Coin pickups en el aire
@@ -712,7 +728,10 @@ document.getElementById('restartBtn').addEventListener('touchend', e => { e.stop
 
 // \u2500\u2500 Game lifecycle \u2500\u2500
 function startGame() {
-  state='playing'; score=0; frame=0; speed=3.5; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0;
+  state='playing'; score=0; frame=0; speed=4.55; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0;
+  speedMult=1.0; targetSpeedMult=1.0; fluctState='idle'; fluctTimer=0;
+  nextFluctFrame = 500 + Math.floor(Math.random()*200);
+  fluctNotif.classList.remove('show');
   resetPlayer(); updateUI();
   document.getElementById('startScreen').classList.add('hidden');
   document.getElementById('gameOverScreen').classList.add('hidden');
@@ -1107,13 +1126,45 @@ function loop() {
 
   if(state==='playing'){
     frame++;
+
+    // ── Base speed progression (every 300 frames) ──
     if(frame%300===0){
       const ns=Math.min(speed+0.3,8);
       if(ns>speed){speed=ns;AudioEngine.playSpeedUp();flashScreen('#ffee00',0.25);showSpeedNotif();}
     }
 
-    stars.forEach(s=>{s.x-=s.speed*(speed/3.5);s.twinkle+=0.05;if(s.x<0){s.x=canvas.width;s.y=Math.random()*canvas.height;}});
-    nebula.forEach(n=>{n.x-=n.speed*(speed/3.5);if(n.x+n.r<0){n.x=canvas.width+n.r;n.y=Math.random()*canvas.height;}});
+    // ── Speed fluctuation state machine ──
+    if(fluctState==='idle' && frame>=nextFluctFrame){
+      fluctState='slow'; fluctTimer=Math.round(2.5*60);
+      targetSpeedMult=0.7;
+      fluctNotif.textContent='⬇ SLOW...';
+      fluctNotif.style.cssText='color:#00ccff;text-shadow:0 0 18px #00ccff,0 0 40px #00ccff;';
+      fluctNotif.classList.add('show');
+      flashScreen('#00ccff',0.2);
+    } else if(fluctState==='slow'){
+      fluctTimer--;
+      if(fluctTimer<=0){
+        fluctState='fast'; fluctTimer=Math.round(4*60);
+        targetSpeedMult=1.4;
+        fluctNotif.textContent='⬆ FAST!!!';
+        fluctNotif.style.cssText='color:#ff3300;text-shadow:0 0 18px #ff3300,0 0 40px #ff3300;';
+        flashScreen('#ff3300',0.3);
+        AudioEngine.playSpeedUp();
+      }
+    } else if(fluctState==='fast'){
+      fluctTimer--;
+      if(fluctTimer<=0){
+        fluctState='idle'; targetSpeedMult=1.0;
+        fluctNotif.classList.remove('show');
+        nextFluctFrame = frame + 500 + Math.floor(Math.random()*200);
+      }
+    }
+    // Smooth lerp toward target multiplier
+    speedMult += (targetSpeedMult - speedMult) * 0.05;
+    const spd = speed * speedMult;
+
+    stars.forEach(s=>{s.x-=s.speed*(spd/3.5);s.twinkle+=0.05;if(s.x<0){s.x=canvas.width;s.y=Math.random()*canvas.height;}});
+    nebula.forEach(n=>{n.x-=n.speed*(spd/3.5);if(n.x+n.r<0){n.x=canvas.width+n.r;n.y=Math.random()*canvas.height;}});
 
     const spawnInterval=Math.max(80,130-score*1.5);
     if(frame%Math.floor(spawnInterval)===0) spawnBarrier();
@@ -1128,11 +1179,11 @@ function loop() {
     }
 
     // Update coin pickups
-    coinPickups.forEach(c=>{ c.x-=speed; });
+    coinPickups.forEach(c=>{ c.x-=spd; });
     coinPickups=coinPickups.filter(c=>c.x>-20&&!c.collected);
 
     barriers.forEach(b=>{
-      b.x-=speed;
+      b.x-=spd;
       if(!b.scored&&b.x+BAR_W<player.x){
         b.scored=true; score++; combo++;
         updateUI(); popScore();
