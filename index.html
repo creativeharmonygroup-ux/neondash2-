@@ -327,12 +327,17 @@
   #fluctNotif.show { opacity: 1; }
 
   #speedNotif {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-    font-size: 14px; font-weight: 700; color: var(--neon-yellow);
-    letter-spacing: 4px; text-shadow: 0 0 20px var(--neon-yellow);
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 48px; font-weight: 700;
+    background: linear-gradient(90deg, #ffe600, #ff8c00, #ffe600);
+    background-size: 200% auto;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 4px;
+    filter: drop-shadow(0 0 12px #ffaa00) drop-shadow(0 0 28px #ff6600);
     pointer-events: none; z-index: 6; white-space: nowrap;
+    display: none;
   }
-  #speedNotif.show { animation: speedPop 1.2s cubic-bezier(0.34,1.56,0.64,1) forwards; }
 
   @keyframes titlePulse {
     0%,100% { text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan); }
@@ -341,12 +346,7 @@
   @keyframes float { 0%,100% { transform: translateY(0px) rotate(-5deg); } 50% { transform: translateY(-15px) rotate(5deg); } }
   @keyframes blink { 0%,100% { opacity: 0; } 50% { opacity: 1; } }
   @keyframes badgePop { 0% { transform: scale(0) rotate(-10deg); } 100% { transform: scale(1) rotate(0deg); } }
-  @keyframes speedPop {
-    0% { transform: translate(-50%,-50%) scale(0); opacity:1; }
-    30% { transform: translate(-50%,-50%) scale(1.2); opacity:1; }
-    70% { transform: translate(-50%,-50%) scale(1); opacity:1; }
-    100% { transform: translate(-50%,-70%) scale(0.8); opacity:0; }
-  }
+
   @keyframes coinPop { 0% { transform:scale(1); } 50% { transform:scale(1.5); } 100% { transform:scale(1); } }
 
   /* ── REPLAY OVERLAY ── */
@@ -744,7 +744,12 @@ function flashScreen(color, alpha=0.5) {
   setTimeout(()=>{ flashOverlay.style.opacity=0; },80);
 }
 function triggerShake(power=8) { screenShake.power=power; }
-function showSpeedNotif() { speedNotif.classList.remove('show'); void speedNotif.offsetWidth; speedNotif.classList.add('show'); }
+let speedNotifActive = false;
+function showSpeedNotif() {
+  speedNotif.style.display = 'block';
+  speedNotifActive = true;
+  setTimeout(() => { speedNotif.style.display = 'none'; speedNotifActive = false; }, 2000);
+}
 function showCombo(n) { const el=document.getElementById('comboDisplay'); el.textContent=`x${n} COMBO!`; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200); }
 function popScore() { const el=document.getElementById('scoreDisplay'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),150); }
 function popCoin() { const el=document.getElementById('coinCount'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),250); }
@@ -1189,11 +1194,11 @@ function loop() {
     // ── Base speed progression (every 300 frames) ──
     if(frame%300===0){
       const ns=Math.min(speed+0.3,8);
-      if(ns>speed){speed=ns;AudioEngine.playSpeedUp();flashScreen('#ffee00',0.25);showSpeedNotif();}
+      if(ns>speed){speed=ns;if(ns===8&&fluctState==='idle'){flashScreen('#ffee00',0.25);showSpeedNotif();}}
     }
 
     // ── Speed fluctuation state machine ──
-    if(fluctState==='idle' && frame>=nextFluctFrame){
+    if(fluctState==='idle' && frame>=nextFluctFrame && !speedNotifActive){
       fluctState='slow'; fluctTimer=Math.round(2.5*60);
       targetSpeedMult=0.7;
       fluctNotif.textContent='⬇ SLOW...';
@@ -1205,9 +1210,9 @@ function loop() {
       if(fluctTimer<=0){
         fluctState='fast'; fluctTimer=Math.round(4*60);
         targetSpeedMult=1.4;
-        fluctNotif.textContent='⬆ FAST!!!';
-        fluctNotif.style.cssText='color:#ff3300;text-shadow:0 0 18px #ff3300,0 0 40px #ff3300;';
-        flashScreen('#ff3300',0.3);
+        fluctNotif.textContent='⚡ SPEED UP!';
+        fluctNotif.style.cssText='color:#ffe600;font-size:48px;text-shadow:0 0 18px #ffaa00,0 0 40px #ff6600,0 0 70px #ff4400;';
+        flashScreen('#ffee00',0.25);
         AudioEngine.playSpeedUp();
       }
     } else if(fluctState==='fast'){

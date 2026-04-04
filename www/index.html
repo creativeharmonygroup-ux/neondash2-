@@ -328,11 +328,23 @@
 
   #speedNotif {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-    font-size: 14px; font-weight: 700; color: var(--neon-yellow);
-    letter-spacing: 4px; text-shadow: 0 0 20px var(--neon-yellow);
+    font-size: 48px; font-weight: 700;
+    background: linear-gradient(90deg, #ffe600, #ff8c00, #ffe600);
+    background-size: 200% auto;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 4px;
+    filter: drop-shadow(0 0 12px #ffaa00) drop-shadow(0 0 28px #ff6600);
     pointer-events: none; z-index: 6; white-space: nowrap;
   }
-  #speedNotif.show { animation: speedPop 1.2s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+  #speedNotif.show {
+    animation: speedPop 1.2s cubic-bezier(0.34,1.56,0.64,1) forwards,
+               speedGlow 0.4s ease-in-out infinite alternate;
+  }
+  @keyframes speedGlow {
+    0%   { filter: drop-shadow(0 0 10px #ffe600) drop-shadow(0 0 24px #ff8c00); background-position: 0% center; }
+    100% { filter: drop-shadow(0 0 22px #ffdd00) drop-shadow(0 0 48px #ff4400); background-position: 100% center; }
+  }
 
   @keyframes titlePulse {
     0%,100% { text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan); }
@@ -411,7 +423,7 @@
   </div>
 
   <div id="flashOverlay"></div>
-  <div id="speedNotif">\u26a1 SPEED UP!</div>
+  <div id="speedNotif">⚡ SPEED UP!</div>
   <div id="fluctNotif"></div>
 
   <!-- START -->
@@ -744,7 +756,59 @@ function flashScreen(color, alpha=0.5) {
   setTimeout(()=>{ flashOverlay.style.opacity=0; },80);
 }
 function triggerShake(power=8) { screenShake.power=power; }
-function showSpeedNotif() { speedNotif.classList.remove('show'); void speedNotif.offsetWidth; speedNotif.classList.add('show'); }
+function showSpeedNotif() {
+  speedNotif.classList.remove('show');
+  void speedNotif.offsetWidth;
+  speedNotif.classList.add('show');
+  playSpeedUpSound();
+}
+function playSpeedUpSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0, ctx.currentTime);
+    master.gain.linearRampToValueAtTime(0.55, ctx.currentTime + 0.05);
+    master.gain.linearRampToValueAtTime(0.0, ctx.currentTime + 0.9);
+    master.connect(ctx.destination);
+
+    // Rising sweep — "SPEEED"
+    const osc1 = ctx.createOscillator();
+    const g1 = ctx.createGain();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(180, ctx.currentTime);
+    osc1.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.45);
+    g1.gain.setValueAtTime(1, ctx.currentTime);
+    g1.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.48);
+    osc1.connect(g1); g1.connect(master);
+    osc1.start(ctx.currentTime); osc1.stop(ctx.currentTime + 0.5);
+
+    // Sharp punch — "UP!"
+    const osc2 = ctx.createOscillator();
+    const g2 = ctx.createGain();
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(620, ctx.currentTime + 0.42);
+    osc2.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.65);
+    g2.gain.setValueAtTime(0, ctx.currentTime + 0.42);
+    g2.gain.linearRampToValueAtTime(0.7, ctx.currentTime + 0.45);
+    g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+    osc2.connect(g2); g2.connect(master);
+    osc2.start(ctx.currentTime + 0.42); osc2.stop(ctx.currentTime + 0.92);
+
+    // Sub-bass thump on the hit
+    const osc3 = ctx.createOscillator();
+    const g3 = ctx.createGain();
+    osc3.type = 'sine';
+    osc3.frequency.setValueAtTime(90, ctx.currentTime + 0.42);
+    osc3.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.7);
+    g3.gain.setValueAtTime(0, ctx.currentTime + 0.42);
+    g3.gain.linearRampToValueAtTime(0.9, ctx.currentTime + 0.44);
+    g3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.75);
+    osc3.connect(g3); g3.connect(master);
+    osc3.start(ctx.currentTime + 0.42); osc3.stop(ctx.currentTime + 0.76);
+
+    setTimeout(() => ctx.close(), 1200);
+  } catch(e) {}
+}
 function showCombo(n) { const el=document.getElementById('comboDisplay'); el.textContent=`x${n} COMBO!`; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200); }
 function popScore() { const el=document.getElementById('scoreDisplay'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),150); }
 function popCoin() { const el=document.getElementById('coinCount'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),250); }
