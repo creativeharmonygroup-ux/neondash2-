@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+"<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NEON DASH 🚀</title>
+<title>NEON DASH \ud83d\ude80</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;600&display=swap');
 
@@ -122,7 +122,7 @@
   }
   .screen.hidden { display: none; }
 
-  /* ── START SCREEN ── */
+  /* \u2500\u2500 START SCREEN \u2500\u2500 */
   #startScreen { gap: 0; }
   .game-title {
     font-size: 52px; font-weight: 900; color: white; letter-spacing: 6px;
@@ -143,7 +143,7 @@
     color: rgba(255,255,255,0.4); letter-spacing: 2px; text-align: center; line-height: 2;
   }
 
-  /* ── GAME OVER SCREEN ── */
+  /* \u2500\u2500 GAME OVER SCREEN \u2500\u2500 */
   #gameOverScreen { gap: 8px; }
   .over-label { font-size: 11px; color: var(--neon-pink); letter-spacing: 6px; margin-bottom: 8px; opacity: 0.8; }
   .over-score {
@@ -176,21 +176,7 @@
   }
   .shop-btn-over:active { background: var(--neon-yellow); color: black; transform: scale(0.96); }
 
-  /* ── HUMILIATION PHRASE ── */
-  .humiliation-phrase {
-    font-size: 28px; font-weight: 900; color: var(--neon-pink);
-    text-shadow: 0 0 12px var(--neon-pink), 0 0 30px var(--neon-pink), 0 0 60px rgba(255,0,110,0.5);
-    letter-spacing: 3px; text-align: center; margin-bottom: 12px;
-    animation: phraseFlicker 0.6s ease-out;
-  }
-  @keyframes phraseFlicker {
-    0%   { opacity: 0; transform: scale(1.4); }
-    40%  { opacity: 1; transform: scale(0.95); }
-    70%  { opacity: 0.7; transform: scale(1.02); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-
-  /* ── SHOP SCREEN ── */
+  /* \u2500\u2500 SHOP SCREEN \u2500\u2500 */
   #shopScreen {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(6,6,18,0.97); backdrop-filter: blur(8px);
@@ -299,6 +285,49 @@
   }
   @keyframes coinPop { 0% { transform:scale(1); } 50% { transform:scale(1.5); } 100% { transform:scale(1); } }
 
+  /* ── REPLAY OVERLAY ── */
+  #replayOverlay { gap: 14px; padding: 20px; z-index: 80; }
+
+  #replayVideo {
+    width: 100%; max-height: 62%;
+    border-radius: 14px;
+    border: 2px solid rgba(255,0,110,0.6);
+    box-shadow: 0 0 40px rgba(255,0,110,0.4), 0 0 80px rgba(191,0,255,0.2);
+    background: #000; display: block; object-fit: cover;
+  }
+
+  .replay-btn {
+    background: rgba(255,0,110,0.1); border: 2px solid var(--neon-pink);
+    color: var(--neon-pink); font-family: 'Orbitron', monospace;
+    font-size: 13px; font-weight: 900; letter-spacing: 4px;
+    padding: 12px 36px; border-radius: 50px; cursor: pointer;
+    pointer-events: all;
+    box-shadow: 0 0 20px rgba(255,0,110,0.3);
+    transition: all 0.2s;
+  }
+  .replay-btn:active { background: var(--neon-pink); color: #020208; transform: scale(0.96); }
+
+  #shareTiktokBtn {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    width: 100%; max-width: 300px;
+    background: linear-gradient(135deg, #ff006e, #bf00ff);
+    color: white; border: none; border-radius: 50px; cursor: pointer;
+    font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 900;
+    letter-spacing: 3px; padding: 14px 28px;
+    box-shadow: 0 0 30px rgba(255,0,110,0.5);
+    transition: transform 0.15s, box-shadow 0.15s;
+    pointer-events: all;
+  }
+  #shareTiktokBtn:active { transform: scale(0.96); box-shadow: 0 0 50px rgba(255,0,110,0.7); }
+
+  .rv-play-again {
+    background: transparent; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.35); font-family: 'Orbitron', monospace;
+    font-size: 10px; letter-spacing: 2px; padding: 6px;
+    transition: color 0.2s; pointer-events: all;
+  }
+  .rv-play-again:hover { color: white; }
+
   @media (max-width: 420px) {
     #gameWrapper { width:100vw; height:100vh; border-radius:0; border:none; }
   }
@@ -311,50 +340,62 @@
     <div id="scoreDisplay">0</div>
     <div id="bestDisplay">BEST: 0</div>
     <div id="comboDisplay">x2 COMBO!</div>
-    <div id="coinHud"><span id="coinIcon">●</span><span id="coinCount">0</span></div>
-    <button id="soundToggle" title="Toggle Sound">🔊</button>
-    <button id="shopBtn" title="Shop">🛸</button>
+    <div id="coinHud"><span id="coinIcon">\u25cf</span><span id="coinCount">0</span></div>
+    <button id="soundToggle" title="Toggle Sound">\ud83d\udd0a</button>
+    <button id="shopBtn" title="Shop">\ud83d\udef8</button>
   </div>
 
   <div id="flashOverlay"></div>
-  <div id="speedNotif">⚡ SPEED UP!</div>
+  <div id="speedNotif">\u26a1 SPEED UP!</div>
 
   <!-- START -->
   <div class="screen" id="startScreen">
     <div class="game-title">NEON DASH</div>
-    <div class="game-subtitle">Hypercasual · Infinite</div>
-    <div class="ship-preview" id="startShipEmoji">🚀</div>
-    <div class="tap-hint">— TAP TO START —</div>
-    <div class="instructions">TAP / CLICK TO BOOST<br>DODGE THE BARRIERS<br>COLLECT COINS 💛</div>
+    <div class="game-subtitle">Hypercasual \u00b7 Infinite</div>
+    <div class="ship-preview" id="startShipEmoji">\ud83d\ude80</div>
+    <div class="tap-hint">\u2014 TAP TO START \u2014</div>
+    <div class="instructions">TAP / CLICK TO BOOST<br>DODGE THE BARRIERS<br>COLLECT COINS \ud83d\udc9b</div>
   </div>
 
   <!-- GAME OVER -->
   <div class="screen hidden" id="gameOverScreen">
     <div class="over-label">GAME OVER</div>
-    <div class="humiliation-phrase" id="humiliationPhrase"></div>
     <div class="over-score" id="finalScore">0</div>
     <div class="over-best" id="overBest">BEST: 0</div>
-    <div class="over-coins-earned" id="overCoinsEarned">+0 ● COINS</div>
-    <div class="new-best-badge" id="newBestBadge">★ NEW RECORD ★</div>
+    <div class="over-coins-earned" id="overCoinsEarned">+0 \u25cf COINS</div>
+    <div class="new-best-badge" id="newBestBadge">\u2605 NEW RECORD \u2605</div>
+    <button class="replay-btn" id="replayBtn">▶ REPLAY</button>
     <button class="restart-btn" id="restartBtn">PLAY AGAIN</button>
-    <button class="shop-btn-over" id="shopBtnOver">● SHIP SHOP</button>
+    <button class="shop-btn-over" id="shopBtnOver">SHIP SHOP</button>
+  </div>
+
+  <!-- REPLAY OVERLAY -->
+  <div id="replayOverlay" class="screen hidden">
+    <video id="replayVideo" playsinline muted autoplay loop></video>
+    <button id="shareTiktokBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.19 8.19 0 0 0 4.79 1.52V6.76a4.85 4.85 0 0 1-1.02-.07z"/>
+      </svg>
+      SHARE TO TIKTOK
+    </button>
+    <button class="rv-play-again" id="rvPlayAgainBtn">↺ PLAY AGAIN</button>
   </div>
 
   <!-- SHOP -->
   <div id="shopScreen" class="hidden">
     <div class="shop-header">
       <div class="shop-title">HANGAR</div>
-      <div class="shop-coins">● <span id="shopCoinCount">0</span></div>
-      <button class="shop-close" id="shopClose">✕</button>
+      <div class="shop-coins">\u25cf <span id="shopCoinCount">0</span></div>
+      <button class="shop-close" id="shopClose">\u2715</button>
     </div>
     <div class="shop-grid" id="shopGrid"></div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════
-//  SHIP CATALOGUE — 8 naves únicas
-// ═══════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+//  SHIP CATALOGUE \u2014 8 naves \u00fanicas
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 const SHIPS = [
   {
     id: 'classic',
@@ -365,8 +406,8 @@ const SHIPS = [
     flameColors: ['#ffffff','#aaffff','#ffee00','#ff6600'],
     wingColor: 'rgba(0,255,240,0.8)',
     glowColor: '#00fff0',
-    emoji: '🚀',
-    description: 'Nave clásica'
+    emoji: '\ud83d\ude80',
+    description: 'Nave cl\u00e1sica'
   },
   {
     id: 'phantom',
@@ -377,7 +418,7 @@ const SHIPS = [
     flameColors: ['#ffffff','#e0aaff','#bf00ff','#6600cc'],
     wingColor: 'rgba(191,0,255,0.8)',
     glowColor: '#bf00ff',
-    emoji: '🛸',
+    emoji: '\ud83d\udef8',
     description: 'Nave fantasma'
   },
   {
@@ -389,7 +430,7 @@ const SHIPS = [
     flameColors: ['#ffffff','#ffff00','#ff4400','#880000'],
     wingColor: 'rgba(255,68,0,0.9)',
     glowColor: '#ff4400',
-    emoji: '🔥',
+    emoji: '\ud83d\udd25',
     description: 'Nave de fuego'
   },
   {
@@ -401,7 +442,7 @@ const SHIPS = [
     flameColors: ['#ffffff','#ccffff','#aaaaaa','#333333'],
     wingColor: 'rgba(200,200,255,0.6)',
     glowColor: '#aaaaff',
-    emoji: '👻',
+    emoji: '\ud83d\udc7b',
     description: 'Nave invisible'
   },
   {
@@ -413,7 +454,7 @@ const SHIPS = [
     flameColors: ['#ffffff','#ffffff','#ffee00','#ff8800'],
     wingColor: 'rgba(255,238,0,0.9)',
     glowColor: '#ffee00',
-    emoji: '⭐',
+    emoji: '\u2b50',
     description: 'Estrella dorada'
   },
   {
@@ -425,7 +466,7 @@ const SHIPS = [
     flameColors: ['#aaaaff','#4466ff','#0033cc','#000066'],
     wingColor: 'rgba(0,102,255,0.8)',
     glowColor: '#0066ff',
-    emoji: '🌊',
+    emoji: '\ud83c\udf0a',
     description: 'Profundidades'
   },
   {
@@ -437,8 +478,8 @@ const SHIPS = [
     flameColors: ['#ffffff','#aaffdd','#00ff88','#006633'],
     wingColor: 'rgba(0,255,136,0.8)',
     glowColor: '#00ff88',
-    emoji: '⚡',
-    description: 'Tormenta eléctrica'
+    emoji: '\u26a1',
+    description: 'Tormenta el\u00e9ctrica'
   },
   {
     id: 'legend',
@@ -449,15 +490,15 @@ const SHIPS = [
     flameColors: ['#ffffff','#ffaacc','#ff006e','#880033'],
     wingColor: 'rgba(255,0,110,0.9)',
     glowColor: '#ff006e',
-    emoji: '👑',
+    emoji: '\ud83d\udc51',
     description: 'La nave suprema',
     rainbow: true
   }
 ];
 
-// ═══════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 //  SAVE SYSTEM
-// ═══════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 function loadSave() {
   try {
     const s = JSON.parse(localStorage.getItem('neonDashSave') || '{}');
@@ -476,9 +517,9 @@ let save = loadSave();
 function getShip(id) { return SHIPS.find(s => s.id === id) || SHIPS[0]; }
 function currentShip() { return getShip(save.selected); }
 
-// ═══════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 //  AUDIO ENGINE
-// ═══════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 const AudioEngine = (() => {
   let ctx = null, masterGain = null, muted = false, musicPlaying = false, musicTimer = null, nextBarTime = 0;
   const BPM = 138, beat = 60 / BPM;
@@ -553,9 +594,9 @@ const AudioEngine = (() => {
   return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, startMusic, stopMusic };
 })();
 
-// ═══════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 //  GAME ENGINE
-// ═══════════════════════════════════════════
+// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const wrapper = document.getElementById('gameWrapper');
@@ -639,13 +680,13 @@ function updateCoinHud() {
   document.getElementById('shopCoinCount').textContent = save.coins;
 }
 
-// ── Controls ──
+// \u2500\u2500 Controls \u2500\u2500
 const soundBtn = document.getElementById('soundToggle');
 soundBtn.addEventListener('click', e => {
   e.stopPropagation();
   const nowMuted = !AudioEngine.isMuted();
   AudioEngine.setMuted(nowMuted);
-  soundBtn.textContent = nowMuted ? '🔇' : '🔊';
+  soundBtn.textContent = nowMuted ? '\ud83d\udd07' : '\ud83d\udd0a';
   soundBtn.classList.toggle('muted', nowMuted);
 });
 
@@ -669,16 +710,21 @@ wrapper.addEventListener('touchstart', e => { e.preventDefault(); doJump(); }, {
 document.getElementById('restartBtn').addEventListener('click', e => { e.stopPropagation(); startGame(); });
 document.getElementById('restartBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); startGame(); });
 
-// ── Game lifecycle ──
+// \u2500\u2500 Game lifecycle \u2500\u2500
 function startGame() {
   state='playing'; score=0; frame=0; speed=3.5; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0;
   resetPlayer(); updateUI();
   document.getElementById('startScreen').classList.add('hidden');
   document.getElementById('gameOverScreen').classList.add('hidden');
   document.getElementById('shopScreen').classList.add('hidden');
+  const rv = document.getElementById('replayVideo');
+  rv.pause(); rv.src = '';
+  document.getElementById('replayOverlay').classList.add('hidden');
+  Replay.reset();
   spawnBarrier();
   AudioEngine.startMusic();
   updateStartShipEmoji();
+  Replay.start(canvas);
 }
 
 function updateUI() {
@@ -699,6 +745,7 @@ function awardCoins(amount, x, y) {
 
 function gameOver() {
   state='dead'; player.dead=true;
+  const clipPromise = Replay.stop();
   AudioEngine.stopMusic(); AudioEngine.playDeath();
   flashScreen('#ff006e', 0.7); triggerShake(12);
   spawnParticles(player.x,player.y,'#ff006e',30,1.5);
@@ -710,32 +757,20 @@ function gameOver() {
     setTimeout(()=>AudioEngine.playNewRecord(),800);
   } else { document.getElementById('newBestBadge').style.display='none'; }
 
-  // Bonus monedas por puntuación
+  // Bonus monedas por puntuaci\u00f3n
   const bonus = Math.floor(score / 5);
   if (bonus > 0) awardCoins(bonus);
 
-  const humiliations = [
-    "THAT WAS SAD.", "PATHETIC.", "NOT EVEN CLOSE.",
-    "MY GRANDMA FLIES BETTER.", "SERIOUSLY? 0 POINTS?",
-    "EMBARRASSING.", "OUCH.", "DELETED.",
-    "IS THAT ALL?", "KEEP DREAMING."
-  ];
-  const phrase = humiliations[Math.floor(Math.random() * humiliations.length)];
-  const el = document.getElementById('humiliationPhrase');
-  el.textContent = phrase;
-  el.style.animation = 'none';
-  void el.offsetWidth; // reflow to restart animation
-  el.style.animation = '';
-
   document.getElementById('finalScore').textContent = score;
   document.getElementById('overBest').textContent = 'BEST: ' + save.best;
-  document.getElementById('overCoinsEarned').textContent = `+${coinsThisRun + bonus} ● COINS`;
-  setTimeout(()=>{ document.getElementById('gameOverScreen').classList.remove('hidden'); },700);
+  document.getElementById('overCoinsEarned').textContent = `+${coinsThisRun + bonus} \u25cf COINS`;
+  clipPromise.then(blob => { lastClipBlob = blob; });
+  setTimeout(() => { document.getElementById('gameOverScreen').classList.remove('hidden'); }, 700);
 }
 
-// ─────────────────────────────────
+// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 //  SHIP SHOP
-// ─────────────────────────────────
+// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function openShop() {
   AudioEngine.init(); AudioEngine.resume();
   renderShop();
@@ -780,13 +815,13 @@ function renderShop() {
     // Badge
     const badge = document.createElement('div');
     badge.className = 'ship-card-badge';
-    if (selected) { badge.classList.add('badge-selected'); badge.textContent = '✓ ACTIVE'; }
+    if (selected) { badge.classList.add('badge-selected'); badge.textContent = '\u2713 ACTIVE'; }
     else if (owned) { badge.classList.add('badge-owned'); badge.textContent = 'SELECT'; }
     else if (ship.price === 0) { badge.classList.add('badge-owned'); badge.textContent = 'FREE'; }
     else {
       badge.classList.add('badge-price');
       if (affordable) badge.classList.add('affordable');
-      badge.innerHTML = `● ${ship.price}`;
+      badge.innerHTML = `\u25cf ${ship.price}`;
     }
     card.appendChild(badge);
 
@@ -836,7 +871,7 @@ function drawShipPreview(c, ship, selected) {
   if (!save.owned.includes(ship.id)) {
     gfx.restore();
     gfx.fillStyle='rgba(6,6,18,0.55)'; gfx.fillRect(0,0,70,70);
-    gfx.fillStyle='rgba(255,255,255,0.5)'; gfx.font='bold 22px serif'; gfx.textAlign='center'; gfx.textBaseline='middle'; gfx.fillText('🔒',35,35);
+    gfx.fillStyle='rgba(255,255,255,0.5)'; gfx.font='bold 22px serif'; gfx.textAlign='center'; gfx.textBaseline='middle'; gfx.fillText('\ud83d\udd12',35,35);
   } else {
     gfx.restore();
   }
@@ -875,7 +910,7 @@ function animateShipPreview(c, ship) {
     if (!save.owned.includes(ship.id)) {
       gfx.restore();
       gfx.fillStyle='rgba(6,6,18,0.55)'; gfx.fillRect(0,0,70,70);
-      gfx.font='bold 22px serif'; gfx.textAlign='center'; gfx.textBaseline='middle'; gfx.fillText('🔒',35,35);
+      gfx.font='bold 22px serif'; gfx.textAlign='center'; gfx.textBaseline='middle'; gfx.fillText('\ud83d\udd12',35,35);
     } else { gfx.restore(); }
 
     requestAnimationFrame(frame);
@@ -903,7 +938,7 @@ function onShipCardClick(ship, card) {
     flashScreen(ship.color, 0.3);
     setTimeout(()=>renderShop(), 200);
   } else {
-    // Can't afford — shake card
+    // Can't afford \u2014 shake card
     card.style.animation = 'none'; void card.offsetWidth;
     card.style.animation = 'shake 0.3s ease';
     setTimeout(()=>{ card.style.animation=''; },300);
@@ -915,9 +950,9 @@ function getRainbow(t) {
   return `rgb(${Math.floor(r)},${Math.floor(g)},${Math.floor(b)})`;
 }
 
-// ─────────────────────────────────
+// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 //  DRAW FUNCTIONS
-// ─────────────────────────────────
+// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function drawBackground() {
   const grad=ctx.createLinearGradient(0,0,0,canvas.height);
   grad.addColorStop(0,'#060612'); grad.addColorStop(1,'#0d0d2b');
@@ -950,12 +985,12 @@ function drawCoinPickups() {
     cg.addColorStop(0,'#ffffff'); cg.addColorStop(0.4,'#ffee00'); cg.addColorStop(1,'#cc8800');
     ctx.fillStyle=cg;
     ctx.beginPath(); ctx.ellipse(0,0,c.r*(0.3+0.7*squish),c.r,0,0,Math.PI*2); ctx.fill();
-    // ● symbol
+    // \u25cf symbol
     if(squish>0.3){
       ctx.fillStyle='rgba(0,0,0,0.5)';
       ctx.font=`bold ${c.r}px Orbitron`;
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('●',0,1);
+      ctx.fillText('\u25cf',0,1);
     }
     ctx.shadowBlur=0; ctx.restore();
   });
@@ -1056,7 +1091,7 @@ function checkCoinCollection() {
   });
 }
 
-// ── Main loop ──
+// \u2500\u2500 Main loop \u2500\u2500
 function loop() {
   if(screenShake.power>0){
     screenShake.x=(Math.random()-0.5)*screenShake.power;
@@ -1083,7 +1118,7 @@ function loop() {
     const spawnInterval=Math.max(80,130-score*1.5);
     if(frame%Math.floor(spawnInterval)===0) spawnBarrier();
 
-    // Spawn monedas (cada ~200 frames, posición aleatoria)
+    // Spawn monedas (cada ~200 frames, posici\u00f3n aleatoria)
     if(frame%180===90) spawnCoinPickup();
 
     if(!player.dead){
@@ -1129,6 +1164,109 @@ function loop() {
 updateUI();
 updateStartShipEmoji();
 loop();
+
+// ═══════════════════════════════════════════════
+//  REPLAY RECORDER  — rolling 5-second buffer
+// ═══════════════════════════════════════════════
+const Replay = (() => {
+  const CHUNK_MS = 500;
+  const MAX_CHUNKS = 11; // chunk[0]=EBML header + last 10 data chunks ≈ 5s
+
+  const MIMES = [
+    'video/webm;codecs=vp9',
+    'video/webm;codecs=vp8',
+    'video/webm',
+    'video/mp4'
+  ];
+
+  let recorder = null, chunks = [], mime = '';
+
+  function start(canvasEl) {
+    try {
+      chunks = [];
+      mime = MIMES.find(m => MediaRecorder.isTypeSupported(m)) || '';
+      const stream = canvasEl.captureStream(30);
+      const opts = { videoBitsPerSecond: 2_000_000 };
+      if (mime) opts.mimeType = mime;
+      recorder = new MediaRecorder(stream, opts);
+      recorder.ondataavailable = e => {
+        if (!e.data || e.data.size === 0) return;
+        chunks.push(e.data);
+        // Always keep chunk[0] (EBML/container header) + last MAX_CHUNKS-1 chunks
+        if (chunks.length > MAX_CHUNKS) {
+          chunks = [chunks[0], ...chunks.slice(-(MAX_CHUNKS - 1))];
+        }
+      };
+      recorder.start(CHUNK_MS);
+    } catch (err) {
+      recorder = null;
+    }
+  }
+
+  function stop() {
+    return new Promise(resolve => {
+      if (!recorder || recorder.state === 'inactive') { resolve(null); return; }
+      recorder.addEventListener('stop', () => {
+        const blob = chunks.length
+          ? new Blob(chunks, { type: mime || 'video/webm' })
+          : null;
+        resolve(blob);
+      }, { once: true });
+      recorder.stop();
+    });
+  }
+
+  function reset() {
+    try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch (_) {}
+    recorder = null; chunks = [];
+  }
+
+  return { start, stop, reset };
+})();
+
+let lastClipBlob = null;
+
+// ── REPLAY button → show video overlay ──
+document.getElementById('replayBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  if (!lastClipBlob) return;
+
+  const url = URL.createObjectURL(lastClipBlob);
+  const vid = document.getElementById('replayVideo');
+  vid.src = url;
+  vid.play().catch(() => {});
+
+  document.getElementById('gameOverScreen').classList.add('hidden');
+  document.getElementById('replayOverlay').classList.remove('hidden');
+});
+
+// ── SHARE TO TIKTOK ──
+document.getElementById('shareTiktokBtn').addEventListener('click', async () => {
+  if (!lastClipBlob) return;
+  const ext = lastClipBlob.type.includes('mp4') ? 'mp4' : 'webm';
+  const file = new File([lastClipBlob], `neon-dash.${ext}`, { type: lastClipBlob.type });
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        title: '💀 Morí en NEON DASH',
+        text: '¿Puedes superar mi score? 🚀 Descarga NEON DASH gratis',
+        files: [file]
+      });
+      return;
+    } catch (_) { /* cancelled */ }
+  }
+  // Fallback: download
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(lastClipBlob);
+  a.download = `neon-dash.${ext}`;
+  a.click();
+});
+
+// ── PLAY AGAIN from replay overlay ──
+document.getElementById('rvPlayAgainBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  startGame();
+});
 </script>
 
 <style>
