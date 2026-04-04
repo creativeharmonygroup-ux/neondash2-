@@ -325,6 +325,13 @@
     opacity: 0; transition: opacity 0.35s ease;
   }
   #fluctNotif.show { opacity: 1; }
+  #phaseIndicator {
+    position: absolute; top: 14px; right: 16px;
+    font-size: 11px; font-weight: 700; letter-spacing: 3px;
+    pointer-events: none; z-index: 7; white-space: nowrap;
+    opacity: 0; transition: opacity 0.6s ease, color 0.6s ease, text-shadow 0.6s ease;
+  }
+  #phaseIndicator.show { opacity: 0.55; }
 
   #speedNotif {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -413,6 +420,7 @@
   <div id="flashOverlay"></div>
   <div id="speedNotif">⚡ SPEED UP!</div>
   <div id="fluctNotif"></div>
+  <div id="phaseIndicator"></div>
 
   <!-- START -->
   <div class="screen" id="startScreen">
@@ -679,10 +687,9 @@ let coinsThisRun = 0;
 
 // Speed fluctuation
 let speedMult = 1.0, targetSpeedMult = 1.0;
-let fluctState = 'idle'; // 'idle' | 'slow' | 'fast'
-let fluctTimer = 0;
-let nextFluctFrame = 500 + Math.floor(Math.random() * 200);
+let scorePhase = -1; // tracks last applied phase to detect changes
 const fluctNotif = document.getElementById('fluctNotif');
+const phaseIndicator = document.getElementById('phaseIndicator');
 let screenShake = { x:0, y:0, power:0 };
 
 // Coin pickups en el aire
@@ -792,9 +799,9 @@ document.getElementById('restartBtn').addEventListener('touchend', e => { e.stop
 // \u2500\u2500 Game lifecycle \u2500\u2500
 function startGame() {
   state='playing'; score=0; frame=0; speed=5.45; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0;
-  speedMult=1.0; targetSpeedMult=1.0; fluctState='idle'; fluctTimer=0;
-  nextFluctFrame = 500 + Math.floor(Math.random()*200);
+  speedMult=1.0; targetSpeedMult=1.0; scorePhase=-1;
   fluctNotif.classList.remove('show');
+  phaseIndicator.classList.remove('show');
   resetPlayer(); updateUI();
   document.getElementById('startScreen').classList.add('hidden');
   document.getElementById('gameOverScreen').classList.add('hidden');
@@ -1194,34 +1201,34 @@ function loop() {
     // ── Base speed progression (every 300 frames) ──
     if(frame%300===0){
       const ns=Math.min(speed+0.3,8);
-      if(ns>speed){speed=ns;if(ns===8&&fluctState==='idle'){flashScreen('#ffee00',0.25);showSpeedNotif();}}
+      if(ns>speed){speed=ns;if(ns===8&&!speedNotifActive){flashScreen('#ffee00',0.25);showSpeedNotif();}}
     }
 
-    // ── Speed fluctuation state machine ──
-    if(fluctState==='idle' && frame>=nextFluctFrame && !speedNotifActive){
-      fluctState='slow'; fluctTimer=Math.round(2.5*60);
-      targetSpeedMult=0.7;
-      fluctNotif.textContent='⬇ SLOW...';
-      fluctNotif.style.cssText='color:#00ccff;text-shadow:0 0 18px #00ccff,0 0 40px #00ccff;';
-      fluctNotif.classList.add('show');
-      flashScreen('#00ccff',0.2);
-    } else if(fluctState==='slow'){
-      fluctTimer--;
-      if(fluctTimer<=0){
-        fluctState='fast'; fluctTimer=Math.round(4*60);
-        targetSpeedMult=1.4;
-        fluctNotif.textContent='⚡ SPEED UP!';
-        fluctNotif.style.cssText='color:#ffe600;font-size:48px;text-shadow:0 0 18px #ffaa00,0 0 40px #ff6600,0 0 70px #ff4400;';
-        flashScreen('#ffee00',0.25);
-        AudioEngine.playSpeedUp();
-      }
-    } else if(fluctState==='fast'){
-      fluctTimer--;
-      if(fluctTimer<=0){
-        fluctState='idle'; targetSpeedMult=1.0;
+    // ── Score-based speed phase system ──
+    // Cycle every 20 pts: 0-5 normal | 5-10 fast(140%) | 10-15 slow(70%) | 15-20 normal
+    const cycleScore = score % 20;
+    const phase = cycleScore < 5 ? 0 : cycleScore < 10 ? 1 : cycleScore < 15 ? 2 : 0;
+    if(phase !== scorePhase){
+      scorePhase = phase;
+      if(phase === 1){
+        targetSpeedMult = 1.4;
+        fluctNotif.textContent = '⚡ SPEED UP!';
+        fluctNotif.style.cssText = 'color:#ffe600;font-size:22px;text-shadow:0 0 18px #ffaa00,0 0 40px #ff6600;';
+        fluctNotif.classList.add('show');
+        setTimeout(()=>fluctNotif.classList.remove('show'), 1500);
+        flashScreen('#ffee00', 0.2);
+      } else if(phase === 2){
+        targetSpeedMult = 0.7;
+        fluctNotif.textContent = 'SLOW DOWN...';
+        fluctNotif.style.cssText = 'color:#00ccff;font-size:22px;text-shadow:0 0 18px #00ccff,0 0 40px #0099ff;';
+        fluctNotif.classList.add('show');
+        setTimeout(()=>fluctNotif.classList.remove('show'), 1500);
+        flashScreen('#00ccff', 0.2);
+      } else {
+        targetSpeedMult = 1.0;
         fluctNotif.classList.remove('show');
-        nextFluctFrame = frame + 500 + Math.floor(Math.random()*200);
       }
+      phaseIndicator.classList.remove('show');
     }
     // Smooth lerp toward target multiplier
     speedMult += (targetSpeedMult - speedMult) * 0.05;
