@@ -1206,19 +1206,19 @@ function loop() {
 
     // ── Score-based speed phase system ──
     // Cycle every 20 pts: 0-5 normal | 5-10 fast(140%) | 10-15 slow(70%) | 15-20 normal
-    const cycleScore = score % 20;
-    const phase = cycleScore < 5 ? 0 : cycleScore < 10 ? 1 : cycleScore < 15 ? 2 : 0;
+    const cycleScore = score % 30;
+    const phase = cycleScore < 8 ? 0 : cycleScore < 15 ? 1 : cycleScore < 22 ? 2 : 0;
     if(phase !== scorePhase){
       scorePhase = phase;
       if(phase === 1){
-        targetSpeedMult = 1.4;
+        targetSpeedMult = 1.2;
         fluctNotif.textContent = '⚡ SPEED UP!';
         fluctNotif.style.cssText = 'color:#ffe600;font-size:22px;text-shadow:0 0 18px #ffaa00,0 0 40px #ff6600;';
         fluctNotif.classList.add('show');
         setTimeout(()=>fluctNotif.classList.remove('show'), 1500);
         flashScreen('#ffee00', 0.2);
       } else if(phase === 2){
-        targetSpeedMult = 0.7;
+        targetSpeedMult = 0.75;
         fluctNotif.textContent = 'SLOW DOWN...';
         fluctNotif.style.cssText = 'color:#00ccff;font-size:22px;text-shadow:0 0 18px #00ccff,0 0 40px #0099ff;';
         fluctNotif.classList.add('show');
