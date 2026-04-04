@@ -179,6 +179,13 @@
     0%,100% { text-shadow: 0 0 20px var(--neon-pink), 0 0 50px var(--neon-pink), 0 0 100px rgba(255,0,110,0.5); }
     50%      { text-shadow: 0 0 30px var(--neon-pink), 0 0 70px var(--neon-pink), 0 0 140px rgba(255,0,110,0.7), 0 0 200px rgba(255,0,110,0.25); }
   }
+  .over-phrase {
+    font-size: 13px; font-weight: 900; color: var(--neon-pink);
+    letter-spacing: 2px; text-align: center; line-height: 1.3;
+    text-shadow: 0 0 12px var(--neon-pink), 0 0 30px var(--neon-pink);
+    max-width: 280px; margin-bottom: 6px;
+    animation: labelPulse 2s ease-in-out infinite;
+  }
   .over-best {
     font-size: 12px; color: var(--neon-yellow); letter-spacing: 4px; margin-bottom: 4px;
     text-shadow: 0 0 8px var(--neon-yellow);
@@ -420,6 +427,7 @@
   <div class="screen hidden" id="gameOverScreen">
     <div class="over-label">GAME OVER</div>
     <div class="over-score" id="finalScore">0</div>
+    <div class="over-phrase" id="overPhrase"></div>
     <div class="over-best" id="overBest">BEST: 0</div>
     <div class="over-coins-earned" id="overCoinsEarned">+0 \u25cf COINS</div>
     <div class="new-best-badge" id="newBestBadge">\u2605 NEW RECORD \u2605</div>
@@ -831,6 +839,7 @@ function gameOver() {
   if (bonus > 0) awardCoins(bonus);
 
   document.getElementById('finalScore').textContent = score;
+  document.getElementById('overPhrase').textContent = getDeathPhrase(score);
   document.getElementById('overBest').textContent = 'BEST: ' + save.best;
   document.getElementById('overCoinsEarned').textContent = `+${coinsThisRun + bonus} \u25cf COINS`;
   clipPromise.then(blob => { lastClipBlob = blob; });
@@ -1326,6 +1335,29 @@ const Replay = (() => {
 })();
 
 let lastClipBlob = null;
+
+const DEATH_PHRASES = [
+  'THAT WAS SAD.',
+  'PATHETIC.',
+  'NOT EVEN CLOSE.',
+  'MY GRANDMA FLIES BETTER.',
+  'EMBARRASSING.',
+  'OUCH.',
+  'DELETED.',
+  'IS THAT ALL?',
+  'KEEP DREAMING.',
+  'TRULY AWFUL.',
+  'ALMOST... BUT NO.',
+  'YOU CALL THAT FLYING?',
+  'FAILED ATTEMPT.',
+  'NOT YOUR DAY.',
+  'KEEP PRACTICING.'
+];
+function getDeathPhrase(s) {
+  if (s === 0) return 'YOU DIED INSTANTLY. WOW.';
+  if (s <= 5)  return 'SERIOUSLY? ' + s + ' POINTS?';
+  return DEATH_PHRASES[Math.floor(Math.random() * DEATH_PHRASES.length)];
+}
 
 // ── REPLAY button → show video overlay ──
 document.getElementById('replayBtn').addEventListener('click', e => {
