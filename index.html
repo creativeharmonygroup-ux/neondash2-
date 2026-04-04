@@ -362,7 +362,7 @@
     <div class="game-title">NEON DASH</div>
     <div class="game-subtitle">Hypercasual \u00b7 Infinite</div>
     <div class="ship-preview" id="startShipEmoji">\ud83d\ude80</div>
-    <div class="tap-hint">\u2014 TAP TO START \u2014</div>
+    <div class="tap-hint">TAP TO START</div>
     <div class="instructions">TAP / CLICK TO BOOST<br>DODGE THE BARRIERS<br>COLLECT COINS \ud83d\udc9b</div>
   </div>
 
@@ -728,7 +728,7 @@ document.getElementById('restartBtn').addEventListener('touchend', e => { e.stop
 
 // \u2500\u2500 Game lifecycle \u2500\u2500
 function startGame() {
-  state='playing'; score=0; frame=0; speed=4.55; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0;
+  state='playing'; score=0; frame=0; speed=5.45; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0;
   speedMult=1.0; targetSpeedMult=1.0; fluctState='idle'; fluctTimer=0;
   nextFluctFrame = 500 + Math.floor(Math.random()*200);
   fluctNotif.classList.remove('show');
