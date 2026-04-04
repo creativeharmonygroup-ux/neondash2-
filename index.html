@@ -144,37 +144,86 @@
   }
 
   /* \u2500\u2500 GAME OVER SCREEN \u2500\u2500 */
-  #gameOverScreen { gap: 8px; }
-  .over-label { font-size: 11px; color: var(--neon-pink); letter-spacing: 6px; margin-bottom: 8px; opacity: 0.8; }
-  .over-score {
-    font-size: 80px; font-weight: 900; color: white;
-    text-shadow: 0 0 20px var(--neon-pink), 0 0 40px var(--neon-pink); line-height: 1; margin-bottom: 4px;
+  #gameOverScreen {
+    gap: 8px; background: rgba(4,2,16,0.96);
   }
-  .over-best { font-size: 12px; color: var(--neon-yellow); letter-spacing: 4px; margin-bottom: 4px; }
+  #gameOverScreen::before {
+    content: ''; position: absolute; inset: 28px 18px; border-radius: 20px;
+    border: 1.5px solid var(--neon-pink);
+    box-shadow: 0 0 18px rgba(255,0,110,0.45), 0 0 55px rgba(255,0,110,0.15),
+                inset 0 0 30px rgba(255,0,110,0.05);
+    pointer-events: none;
+    animation: panelFlicker 4s ease-in-out infinite;
+  }
+  @keyframes panelFlicker {
+    0%,94%,100% { opacity:1; }
+    95%  { opacity:0.65; }
+    96%  { opacity:1; }
+    97%  { opacity:0.75; }
+  }
+  .over-label {
+    font-size: 11px; color: var(--neon-pink); letter-spacing: 8px; margin-bottom: 6px;
+    text-shadow: 0 0 10px var(--neon-pink), 0 0 24px var(--neon-pink);
+    animation: labelPulse 2s ease-in-out infinite;
+  }
+  @keyframes labelPulse {
+    0%,100% { opacity:0.8; text-shadow: 0 0 10px var(--neon-pink), 0 0 24px var(--neon-pink); }
+    50%      { opacity:1;   text-shadow: 0 0 18px var(--neon-pink), 0 0 50px var(--neon-pink), 0 0 80px rgba(255,0,110,0.4); }
+  }
+  .over-score {
+    font-size: 88px; font-weight: 900; color: var(--neon-pink); line-height: 1; margin-bottom: 4px;
+    text-shadow: 0 0 20px var(--neon-pink), 0 0 50px var(--neon-pink), 0 0 100px rgba(255,0,110,0.5);
+    animation: scoreGlow 1.5s ease-in-out infinite, btnFloat 3s ease-in-out infinite;
+  }
+  @keyframes scoreGlow {
+    0%,100% { text-shadow: 0 0 20px var(--neon-pink), 0 0 50px var(--neon-pink), 0 0 100px rgba(255,0,110,0.5); }
+    50%      { text-shadow: 0 0 30px var(--neon-pink), 0 0 70px var(--neon-pink), 0 0 140px rgba(255,0,110,0.7), 0 0 200px rgba(255,0,110,0.25); }
+  }
+  .over-best {
+    font-size: 12px; color: var(--neon-yellow); letter-spacing: 4px; margin-bottom: 4px;
+    text-shadow: 0 0 8px var(--neon-yellow);
+  }
   .over-coins-earned {
-    font-size: 13px; color: var(--neon-yellow); letter-spacing: 3px; margin-bottom: 20px;
+    font-size: 13px; color: var(--neon-yellow); letter-spacing: 3px; margin-bottom: 18px;
     opacity: 0.9; font-family: 'Rajdhani', sans-serif;
+    text-shadow: 0 0 6px rgba(255,238,0,0.6);
   }
   .new-best-badge {
     background: var(--neon-yellow); color: black; font-size: 10px; font-weight: 700;
-    letter-spacing: 3px; padding: 4px 12px; border-radius: 20px; margin-bottom: 20px;
+    letter-spacing: 3px; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px;
     display: none; animation: badgePop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 0 20px rgba(255,238,0,0.7);
   }
   .restart-btn {
     background: transparent; border: 2px solid var(--neon-cyan); color: var(--neon-cyan);
     font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700;
     letter-spacing: 4px; padding: 14px 40px; border-radius: 50px; cursor: pointer;
-    pointer-events: all; box-shadow: 0 0 20px rgba(0,255,240,0.3); transition: all 0.2s;
-    text-transform: uppercase; margin-bottom: 10px;
+    pointer-events: all; text-transform: uppercase; margin-bottom: 10px;
+    text-shadow: 0 0 10px var(--neon-cyan);
+    box-shadow: 0 0 16px rgba(0,255,240,0.4), inset 0 0 14px rgba(0,255,240,0.06);
+    animation: btnPulse 2s ease-in-out infinite, btnFloat 2.8s ease-in-out infinite;
+    transition: background 0.15s, transform 0.15s;
   }
-  .restart-btn:active { background: var(--neon-cyan); color: black; transform: scale(0.96); }
+  @keyframes btnPulse {
+    0%,100% { box-shadow: 0 0 16px rgba(0,255,240,0.4), inset 0 0 14px rgba(0,255,240,0.06); }
+    50%      { box-shadow: 0 0 30px rgba(0,255,240,0.7), 0 0 55px rgba(0,255,240,0.3), inset 0 0 20px rgba(0,255,240,0.1); }
+  }
+  .restart-btn:active { background: var(--neon-cyan); color: black; transform: scale(0.96); animation: none; }
+  @keyframes btnFloat {
+    0%,100% { transform: translateY(0px); }
+    50%      { transform: translateY(-5px); }
+  }
   .shop-btn-over {
-    background: transparent; border: 1.5px solid rgba(255,238,0,0.5); color: var(--neon-yellow);
-    font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 600;
+    background: transparent; border: 1.5px solid rgba(255,238,0,0.6); color: var(--neon-yellow);
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
     letter-spacing: 3px; padding: 10px 30px; border-radius: 50px; cursor: pointer;
-    pointer-events: all; transition: all 0.2s; text-transform: uppercase;
+    pointer-events: all; text-transform: uppercase;
+    text-shadow: 0 0 8px var(--neon-yellow);
+    box-shadow: 0 0 12px rgba(255,238,0,0.3), inset 0 0 10px rgba(255,238,0,0.04);
+    transition: box-shadow 0.2s, background 0.2s;
+    animation: btnFloat 3.4s ease-in-out infinite 0.6s;
   }
-  .shop-btn-over:active { background: var(--neon-yellow); color: black; transform: scale(0.96); }
+  .shop-btn-over:active { background: var(--neon-yellow); color: black; transform: scale(0.96); animation: none; }
 
   /* \u2500\u2500 SHOP SCREEN \u2500\u2500 */
   #shopScreen {
@@ -311,7 +360,8 @@
     padding: 12px 36px; border-radius: 50px; cursor: pointer;
     pointer-events: all;
     box-shadow: 0 0 20px rgba(255,0,110,0.3);
-    transition: all 0.2s;
+    animation: btnFloat 3.6s ease-in-out infinite 0.4s;
+    transition: background 0.15s, transform 0.15s;
   }
   .replay-btn:active { background: var(--neon-pink); color: #020208; transform: scale(0.96); }
 
