@@ -367,6 +367,17 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
   transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),filter 0.2s;
 }
 
+/* SHARE CARD */
+#shareOverlay{position:fixed;inset:0;z-index:9998;background:rgba(2,2,8,0.97);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px;backdrop-filter:blur(12px);}
+#shareOverlay.show{display:flex;}
+#shareCanvas{max-width:min(370px,88vw);border-radius:18px;border:2px solid rgba(255,0,110,0.7);box-shadow:0 0 60px rgba(255,0,110,0.4),0 0 120px rgba(191,0,255,0.2);}
+.share-phrase{font-family:'Orbitron',monospace;font-size:clamp(16px,4.5vw,24px);font-weight:900;color:#ff006e;text-shadow:0 0 20px #ff006e,0 0 50px #ff006e;letter-spacing:2px;text-align:center;max-width:360px;line-height:1.3;animation:phrPulse 1.5s ease-in-out infinite;}
+@keyframes phrPulse{0%,100%{text-shadow:0 0 20px #ff006e,0 0 40px #ff006e;}50%{text-shadow:0 0 40px #ff006e,0 0 80px #ff006e,0 0 140px rgba(255,0,110,0.5);}}
+.share-tiktok-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#ff006e,#bf00ff);color:white;font-family:'Orbitron',monospace;font-size:12px;font-weight:900;letter-spacing:3px;padding:16px 36px;border-radius:50px;border:none;cursor:pointer;box-shadow:0 0 40px rgba(255,0,110,0.5);transition:all 0.2s;width:100%;max-width:320px;}
+.share-tiktok-btn:hover,.share-tiktok-btn:active{transform:scale(1.05);box-shadow:0 0 70px rgba(255,0,110,0.8);}
+.share-again-btn{background:transparent;color:rgba(255,255,255,0.35);font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;border:none;cursor:pointer;padding:8px;transition:color 0.2s;}
+.share-again-btn:hover{color:white;}
+
 /* DESKTOP */
 @media(min-width:700px){
   .grid{grid-template-columns:repeat(4,1fr);}
@@ -505,6 +516,17 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
   <div class="footer-links"><a href="#">Privacidad</a><a href="#">Términos</a><a href="#">Contacto</a><a href="https://tiktok.com" target="_blank">TikTok</a></div>
   <div class="footer-copy">© 2026 NEON DASH · neondash.juegos</div>
 </footer>
+
+<!-- SHARE CARD OVERLAY -->
+<div id="shareOverlay">
+  <canvas id="shareCanvas"></canvas>
+  <div id="sharePhrase" class="share-phrase"></div>
+  <button class="share-tiktok-btn" id="shareTiktokBtn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.19 8.19 0 0 0 4.79 1.52V6.76a4.85 4.85 0 0 1-1.02-.07z"/></svg>
+    SHARE TO TIKTOK
+  </button>
+  <button class="share-again-btn" id="shareAgainBtn">↺ INTENTAR DE NUEVO</button>
+</div>
 
 <script>
 const obs=new IntersectionObserver(entries=>{entries.forEach((e,i)=>{if(e.isIntersecting)setTimeout(()=>e.target.classList.add('visible'),i*80)});},{threshold:0.1});
@@ -707,7 +729,7 @@ function loop(){
     const r=player.size*.6;
     if(player.y-r<0||player.y+r>c.height)dead=true;
     for(const b of barriers){if(player.x+r>b.x&&player.x-r<b.x+28&&(player.y-r<b.top||player.y+r>b.bot)){dead=true;break;}}
-    if(dead){spawnP(player.x,player.y,'#ff006e',20);setTimeout(()=>window.parent.postMessage('gameover','*'),1200);}
+    if(dead){spawnP(player.x,player.y,'#ff006e',20);setTimeout(()=>{try{window.parent.postMessage({type:'gameover',score:score,img:c.toDataURL('image/png')},'*');}catch(err){window.parent.postMessage({type:'gameover',score:score,img:''},'*');}},1200);}
   }
   requestAnimationFrame(loop);
 }
@@ -766,7 +788,174 @@ demoReplay.addEventListener('click', resetDemo);
 
 // Escuchar cuando el jugador muere en el iframe
 window.addEventListener('message', e => {
-  if (e.data === 'gameover') endDemo();
+  if (!e.data) return;
+  if (e.data === 'gameover') { endDemo(); return; }
+  if (e.data.type === 'gameover') {
+    clearInterval(timerInterval);
+    timerNum.style.display = 'none';
+    showShareCard(e.data.score || 0, e.data.img || '');
+  }
+});
+
+// ── SHARE CARD ──
+const HUMILIATE = [
+  "CHOCASTE AL PRIMER INTENTO 😂",
+  "¿EN SERIO? NI 3 PUNTOS 💀",
+  "HASTA TU ABUELA VUELA MEJOR",
+  "RÉCORD MUNDIAL DE PENA",
+  "0 TALENTO DETECTADO 🤡",
+  "TU NAVE NO QUIERE VOLAR",
+  "GG EZ COPE L + RATIO",
+  "ERES EL JEFE FINAL DEL FRACASO",
+  "ESO NO FUE VOLAR, FUE CAER",
+  "NEON DASH TE RECHAZA 💔"
+];
+
+function wrapTextCanvas(ctx, text, x, y, maxWidth, lineH) {
+  const words = text.split(' ');
+  let line = '', lines = [];
+  for (let w of words) {
+    const test = line + w + ' ';
+    if (ctx.measureText(test).width > maxWidth && line) { lines.push(line.trim()); line = w + ' '; }
+    else line = test;
+  }
+  lines.push(line.trim());
+  const startY = y - (lines.length - 1) * lineH / 2;
+  lines.forEach((l, i) => ctx.fillText(l, x, startY + i * lineH));
+}
+
+async function showShareCard(score, imgDataUrl) {
+  const phrase = HUMILIATE[Math.floor(Math.random() * HUMILIATE.length)];
+  document.getElementById('sharePhrase').textContent = phrase;
+
+  const sc = document.getElementById('shareCanvas');
+  const ctx = sc.getContext('2d');
+  const W = 540, H = 960;
+  sc.width = W; sc.height = H;
+
+  // Background
+  ctx.fillStyle = '#020208';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(0,255,240,0.05)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  // Gradient background glow
+  const grd = ctx.createRadialGradient(W/2, H*0.35, 0, W/2, H*0.35, 320);
+  grd.addColorStop(0, 'rgba(255,0,110,0.12)');
+  grd.addColorStop(1, 'transparent');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, W, H);
+
+  // Logo
+  await document.fonts.load('900 32px Orbitron');
+  ctx.textAlign = 'center';
+  ctx.font = '900 32px Orbitron, monospace';
+  ctx.shadowColor = '#00fff0'; ctx.shadowBlur = 25;
+  ctx.fillStyle = '#00fff0';
+  ctx.fillText('NEON DASH', W / 2, 80);
+
+  ctx.font = '700 13px Orbitron, monospace';
+  ctx.fillStyle = 'rgba(0,255,240,0.5)';
+  ctx.shadowBlur = 8;
+  ctx.fillText('INFINITE HYPERCASUAL', W / 2, 108);
+
+  // Divider line top
+  ctx.shadowBlur = 0;
+  const lg1 = ctx.createLinearGradient(40, 0, W-40, 0);
+  lg1.addColorStop(0, 'transparent'); lg1.addColorStop(0.5, 'rgba(0,255,240,0.4)'); lg1.addColorStop(1, 'transparent');
+  ctx.strokeStyle = lg1; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40, 128); ctx.lineTo(W-40, 128); ctx.stroke();
+
+  // Game screenshot
+  if (imgDataUrl) {
+    const img = new Image();
+    img.src = imgDataUrl;
+    await new Promise(r => { img.onload = r; img.onerror = r; });
+    const iW = W - 60, iH = iW * (img.height / img.width || 0.75);
+    ctx.save();
+    ctx.shadowColor = '#ff006e'; ctx.shadowBlur = 20;
+    // Rounded clip
+    ctx.beginPath();
+    const rx = 30, ry = 148, rw = iW, rh = iH, rad = 12;
+    ctx.moveTo(rx+rad, ry); ctx.lineTo(rx+rw-rad, ry);
+    ctx.arcTo(rx+rw, ry, rx+rw, ry+rad, rad);
+    ctx.lineTo(rx+rw, ry+rh-rad);
+    ctx.arcTo(rx+rw, ry+rh, rx+rw-rad, ry+rh, rad);
+    ctx.lineTo(rx+rad, ry+rh);
+    ctx.arcTo(rx, ry+rh, rx, ry+rh-rad, rad);
+    ctx.lineTo(rx, ry+rad);
+    ctx.arcTo(rx, ry, rx+rad, ry, rad);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(img, rx, ry, rw, rh);
+    ctx.restore();
+  }
+
+  // Divider line mid
+  const lg2 = ctx.createLinearGradient(40, 0, W-40, 0);
+  lg2.addColorStop(0, 'transparent'); lg2.addColorStop(0.5, 'rgba(255,0,110,0.5)'); lg2.addColorStop(1, 'transparent');
+  ctx.strokeStyle = lg2; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40, 620); ctx.lineTo(W-40, 620); ctx.stroke();
+
+  // Humiliating phrase
+  ctx.font = '900 38px Orbitron, monospace';
+  ctx.fillStyle = '#ff006e';
+  ctx.shadowColor = '#ff006e'; ctx.shadowBlur = 35;
+  wrapTextCanvas(ctx, phrase, W/2, 700, W - 80, 50);
+
+  // Score section
+  ctx.shadowColor = '#ffee00'; ctx.shadowBlur = 50;
+  ctx.fillStyle = '#ffee00';
+  ctx.font = '900 100px Orbitron, monospace';
+  ctx.fillText(score, W/2, 830);
+
+  ctx.shadowBlur = 10;
+  ctx.fillStyle = 'rgba(255,238,0,0.6)';
+  ctx.font = '700 14px Orbitron, monospace';
+  ctx.letterSpacing = '4px';
+  ctx.fillText('PUNTUACIÓN', W/2, 858);
+  ctx.letterSpacing = '0px';
+
+  // Watermark
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(0,255,240,0.25)';
+  ctx.font = '600 13px Orbitron, monospace';
+  ctx.fillText('neondash.juegos  ·  ¿PUEDES SUPERARME?', W/2, H - 28);
+
+  document.getElementById('shareOverlay').classList.add('show');
+}
+
+function hideShareCard() {
+  document.getElementById('shareOverlay').classList.remove('show');
+  resetDemo();
+}
+
+document.getElementById('shareAgainBtn').addEventListener('click', hideShareCard);
+
+document.getElementById('shareTiktokBtn').addEventListener('click', () => {
+  const sc = document.getElementById('shareCanvas');
+  sc.toBlob(async blob => {
+    const file = new File([blob], 'neon-dash-muerte.png', {type: 'image/png'});
+    if (navigator.share && navigator.canShare && navigator.canShare({files: [file]})) {
+      try {
+        await navigator.share({
+          title: '💀 Morí en NEON DASH',
+          text: '¿Puedes superar mi puntuación? Descarga NEON DASH gratis 🚀',
+          files: [file]
+        });
+        return;
+      } catch(err) { /* cancelled or unsupported */ }
+    }
+    // Fallback: download the image
+    const a = document.createElement('a');
+    a.download = 'neon-dash-muerte.png';
+    a.href = sc.toDataURL('image/png');
+    a.click();
+  }, 'image/png');
 });
 </script>
 </body>

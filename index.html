@@ -285,6 +285,56 @@
   }
   @keyframes coinPop { 0% { transform:scale(1); } 50% { transform:scale(1.5); } 100% { transform:scale(1); } }
 
+  /* ── SHARE CARD OVERLAY ── */
+  #shareCardOverlay {
+    position: absolute; inset: 0; z-index: 80;
+    background: rgba(2,2,8,0.97); backdrop-filter: blur(8px);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px; padding: 16px;
+  }
+  #shareCardOverlay.show { display: flex; }
+
+  #shareCardCanvas {
+    max-width: 100%; max-height: 52vh;
+    border-radius: 14px;
+    border: 2px solid rgba(255,0,110,0.6);
+    box-shadow: 0 0 40px rgba(255,0,110,0.35), 0 0 80px rgba(191,0,255,0.15);
+  }
+
+  #sharePhrase {
+    font-size: clamp(13px, 3.8vw, 18px); font-weight: 900;
+    color: #ff006e; letter-spacing: 2px; text-align: center;
+    text-shadow: 0 0 14px #ff006e, 0 0 35px #ff006e;
+    line-height: 1.25; max-width: 340px;
+    animation: phrasePulse 1.4s ease-in-out infinite;
+  }
+  @keyframes phrasePulse {
+    0%,100% { text-shadow: 0 0 14px #ff006e, 0 0 30px #ff006e; }
+    50%      { text-shadow: 0 0 28px #ff006e, 0 0 60px #ff006e, 0 0 100px rgba(255,0,110,0.4); }
+  }
+
+  #shareTiktokBtn {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    width: 100%; max-width: 300px;
+    background: linear-gradient(135deg, #ff006e, #bf00ff);
+    color: white; border: none; border-radius: 50px; cursor: pointer;
+    font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 900;
+    letter-spacing: 3px; padding: 14px 28px;
+    box-shadow: 0 0 30px rgba(255,0,110,0.5);
+    transition: transform 0.15s, box-shadow 0.15s;
+    pointer-events: all;
+  }
+  #shareTiktokBtn:active { transform: scale(0.96); box-shadow: 0 0 50px rgba(255,0,110,0.7); }
+
+  #sharePlayAgainBtn {
+    background: transparent; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.35); font-family: 'Orbitron', monospace;
+    font-size: 10px; letter-spacing: 2px; padding: 6px;
+    transition: color 0.2s; pointer-events: all;
+  }
+  #sharePlayAgainBtn:hover { color: white; }
+
   @media (max-width: 420px) {
     #gameWrapper { width:100vw; height:100vh; border-radius:0; border:none; }
   }
@@ -323,6 +373,19 @@
     <div class="new-best-badge" id="newBestBadge">\u2605 NEW RECORD \u2605</div>
     <button class="restart-btn" id="restartBtn">PLAY AGAIN</button>
     <button class="shop-btn-over" id="shopBtnOver">\u25cf SHIP SHOP</button>
+  </div>
+
+  <!-- SHARE CARD -->
+  <div id="shareCardOverlay">
+    <canvas id="shareCardCanvas"></canvas>
+    <div id="sharePhrase"></div>
+    <button id="shareTiktokBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.19 8.19 0 0 0 4.79 1.52V6.76a4.85 4.85 0 0 1-1.02-.07z"/>
+      </svg>
+      SHARE TO TIKTOK
+    </button>
+    <button id="sharePlayAgainBtn">↺ PLAY AGAIN</button>
   </div>
 
   <!-- SHOP -->
@@ -661,6 +724,7 @@ function startGame() {
   document.getElementById('startScreen').classList.add('hidden');
   document.getElementById('gameOverScreen').classList.add('hidden');
   document.getElementById('shopScreen').classList.add('hidden');
+  document.getElementById('shareCardOverlay').classList.remove('show');
   spawnBarrier();
   AudioEngine.startMusic();
   updateStartShipEmoji();
@@ -684,6 +748,7 @@ function awardCoins(amount, x, y) {
 
 function gameOver() {
   state='dead'; player.dead=true;
+  const deathShot = canvas.toDataURL('image/png');
   AudioEngine.stopMusic(); AudioEngine.playDeath();
   flashScreen('#ff006e', 0.7); triggerShake(12);
   spawnParticles(player.x,player.y,'#ff006e',30,1.5);
@@ -702,7 +767,7 @@ function gameOver() {
   document.getElementById('finalScore').textContent = score;
   document.getElementById('overBest').textContent = 'BEST: ' + save.best;
   document.getElementById('overCoinsEarned').textContent = `+${coinsThisRun + bonus} \u25cf COINS`;
-  setTimeout(()=>{ document.getElementById('gameOverScreen').classList.remove('hidden'); },700);
+  setTimeout(() => showShareCard(score, save.best, deathShot), 700);
 }
 
 // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -1101,6 +1166,173 @@ function loop() {
 updateUI();
 updateStartShipEmoji();
 loop();
+
+// ═══════════════════════════════════════════════
+//  SHARE CARD
+// ═══════════════════════════════════════════════
+const HUMILIATE_PHRASES = [
+  'CHOCASTE AL PRIMER INTENTO 😂',
+  '¿EN SERIO? NI 3 PUNTOS 💀',
+  'HASTA TU ABUELA VUELA MEJOR',
+  'RÉCORD MUNDIAL DE PENA 🤡',
+  '0 TALENTO DETECTADO',
+  'GG EZ COPE L + RATIO',
+  'ESO NO FUE VOLAR, FUE CAER',
+  'TU NAVE TE ODIA 💔',
+  'NEON DASH TE RECHAZÓ',
+  'EL JEFE FINAL DEL FRACASO'
+];
+
+function wrapCard(ctx, text, x, y, maxW, lineH) {
+  const words = text.split(' ');
+  let line = '', lines = [];
+  for (const w of words) {
+    const t = line + w + ' ';
+    if (ctx.measureText(t).width > maxW && line) { lines.push(line.trim()); line = w + ' '; }
+    else line = t;
+  }
+  lines.push(line.trim());
+  const startY = y - (lines.length - 1) * lineH / 2;
+  lines.forEach((l, i) => ctx.fillText(l, x, startY + i * lineH));
+}
+
+async function showShareCard(finalScore, bestScore, screenshotDataUrl) {
+  const phrase = HUMILIATE_PHRASES[Math.floor(Math.random() * HUMILIATE_PHRASES.length)];
+  document.getElementById('sharePhrase').textContent = phrase;
+
+  const ship = currentShip();
+  const sc = document.getElementById('shareCardCanvas');
+  const sctx = sc.getContext('2d');
+  const W = 540, H = 960;
+  sc.width = W; sc.height = H;
+
+  // Background
+  sctx.fillStyle = '#020208';
+  sctx.fillRect(0, 0, W, H);
+
+  // Grid
+  sctx.strokeStyle = 'rgba(0,255,240,0.05)';
+  sctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { sctx.beginPath(); sctx.moveTo(x,0); sctx.lineTo(x,H); sctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { sctx.beginPath(); sctx.moveTo(0,y); sctx.lineTo(W,y); sctx.stroke(); }
+
+  // Pink bloom behind screenshot area
+  const bloom = sctx.createRadialGradient(W/2, H*0.36, 0, W/2, H*0.36, 260);
+  bloom.addColorStop(0, 'rgba(255,0,110,0.14)');
+  bloom.addColorStop(1, 'transparent');
+  sctx.fillStyle = bloom;
+  sctx.fillRect(0, 0, W, H);
+
+  // Logo
+  await document.fonts.load('900 30px Orbitron');
+  sctx.textAlign = 'center';
+  sctx.font = '900 30px Orbitron, monospace';
+  sctx.shadowColor = '#00fff0'; sctx.shadowBlur = 22;
+  sctx.fillStyle = '#00fff0';
+  sctx.fillText('NEON DASH', W/2, 74);
+
+  sctx.font = '700 12px Orbitron, monospace';
+  sctx.fillStyle = 'rgba(0,255,240,0.45)';
+  sctx.shadowBlur = 6;
+  sctx.fillText('HYPERCASUAL · INFINITE', W/2, 100);
+
+  // Divider top
+  sctx.shadowBlur = 0;
+  const d1 = sctx.createLinearGradient(40,0,W-40,0);
+  d1.addColorStop(0,'transparent'); d1.addColorStop(.5,'rgba(0,255,240,0.35)'); d1.addColorStop(1,'transparent');
+  sctx.strokeStyle = d1; sctx.lineWidth = 1;
+  sctx.beginPath(); sctx.moveTo(40,118); sctx.lineTo(W-40,118); sctx.stroke();
+
+  // Game screenshot (rounded rect clip)
+  if (screenshotDataUrl) {
+    const img = new Image();
+    img.src = screenshotDataUrl;
+    await new Promise(r => { img.onload = r; img.onerror = r; });
+    const margin = 28, imgX = margin, imgY = 134;
+    const imgW = W - margin*2, imgH = imgW * (img.height / (img.width || 1));
+    sctx.save();
+    sctx.shadowColor = ship.glowColor || '#00fff0'; sctx.shadowBlur = 18;
+    const r = 12;
+    sctx.beginPath();
+    sctx.moveTo(imgX+r, imgY);
+    sctx.lineTo(imgX+imgW-r, imgY); sctx.arcTo(imgX+imgW,imgY,imgX+imgW,imgY+r,r);
+    sctx.lineTo(imgX+imgW, imgY+imgH-r); sctx.arcTo(imgX+imgW,imgY+imgH,imgX+imgW-r,imgY+imgH,r);
+    sctx.lineTo(imgX+r, imgY+imgH); sctx.arcTo(imgX,imgY+imgH,imgX,imgY+imgH-r,r);
+    sctx.lineTo(imgX, imgY+r); sctx.arcTo(imgX,imgY,imgX+r,imgY,r);
+    sctx.closePath(); sctx.clip();
+    sctx.drawImage(img, imgX, imgY, imgW, imgH);
+    sctx.restore();
+  }
+
+  // Divider mid
+  const d2 = sctx.createLinearGradient(40,0,W-40,0);
+  d2.addColorStop(0,'transparent'); d2.addColorStop(.5,'rgba(255,0,110,0.5)'); d2.addColorStop(1,'transparent');
+  sctx.strokeStyle = d2; sctx.lineWidth = 1;
+  sctx.beginPath(); sctx.moveTo(40,606); sctx.lineTo(W-40,606); sctx.stroke();
+
+  // Ship name row
+  sctx.font = '700 13px Orbitron, monospace';
+  sctx.fillStyle = ship.color || '#00fff0';
+  sctx.shadowColor = ship.color || '#00fff0'; sctx.shadowBlur = 12;
+  sctx.fillText(ship.emoji + '  ' + ship.name, W/2, 638);
+
+  // Humiliating phrase
+  sctx.font = '900 36px Orbitron, monospace';
+  sctx.fillStyle = '#ff006e';
+  sctx.shadowColor = '#ff006e'; sctx.shadowBlur = 30;
+  wrapCard(sctx, phrase, W/2, 710, W - 70, 46);
+
+  // Score
+  sctx.shadowColor = '#ffee00'; sctx.shadowBlur = 50;
+  sctx.fillStyle = '#ffee00';
+  sctx.font = '900 96px Orbitron, monospace';
+  sctx.fillText(finalScore, W/2, 828);
+
+  sctx.font = '700 13px Orbitron, monospace';
+  sctx.fillStyle = 'rgba(255,238,0,0.55)';
+  sctx.shadowBlur = 8;
+  sctx.fillText('SCORE', W/2, 852);
+
+  // Best
+  sctx.font = '600 12px Orbitron, monospace';
+  sctx.fillStyle = 'rgba(255,255,255,0.3)';
+  sctx.shadowBlur = 0;
+  sctx.fillText('BEST ' + bestScore, W/2, 878);
+
+  // Watermark
+  sctx.font = '600 12px Orbitron, monospace';
+  sctx.fillStyle = 'rgba(0,255,240,0.22)';
+  sctx.fillText('neondash.juegos  ·  ¿PUEDES SUPERARME?', W/2, H - 24);
+
+  document.getElementById('shareCardOverlay').classList.add('show');
+}
+
+document.getElementById('shareTiktokBtn').addEventListener('click', () => {
+  const sc = document.getElementById('shareCardCanvas');
+  sc.toBlob(async blob => {
+    const file = new File([blob], 'neon-dash.png', { type: 'image/png' });
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: '💀 Morí en NEON DASH',
+          text: '¿Puedes superar mi score? 🚀 Descarga NEON DASH gratis',
+          files: [file]
+        });
+        return;
+      } catch (_) { /* cancelled */ }
+    }
+    // Fallback: download the image
+    const a = document.createElement('a');
+    a.download = 'neon-dash.png';
+    a.href = sc.toDataURL('image/png');
+    a.click();
+  }, 'image/png');
+});
+
+document.getElementById('sharePlayAgainBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  startGame();
+});
 </script>
 
 <style>
