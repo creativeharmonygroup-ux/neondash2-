@@ -601,10 +601,8 @@ function currentShip() { return getShip(save.selected); }
 //  AUDIO ENGINE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 const AudioEngine = (() => {
-  let ctx = null, masterGain = null, muted = false, musicPlaying = false, musicTimer = null, nextBarTime = 0;
-  const BPM = 138, beat = 60 / BPM;
-  const bassLine = [65,65,98,65,73,65,82,65];
-  const leadLine = [523,523,659,784,659,523,622,523];
+  let ctx = null, masterGain = null, muted = false, musicPlaying = false, musicTimer = null;
+  let nextBarTime = 0, barCount = 0, musicGain = null;
 
   function init() {
     if (ctx) return;
@@ -645,33 +643,105 @@ const AudioEngine = (() => {
   function playNewRecord() { init(); resume(); const t=ctx.currentTime; [523,659,784,1047,1319].forEach((f,i)=>{ playTone({type:'triangle',freq:f,duration:0.2,gainPeak:0.35,startTime:t+i*0.1}); }); }
   function playUnlock() { init(); resume(); const t=ctx.currentTime; [400,600,800,1200].forEach((f,i)=>playTone({type:'sine',freq:f,duration:0.18,gainPeak:0.3,startTime:t+i*0.08})); }
 
-  function scheduleMusicBar(st) {
-    if (!ctx || muted) return;
-    const stepDur = beat * 0.5;
-    bassLine.forEach((freq,i)=>{ if(i%2===0) playTone({type:'sawtooth',freq,freqEnd:freq*0.95,duration:stepDur*0.8,gainPeak:0.1,startTime:st+i*stepDur}); });
-    leadLine.forEach((freq,i)=>{ if(i%3!==2) return; playTone({type:'square',freq,duration:stepDur*0.5,gainPeak:0.05,startTime:st+i*stepDur}); });
-    for(let i=0;i<8;i++) {
-      if(muted) continue;
-      const bs=Math.floor(ctx.sampleRate*0.04), b=ctx.createBuffer(1,bs,ctx.sampleRate);
-      const dd=b.getChannelData(0); for(let j=0;j<bs;j++) dd[j]=Math.random()*2-1;
-      const src=ctx.createBufferSource(), flt=ctx.createBiquadFilter(), g=ctx.createGain();
-      src.buffer=b; flt.type='highpass'; flt.frequency.value=8000;
-      const vol=(i%2===0)?0.06:0.03; g.gain.setValueAtTime(vol,st+i*stepDur); g.gain.exponentialRampToValueAtTime(0.001,st+i*stepDur+0.04);
-      src.connect(flt); flt.connect(g); g.connect(masterGain); src.start(st+i*stepDur); src.stop(st+i*stepDur+0.05);
+  // ── Music helpers (route through musicGain → masterGain) ──
+  function mT(freq, st, dur, type, peak) {
+    if(!ctx||muted||!musicGain) return;
+    const osc=ctx.createOscillator(), g=ctx.createGain();
+    osc.type=type; osc.frequency.value=freq;
+    g.gain.setValueAtTime(0,st);
+    g.gain.linearRampToValueAtTime(peak,st+dur*0.06);
+    g.gain.exponentialRampToValueAtTime(0.001,st+dur);
+    osc.connect(g); g.connect(musicGain); osc.start(st); osc.stop(st+dur+0.02);
+  }
+  function mN(st, dur, peak, ftype, ffreq) {
+    if(!ctx||muted||!musicGain) return;
+    const len=Math.floor(ctx.sampleRate*Math.min(dur,1));
+    const buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    const src=ctx.createBufferSource(), flt=ctx.createBiquadFilter(), g=ctx.createGain();
+    src.buffer=buf; flt.type=ftype; flt.frequency.value=ffreq;
+    g.gain.setValueAtTime(peak,st); g.gain.exponentialRampToValueAtTime(0.001,st+dur);
+    src.connect(flt); flt.connect(g); g.connect(musicGain); src.start(st); src.stop(st+dur);
+  }
+
+  // ── Chiptune track: 150 BPM, A-minor, 4-bar loop ──
+  const Cb=60/150, Ce=Cb/2, Cs=Cb/4, CBAR=Cb*4;
+
+  // 4-bar melody (square wave lead, each row = 8 eighth notes)
+  const MELO=[
+    [659,659,880,784,659,587,659,523],  // bar 0: hook — soars to A5
+    [440,523,587,659,698,659,587,523],  // bar 1: fill — ascending
+    [587,659,698,659,587,523,494,440],  // bar 2: response — descends
+    [659,587,523,494,440,392,440,330],  // bar 3: resolve — lands home
+  ];
+  // 4-bar bass (sawtooth, 8 eighth notes, 0 = rest)
+  const BASS=[
+    [110,0,110,0,165,0,131,0],   // Am
+    [87, 0,87,110,98, 0,98,123], // F → C
+    [98, 0,98,123,147,0,110,0],  // G → Dm
+    [110,0,131,0,165,110,98,82], // Am fill
+  ];
+  // 4-bar arpeggio (triangle, 16 sixteenth notes per bar)
+  const ARPS=[
+    [220,330,440,550,440,330,220,330,220,330,440,550,660,550,440,330], // Am
+    [175,262,349,523,349,262,175,262,196,294,392,523,392,294,196,262], // F→G
+    [196,294,392,523,392,294,196,294,220,330,440,523,440,330,220,330], // G→Dm
+    [220,330,440,660,440,330,220,330,165,247,330,440,330,247,165,220], // Am→Em
+  ];
+
+  function scheduleBar(st) {
+    const bar=barCount%4; barCount++;
+
+    // Kick: beats 1+3; bar 3 adds pickup on beat 3.75
+    const kicks=bar===3?[0,2,2.75]:[0,2];
+    kicks.forEach(i=>{ mT(82,st+i*Cb,0.25,'sine',0.42); mT(96,st+i*Cb,0.12,'sine',0.22); mN(st+i*Cb,0.05,0.2,'lowpass',260); });
+
+    // Snare: beats 2+4
+    [1,3].forEach(i=>{ mN(st+i*Cb,0.13,0.24,'bandpass',1350); mT(185,st+i*Cb,0.07,'triangle',0.13); });
+
+    // Hi-hats: every 8th; 16th layer on bars 1 & 3 for extra drive
+    for(let i=0;i<8;i++) mN(st+i*Ce,0.03,i%2===0?0.09:0.045,'highpass',11000);
+    if(bar===1||bar===3) for(let i=0;i<16;i++) { if(i%2!==0) mN(st+i*Cs,0.018,0.022,'highpass',13500); }
+
+    // Sub-bass pulse on beat 1 (body)
+    mT(55,st,Cb*0.45,'sine',0.14);
+
+    // Bass line
+    BASS[bar].forEach((f,i)=>{ if(f) mT(f,st+i*Ce,Ce*0.65,'sawtooth',0.2); });
+
+    // Melody (square — classic chiptune lead)
+    MELO[bar].forEach((f,i)=>mT(f,st+i*Ce,Ce*0.42,'square',0.06));
+
+    // Arpeggio sparkle (triangle)
+    ARPS[bar].forEach((f,i)=>mT(f,st+i*Cs,Cs*0.5,'triangle',0.03));
+
+    // Chord pad stab on beat 1 (bars 0 & 2 only — keeps breathing room)
+    if(bar===0||bar===2){
+      const chords=bar===0?[220,330,440]:[196,294,392];
+      chords.forEach(f=>mT(f,st,Cb*1.8,'triangle',0.022));
     }
-    [0,4].forEach(i=>playTone({type:'sine',freq:120,freqEnd:40,duration:0.15,gainPeak:0.18,startTime:st+i*stepDur}));
   }
 
   function scheduleLoop() {
-    if (!musicPlaying) return;
-    const barDur = beat * 4;
-    while (nextBarTime < ctx.currentTime + 1.5) { scheduleMusicBar(nextBarTime); nextBarTime += barDur; }
-    musicTimer = setTimeout(scheduleLoop, 300);
+    if(!musicPlaying) return;
+    while(nextBarTime < ctx.currentTime+1.5) { scheduleBar(nextBarTime); nextBarTime+=CBAR; }
+    musicTimer=setTimeout(scheduleLoop,300);
   }
-  function startMusic() { if(!ctx) init(); resume(); if(musicPlaying) return; musicPlaying=true; nextBarTime=ctx.currentTime+0.05; scheduleLoop(); }
-  function stopMusic() { musicPlaying=false; if(musicTimer) clearTimeout(musicTimer); }
+  function startMusic() {
+    if(!ctx) init(); resume();
+    if(musicPlaying) return;
+    musicGain=ctx.createGain(); musicGain.gain.value=1; musicGain.connect(masterGain);
+    barCount=0; musicPlaying=true; nextBarTime=ctx.currentTime+0.05;
+    scheduleLoop();
+  }
+  function stopMusic() {
+    musicPlaying=false;
+    if(musicTimer) clearTimeout(musicTimer);
+    musicGain=null;
+  }
+  function setMusicPhase(p) {} // no-op — single energetic track
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, startMusic, stopMusic };
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, startMusic, stopMusic, setMusicPhase };
 })();
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -1213,6 +1283,8 @@ function loop() {
     // Cycle every 20 pts: 0-5 normal | 5-10 fast(140%) | 10-15 slow(70%) | 15-20 normal
     const cycleScore = score % 30;
     const phase = cycleScore < 8 ? 0 : cycleScore < 15 ? 1 : cycleScore < 22 ? 2 : 0;
+    // music phase 3 = triumphant (22-30), separate from speed phase
+    const musicPhase = cycleScore < 15 ? 1 : cycleScore < 22 ? 2 : 3;
     if(phase !== scorePhase){
       scorePhase = phase;
       if(phase === 1){
@@ -1235,6 +1307,7 @@ function loop() {
       }
       phaseIndicator.classList.remove('show');
     }
+    AudioEngine.setMusicPhase(musicPhase);
     // Smooth lerp toward target multiplier
     speedMult += (targetSpeedMult - speedMult) * 0.05;
     const spd = speed * speedMult;
