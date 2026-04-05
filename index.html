@@ -748,6 +748,11 @@ const AudioEngine = (() => {
   function stopMusic() {
     musicPlaying=false;
     if(musicTimer) clearTimeout(musicTimer);
+    // Instantly silence any still-playing scheduled notes
+    if(musicGain && ctx) {
+      musicGain.gain.cancelScheduledValues(ctx.currentTime);
+      musicGain.gain.setValueAtTime(0, ctx.currentTime);
+    }
     try { if(musicDelayFb) musicDelayFb.disconnect(); } catch(e){}
     musicGain=null; musicDelayFb=null;
   }
