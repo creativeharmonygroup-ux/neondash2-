@@ -361,6 +361,32 @@
 
   @keyframes coinPop { 0% { transform:scale(1); } 50% { transform:scale(1.5); } 100% { transform:scale(1); } }
 
+  /* ── SCORE 15 ACHIEVEMENT OVERLAY ── */
+  #achieve15 {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; z-index: 200;
+    opacity: 0; transition: opacity 0.25s ease;
+    background: radial-gradient(ellipse at center, rgba(0,255,240,0.08) 0%, rgba(0,0,0,0.72) 70%);
+  }
+  #achieve15.show { opacity: 1; }
+  #achieve15 .achieve-text {
+    font-size: clamp(28px, 8vw, 52px); font-weight: 900;
+    letter-spacing: 4px; text-align: center;
+    color: #ffffff;
+    text-shadow:
+      0 0 10px #fff,
+      0 0 25px #00fff0,
+      0 0 55px #00fff0,
+      0 0 100px rgba(0,255,240,0.6);
+    animation: achieve15Pulse 0.5s ease-in-out infinite alternate;
+    line-height: 1.2;
+  }
+  @keyframes achieve15Pulse {
+    0%   { text-shadow: 0 0 10px #fff, 0 0 25px #00fff0, 0 0 55px #00fff0, 0 0 100px rgba(0,255,240,0.5); transform: scale(1); }
+    100% { text-shadow: 0 0 20px #fff, 0 0 50px #00fff0, 0 0 100px #00fff0, 0 0 180px rgba(0,255,240,0.8); transform: scale(1.04); }
+  }
+
   /* ── REPLAY OVERLAY ── */
   #replayOverlay { gap: 14px; padding: 20px; z-index: 80; }
 
@@ -426,6 +452,7 @@
   <div id="speedNotif">⚡ SPEED UP!</div>
   <div id="fluctNotif"></div>
   <div id="phaseIndicator"></div>
+  <div id="achieve15"><div class="achieve-text">ONLY 3% REACH HERE</div></div>
 
   <!-- START -->
   <div class="screen" id="startScreen">
@@ -929,6 +956,7 @@ let coinsThisRun = 0;
 
 // Speed fluctuation
 let speedMult = 1.0, targetSpeedMult = 1.0;
+let slowMoMult = 1.0, targetSlowMoMult = 1.0;
 let scorePhase = -1; // tracks last applied phase to detect changes
 const fluctNotif = document.getElementById('fluctNotif');
 const phaseIndicator = document.getElementById('phaseIndicator');
@@ -1000,6 +1028,7 @@ function showSpeedNotif() {
   setTimeout(() => { speedNotif.style.display = 'none'; speedNotifActive = false; }, 2000);
 }
 function showCombo(n) { const el=document.getElementById('comboDisplay'); el.textContent=`x${n} COMBO!`; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200); }
+function showAchieve15() { const el=document.getElementById('achieve15'); el.classList.add('show'); flashScreen('#00fff0',0.25); triggerShake(6); setTimeout(()=>el.classList.remove('show'),2000); }
 function popScore() { const el=document.getElementById('scoreDisplay'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),150); }
 function popCoin() { const el=document.getElementById('coinCount'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),250); }
 
@@ -1041,7 +1070,8 @@ document.getElementById('restartBtn').addEventListener('touchend', e => { e.stop
 // \u2500\u2500 Game lifecycle \u2500\u2500
 function startGame() {
   state='playing'; score=0; frame=0; speed=5.45; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0;
-  speedMult=1.0; targetSpeedMult=1.0; scorePhase=-1;
+  speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
+
   fluctNotif.classList.remove('show');
   phaseIndicator.classList.remove('show');
   resetPlayer(); updateUI();
@@ -1479,7 +1509,8 @@ function loop() {
     AudioEngine.setMusicPhase(musicPhase);
     // Smooth lerp toward target multiplier
     speedMult += (targetSpeedMult - speedMult) * 0.05;
-    const spd = speed * speedMult;
+    slowMoMult += (targetSlowMoMult - slowMoMult) * 0.04;
+    const spd = speed * speedMult * slowMoMult;
 
     stars.forEach(s=>{s.x-=s.speed*(spd/3.5);s.twinkle+=0.05;if(s.x<0){s.x=canvas.width;s.y=Math.random()*canvas.height;}});
     nebula.forEach(n=>{n.x-=n.speed*(spd/3.5);if(n.x+n.r<0){n.x=canvas.width+n.r;n.y=Math.random()*canvas.height;}});
@@ -1507,6 +1538,7 @@ function loop() {
         b.scored=true; score++; combo++;
         updateUI(); popScore();
         spawnParticles(player.x+20,player.y,currentShip().trailColor,6,0.8);
+        if(score===8){setTimeout(()=>{ slowMoMult=0.3; targetSlowMoMult=0.3; showAchieve15(); setTimeout(()=>{ targetSlowMoMult=1.0; },2000); },1500);}
         if(combo>=5&&combo%5===0){AudioEngine.playCombo();showCombo(combo);flashScreen('#ffee00',0.15);}
         else AudioEngine.playScore();
       }
