@@ -602,7 +602,7 @@ function currentShip() { return getShip(save.selected); }
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 const AudioEngine = (() => {
   let ctx = null, masterGain = null, muted = false, musicPlaying = false, musicTimer = null;
-  let nextBarTime = 0, barCount = 0, musicGain = null;
+  let nextBarTime = 0, barCount = 0, musicGain = null, musicDelayFb = null;
 
   function init() {
     if (ctx) return;
@@ -730,14 +730,26 @@ const AudioEngine = (() => {
   function startMusic() {
     if(!ctx) init(); resume();
     if(musicPlaying) return;
-    musicGain=ctx.createGain(); musicGain.gain.value=1; musicGain.connect(masterGain);
+    musicGain=ctx.createGain(); musicGain.gain.value=0.82;
+    // Low-pass filter: cuts highs above 800Hz, keeps bass/mids
+    const lpf=ctx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=800; lpf.Q.value=0.8;
+    musicGain.connect(lpf);
+    // Delay effect: 0.3s, 0.4 feedback, parallel wet/dry
+    const delay=ctx.createDelay(1.0); delay.delayTime.value=0.3;
+    musicDelayFb=ctx.createGain(); musicDelayFb.gain.value=0.4;
+    const wet=ctx.createGain(); wet.gain.value=0.28;
+    lpf.connect(masterGain);                                // dry
+    lpf.connect(delay);                                     // delay input
+    delay.connect(musicDelayFb); musicDelayFb.connect(delay); // feedback loop
+    delay.connect(wet); wet.connect(masterGain);            // wet out
     barCount=0; musicPlaying=true; nextBarTime=ctx.currentTime+0.05;
     scheduleLoop();
   }
   function stopMusic() {
     musicPlaying=false;
     if(musicTimer) clearTimeout(musicTimer);
-    musicGain=null;
+    try { if(musicDelayFb) musicDelayFb.disconnect(); } catch(e){}
+    musicGain=null; musicDelayFb=null;
   }
   function setMusicPhase(p) {} // no-op — single energetic track
 
