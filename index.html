@@ -418,8 +418,8 @@
     <div id="bestDisplay">BEST: 0</div>
     <div id="comboDisplay">x2 COMBO!</div>
     <div id="coinHud"><span id="coinIcon">\u25cf</span><span id="coinCount">0</span></div>
-    <button id="soundToggle" title="Toggle Sound">\ud83d\udd0a</button>
-    <button id="shopBtn" title="Shop">\ud83d\udef8</button>
+    <button id="soundToggle" title="Toggle Sound">🔊</button>
+    <button id="shopBtn" title="Ship Shop">🛸</button>
   </div>
 
   <div id="flashOverlay"></div>
@@ -777,7 +777,7 @@ soundBtn.addEventListener('click', e => {
   e.stopPropagation();
   const nowMuted = !AudioEngine.isMuted();
   AudioEngine.setMuted(nowMuted);
-  soundBtn.textContent = nowMuted ? '\ud83d\udd07' : '\ud83d\udd0a';
+  soundBtn.textContent = nowMuted ? '🔇' : '🔊';
   soundBtn.classList.toggle('muted', nowMuted);
 });
 
