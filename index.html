@@ -639,7 +639,76 @@ const AudioEngine = (() => {
   function playCoin() { init(); resume(); playTone({type:'sine',freq:1200,freqEnd:1600,duration:0.08,gainPeak:0.2}); }
   function playCombo() { init(); resume(); const t=ctx.currentTime; [523,659,784,1047].forEach((f,i)=>playTone({type:'sine',freq:f,duration:0.15,gainPeak:0.3,startTime:t+i*0.07})); }
   function playSpeedUp() { init(); resume(); const t=ctx.currentTime; playTone({type:'sawtooth',freq:200,freqEnd:800,duration:0.4,gainPeak:0.35,startTime:t}); playTone({type:'sine',freq:1200,freqEnd:2400,duration:0.3,gainPeak:0.2,startTime:t+0.1}); }
-  function playDeath() { init(); resume(); const t=ctx.currentTime; playNoise(t,0.5,0.5); playTone({type:'sawtooth',freq:400,freqEnd:50,duration:0.6,gainPeak:0.4,startTime:t}); playTone({type:'sine',freq:80,freqEnd:20,duration:0.5,gainPeak:0.5,startTime:t}); }
+  function playDeath() {
+    init(); resume();
+    const t = ctx.currentTime;
+    const dG = ctx.createGain(); dG.gain.value = 0.8; dG.connect(masterGain);
+
+    // ── Layer 1: Deep bass BOOM ──
+    // Sub-bass punch — hits hard then decays
+    [40, 55, 70].forEach((freq, i) => {
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.setValueAtTime(freq * 1.8, t);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.3, t + 0.5);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.7 - i * 0.12, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+      osc.connect(g); g.connect(dG); osc.start(t); osc.stop(t + 1.25);
+    });
+
+    // ── Layer 2: Explosion noise body ──
+    // Full-spectrum burst that rolls off
+    const expLen = Math.floor(ctx.sampleRate * 2.0);
+    const expBuf = ctx.createBuffer(1, expLen, ctx.sampleRate);
+    const expData = expBuf.getChannelData(0);
+    for (let i = 0; i < expLen; i++) expData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / expLen, 0.4);
+    const expSrc = ctx.createBufferSource();
+    const expLpf = ctx.createBiquadFilter(); expLpf.type = 'lowpass'; expLpf.frequency.value = 1800;
+    const expG = ctx.createGain();
+    expG.gain.setValueAtTime(0.9, t); expG.gain.exponentialRampToValueAtTime(0.001, t + 1.8);
+    expSrc.buffer = expBuf; expSrc.connect(expLpf); expLpf.connect(expG); expG.connect(dG);
+    expSrc.start(t); expSrc.stop(t + 2.0);
+
+    // ── Layer 3: High-pitched CRASH ──
+    // Metallic crash — white noise through highpass
+    const crLen = Math.floor(ctx.sampleRate * 0.6);
+    const crBuf = ctx.createBuffer(1, crLen, ctx.sampleRate);
+    const crData = crBuf.getChannelData(0);
+    for (let i = 0; i < crLen; i++) crData[i] = Math.random() * 2 - 1;
+    const crSrc = ctx.createBufferSource();
+    const crHpf = ctx.createBiquadFilter(); crHpf.type = 'highpass'; crHpf.frequency.value = 6000;
+    const crG = ctx.createGain();
+    crG.gain.setValueAtTime(0.55, t); crG.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+    crSrc.buffer = crBuf; crSrc.connect(crHpf); crHpf.connect(crG); crG.connect(dG);
+    crSrc.start(t); crSrc.stop(t + 0.6);
+
+    // ── Layer 4: Descending frequency sweep ──
+    // Sawtooth power sweep — spaceship tearing apart
+    const swp = ctx.createOscillator(), swpG = ctx.createGain();
+    const swpDist = ctx.createWaveShaper();
+    const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) { const x = i * 2 / 256 - 1; curve[i] = (Math.PI + 280) * x / (Math.PI + 280 * Math.abs(x)); }
+    swpDist.curve = curve;
+    swp.type = 'sawtooth';
+    swp.frequency.setValueAtTime(900, t);
+    swp.frequency.exponentialRampToValueAtTime(30, t + 1.4);
+    swpG.gain.setValueAtTime(0, t);
+    swpG.gain.linearRampToValueAtTime(0.45, t + 0.04);
+    swpG.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
+    swp.connect(swpDist); swpDist.connect(swpG); swpG.connect(dG);
+    swp.start(t); swp.stop(t + 1.45);
+
+    // ── Layer 5: Debris rattles — short metallic pings ──
+    [0.05, 0.12, 0.22, 0.38, 0.55].forEach((delay, i) => {
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(800 - i * 120, t + delay);
+      osc.frequency.exponentialRampToValueAtTime(100 + i * 30, t + delay + 0.18);
+      g.gain.setValueAtTime(0.18 - i * 0.025, t + delay);
+      g.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.2);
+      osc.connect(g); g.connect(dG); osc.start(t + delay); osc.stop(t + delay + 0.22);
+    });
+  }
   function playNewRecord() { init(); resume(); const t=ctx.currentTime; [523,659,784,1047,1319].forEach((f,i)=>{ playTone({type:'triangle',freq:f,duration:0.2,gainPeak:0.35,startTime:t+i*0.1}); }); }
   function playUnlock() { init(); resume(); const t=ctx.currentTime; [400,600,800,1200].forEach((f,i)=>playTone({type:'sine',freq:f,duration:0.18,gainPeak:0.3,startTime:t+i*0.08})); }
 
