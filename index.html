@@ -1092,13 +1092,12 @@ function drawCoinPickups() {
 }
 
 function drawBarrier(b) {
-  const color=`hsl(${b.hue},100%,60%)`, glowColor=`hsl(${b.hue},100%,70%)`;
-  ctx.shadowColor=color; ctx.shadowBlur=25;
+  ctx.shadowColor=`hsl(${b.hue},100%,60%)`; ctx.shadowBlur=25;
   ctx.fillStyle=`hsl(${b.hue},60%,10%)`;
   ctx.fillRect(b.x,0,BAR_W,b.topH); ctx.fillRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
-  ctx.strokeStyle=color; ctx.lineWidth=2;
+  ctx.strokeStyle=`hsl(${b.hue},100%,60%)`; ctx.lineWidth=2;
   ctx.strokeRect(b.x,0,BAR_W,b.topH); ctx.strokeRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
-  ctx.shadowBlur=35; ctx.fillStyle=glowColor;
+  ctx.shadowBlur=35; ctx.fillStyle=`hsl(${b.hue},100%,70%)`;
   ctx.fillRect(b.x-4,b.topH-12,BAR_W+8,12); ctx.fillRect(b.x-4,b.bottomY,BAR_W+8,12);
   ctx.shadowBlur=0;
   ctx.strokeStyle=`hsla(${b.hue},100%,80%,0.3)`; ctx.lineWidth=1;
@@ -1106,6 +1105,7 @@ function drawBarrier(b) {
   ctx.beginPath();ctx.moveTo(b.x+BAR_W/2,b.bottomY+12);ctx.lineTo(b.x+BAR_W/2,canvas.height);ctx.stroke();
   ctx.shadowBlur=0;
 }
+
 
 function drawPlayer() {
   if (player.dead) return;
@@ -1244,6 +1244,7 @@ function loop() {
 
     const spawnInterval=Math.max(80,130-score*1.5);
     if(frame%Math.floor(spawnInterval)===0) spawnBarrier();
+
 
     // Spawn monedas (cada ~200 frames, posici\u00f3n aleatoria)
     if(frame%180===90) spawnCoinPickup();
