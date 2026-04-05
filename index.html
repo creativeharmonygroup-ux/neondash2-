@@ -236,6 +236,22 @@
     animation: btnFloat 3.4s ease-in-out infinite 0.6s;
   }
   .shop-btn-over:active { background: var(--neon-yellow); color: black; transform: scale(0.96); animation: none; }
+  .share3pct-btn {
+    background: transparent; border: 2px solid var(--neon-cyan); color: var(--neon-cyan);
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 3px; padding: 12px 28px; border-radius: 50px; cursor: pointer;
+    pointer-events: all; text-transform: uppercase; margin-bottom: 10px;
+    text-shadow: 0 0 10px var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0,255,240,0.5), inset 0 0 16px rgba(0,255,240,0.08);
+    transition: background 0.15s, transform 0.15s;
+    animation: share3pctPulse 1.5s ease-in-out infinite, btnFloat 3s ease-in-out infinite;
+  }
+  .share3pct-btn.hidden { display: none; }
+  .share3pct-btn:active { background: var(--neon-cyan); color: black; transform: scale(0.96); animation: none; }
+  @keyframes share3pctPulse {
+    0%,100% { box-shadow: 0 0 20px rgba(0,255,240,0.5), inset 0 0 16px rgba(0,255,240,0.08); }
+    50%      { box-shadow: 0 0 40px rgba(0,255,240,0.8), 0 0 70px rgba(0,255,240,0.4), inset 0 0 24px rgba(0,255,240,0.15); }
+  }
 
   /* \u2500\u2500 SHOP SCREEN \u2500\u2500 */
   #shopScreen {
@@ -417,11 +433,16 @@
     color: white; border: none; border-radius: 50px; cursor: pointer;
     font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 900;
     letter-spacing: 3px; padding: 14px 28px;
-    box-shadow: 0 0 30px rgba(255,0,110,0.5);
-    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 0 30px rgba(255,0,110,0.6), 0 0 60px rgba(191,0,255,0.3);
+    transition: transform 0.15s;
     pointer-events: all;
+    animation: tiktokPulse 1.2s ease-in-out infinite;
   }
-  #shareTiktokBtn:active { transform: scale(0.96); box-shadow: 0 0 50px rgba(255,0,110,0.7); }
+  @keyframes tiktokPulse {
+    0%,100% { box-shadow: 0 0 30px rgba(255,0,110,0.6), 0 0 60px rgba(191,0,255,0.3); }
+    50%      { box-shadow: 0 0 55px rgba(255,0,110,0.95), 0 0 100px rgba(191,0,255,0.6), 0 0 140px rgba(255,0,110,0.25); }
+  }
+  #shareTiktokBtn:active { transform: scale(0.96); animation: none; box-shadow: 0 0 60px rgba(255,0,110,0.9); }
 
   .rv-play-again {
     background: transparent; border: none; cursor: pointer;
@@ -473,6 +494,7 @@
     <div class="new-best-badge" id="newBestBadge">\u2605 NEW RECORD \u2605</div>
     <button class="replay-btn" id="replayBtn">▶ REPLAY</button>
     <button class="restart-btn" id="restartBtn">PLAY AGAIN</button>
+    <button class="share3pct-btn hidden" id="share3pctBtn">🎬 WOW TIKTOK MOMENT</button>
     <button class="shop-btn-over" id="shopBtnOver">SHIP SHOP</button>
   </div>
 
@@ -1028,7 +1050,13 @@ function showSpeedNotif() {
   setTimeout(() => { speedNotif.style.display = 'none'; speedNotifActive = false; }, 2000);
 }
 function showCombo(n) { const el=document.getElementById('comboDisplay'); el.textContent=`x${n} COMBO!`; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200); }
-function showAchieve15() { const el=document.getElementById('achieve15'); el.classList.add('show'); flashScreen('#00fff0',0.25); triggerShake(6); setTimeout(()=>el.classList.remove('show'),2000); }
+function showAchieve15() {
+  const el=document.getElementById('achieve15'); el.classList.add('show');
+  flashScreen('#00fff0',0.25); triggerShake(6);
+  reached8 = true;
+  MomentRecorder.capture(document.getElementById('gameCanvas'), 2000, blob => { momentBlob = blob; });
+  setTimeout(()=>el.classList.remove('show'),2000);
+}
 function popScore() { const el=document.getElementById('scoreDisplay'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),150); }
 function popCoin() { const el=document.getElementById('coinCount'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),250); }
 
@@ -1071,6 +1099,7 @@ document.getElementById('restartBtn').addEventListener('touchend', e => { e.stop
 function startGame() {
   state='playing'; score=0; frame=0; speed=5.45; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0;
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
+  momentBlob=null; reached8=false; MomentRecorder.stop();
 
   fluctNotif.classList.remove('show');
   phaseIndicator.classList.remove('show');
@@ -1129,6 +1158,9 @@ function gameOver() {
   document.getElementById('overBest').textContent = 'BEST: ' + save.best;
   document.getElementById('overCoinsEarned').textContent = `+${coinsThisRun + bonus} \u25cf COINS`;
   clipPromise.then(blob => { lastClipBlob = blob; });
+  MomentRecorder.stop().then(blob => { if (blob) momentBlob = blob; });
+  const share3btn = document.getElementById('share3pctBtn');
+  share3btn.classList.toggle('hidden', !reached8);
   setTimeout(() => { document.getElementById('gameOverScreen').classList.remove('hidden'); }, 700);
 }
 
@@ -1627,6 +1659,49 @@ const Replay = (() => {
 })();
 
 let lastClipBlob = null;
+let momentBlob = null, reached8 = false, overlayBlob = null;
+
+// ═══════════════════════════════════════════════
+//  MOMENT RECORDER  — captures the 3% slow-mo clip
+// ═══════════════════════════════════════════════
+const MomentRecorder = (() => {
+  const MIMES = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'];
+  let recorder = null, chunks = [], mime = '', autoTimer = null;
+
+  function start(canvasEl) {
+    if (recorder && recorder.state !== 'inactive') return;
+    chunks = [];
+    try {
+      mime = MIMES.find(m => MediaRecorder.isTypeSupported(m)) || '';
+      const stream = canvasEl.captureStream(30);
+      const opts = { videoBitsPerSecond: 3_000_000 };
+      if (mime) opts.mimeType = mime;
+      recorder = new MediaRecorder(stream, opts);
+      recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+      recorder.start(100);
+    } catch(_) { recorder = null; }
+  }
+
+  function stop() {
+    return new Promise(resolve => {
+      if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+      if (!recorder || recorder.state === 'inactive') { resolve(null); return; }
+      recorder.addEventListener('stop', () => {
+        const blob = chunks.length ? new Blob(chunks, { type: mime || 'video/webm' }) : null;
+        recorder = null; chunks = [];
+        resolve(blob);
+      }, { once: true });
+      recorder.stop();
+    });
+  }
+
+  function capture(canvasEl, ms, cb) {
+    start(canvasEl);
+    autoTimer = setTimeout(() => stop().then(cb), ms);
+  }
+
+  return { capture, stop };
+})();
 
 const DEATH_PHRASES = [
   'THAT WAS SAD.',
@@ -1651,25 +1726,110 @@ function getDeathPhrase(s) {
   return DEATH_PHRASES[Math.floor(Math.random() * DEATH_PHRASES.length)];
 }
 
+// ═══════════════════════════════════════════════
+//  CLIP COMPOSITOR  — bakes text overlays into the 3% moment clip
+// ═══════════════════════════════════════════════
+function drawOverlayText(ctx, W, H) {
+  ctx.save();
+  ctx.textBaseline = 'alphabetic';
+
+  // Subtle dark gradient at top for title readability
+  const topGrad = ctx.createLinearGradient(0, 0, 0, H * 0.18);
+  topGrad.addColorStop(0, 'rgba(0,0,0,0.72)');
+  topGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = topGrad; ctx.fillRect(0, 0, W, H * 0.18);
+
+  // Subtle dark gradient at bottom for URL/CTA readability
+  const botGrad = ctx.createLinearGradient(0, H * 0.68, 0, H);
+  botGrad.addColorStop(0, 'rgba(0,0,0,0)');
+  botGrad.addColorStop(1, 'rgba(0,0,0,0.78)');
+  ctx.fillStyle = botGrad; ctx.fillRect(0, H * 0.68, W, H * 0.32);
+
+  // NEON DASH — top center, cyan glow
+  ctx.textAlign = 'center';
+  ctx.font = `900 ${Math.round(W * 0.1)}px Orbitron, monospace`;
+  ctx.fillStyle = '#00fff0';
+  ctx.shadowColor = '#00fff0'; ctx.shadowBlur = 32;
+  ctx.fillText('NEON DASH', W / 2, H * 0.1);
+  ctx.shadowBlur = 14;
+  ctx.fillText('NEON DASH', W / 2, H * 0.1); // double-draw to boost glow
+
+  // "ONLY 3% REACH THIS." — middle-lower
+  ctx.font = `900 ${Math.round(W * 0.057)}px Orbitron, monospace`;
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = '#00fff0'; ctx.shadowBlur = 20;
+  ctx.fillText('ONLY 3% REACH THIS.', W / 2, H * 0.75);
+
+  // "neondash.games" — bottom center
+  ctx.font = `700 ${Math.round(W * 0.039)}px Orbitron, monospace`;
+  ctx.fillStyle = 'rgba(0,255,240,0.92)';
+  ctx.shadowColor = '#00fff0'; ctx.shadowBlur = 14;
+  ctx.fillText('neondash.games', W / 2, H * 0.91);
+
+  // "CAN YOU BEAT THIS?" — bottom right, small
+  ctx.textAlign = 'right';
+  ctx.font = `700 ${Math.round(W * 0.029)}px Orbitron, monospace`;
+  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 5;
+  ctx.fillText('CAN YOU BEAT THIS?', W - Math.round(W * 0.04), H * 0.97);
+
+  ctx.restore();
+}
+
+function composeClip(sourceBlob) {
+  return new Promise(resolve => {
+    const vid = document.createElement('video');
+    vid.muted = true; vid.playsInline = true;
+    const blobUrl = URL.createObjectURL(sourceBlob);
+    vid.src = blobUrl;
+
+    const fallback = () => { URL.revokeObjectURL(blobUrl); resolve(sourceBlob); };
+    vid.onerror = fallback;
+
+    vid.onloadedmetadata = () => {
+      const W = vid.videoWidth  || canvas.width;
+      const H = vid.videoHeight || canvas.height;
+      const cvs = document.createElement('canvas');
+      cvs.width = W; cvs.height = H;
+      const ctx = cvs.getContext('2d');
+
+      const MIMES = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+      const mime = MIMES.find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+      const recorder = new MediaRecorder(cvs.captureStream(30), { mimeType: mime, videoBitsPerSecond: 4_000_000 });
+      const chunks = [];
+      recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+      recorder.onstop = () => { URL.revokeObjectURL(blobUrl); resolve(chunks.length ? new Blob(chunks, { type: mime }) : sourceBlob); };
+
+      let rafId;
+      function drawFrame() {
+        ctx.drawImage(vid, 0, 0, W, H);
+        drawOverlayText(ctx, W, H);
+        rafId = requestAnimationFrame(drawFrame);
+      }
+      vid.onended = () => { cancelAnimationFrame(rafId); if (recorder.state !== 'inactive') recorder.stop(); };
+      vid.onplay  = () => { recorder.start(100); rafId = requestAnimationFrame(drawFrame); };
+      vid.play().catch(fallback);
+    };
+  });
+}
+
 // ── REPLAY button → show video overlay ──
 document.getElementById('replayBtn').addEventListener('click', e => {
   e.stopPropagation();
   if (!lastClipBlob) return;
-
-  const url = URL.createObjectURL(lastClipBlob);
+  overlayBlob = lastClipBlob;
   const vid = document.getElementById('replayVideo');
-  vid.src = url;
+  vid.src = URL.createObjectURL(overlayBlob);
   vid.play().catch(() => {});
-
   document.getElementById('gameOverScreen').classList.add('hidden');
   document.getElementById('replayOverlay').classList.remove('hidden');
 });
 
 // ── SHARE TO TIKTOK ──
 document.getElementById('shareTiktokBtn').addEventListener('click', async () => {
-  if (!lastClipBlob) return;
-  const ext = lastClipBlob.type.includes('mp4') ? 'mp4' : 'webm';
-  const file = new File([lastClipBlob], `neon-dash.${ext}`, { type: lastClipBlob.type });
+  if (!overlayBlob) return;
+  const ext = overlayBlob.type.includes('mp4') ? 'mp4' : 'webm';
+  const file = new File([overlayBlob], `neon-dash.${ext}`, { type: overlayBlob.type });
   if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({
@@ -1680,11 +1840,28 @@ document.getElementById('shareTiktokBtn').addEventListener('click', async () => 
       return;
     } catch (_) { /* cancelled */ }
   }
-  // Fallback: download
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(lastClipBlob);
+  a.href = URL.createObjectURL(overlayBlob);
   a.download = `neon-dash.${ext}`;
   a.click();
+});
+
+// ── WOW TIKTOK MOMENT → composite overlays then show clip ──
+document.getElementById('share3pctBtn').addEventListener('click', async e => {
+  e.stopPropagation();
+  if (!momentBlob) return;
+  const btn = document.getElementById('share3pctBtn');
+  btn.textContent = '⏳ RENDERING...';
+  btn.disabled = true;
+  const composited = await composeClip(momentBlob);
+  btn.textContent = '🎬 WOW TIKTOK MOMENT';
+  btn.disabled = false;
+  overlayBlob = composited;
+  const vid = document.getElementById('replayVideo');
+  vid.src = URL.createObjectURL(overlayBlob);
+  vid.play().catch(() => {});
+  document.getElementById('gameOverScreen').classList.add('hidden');
+  document.getElementById('replayOverlay').classList.remove('hidden');
 });
 
 // ── PLAY AGAIN from replay overlay ──
