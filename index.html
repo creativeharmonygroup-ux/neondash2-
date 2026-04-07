@@ -414,6 +414,58 @@
     100% { text-shadow: 0 0 20px #fff, 0 0 50px #00fff0, 0 0 100px #00fff0, 0 0 180px rgba(0,255,240,0.8); transform: scale(1.04); }
   }
 
+  /* ── YUPILANDIA ── */
+  #yupiOverlay {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: 180;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  #yupiOverlay.hidden { display: none; }
+
+  #yupiVortexCanvas {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0; transition: opacity 0.4s ease;
+  }
+  #yupiVortexCanvas.show { opacity: 1; }
+
+  #yupiWelcomeText {
+    position: absolute; font-size: 30px; font-weight: 900;
+    letter-spacing: 2px; text-align: center; line-height: 1.4;
+    color: #fff;
+    text-shadow: 0 0 20px #ff00ff, 0 0 45px #ff00ff, 0 0 90px #cc00ff;
+    opacity: 0; transition: opacity 0.6s ease;
+    z-index: 182; pointer-events: none;
+    animation: yupiWelcomePulse 0.7s ease-in-out infinite alternate;
+  }
+  #yupiWelcomeText.show { opacity: 1; }
+  @keyframes yupiWelcomePulse {
+    0%   { text-shadow: 0 0 20px #ff00ff, 0 0 45px #ff00ff, 0 0 90px #cc00ff; transform: scale(1); }
+    100% { text-shadow: 0 0 35px #ff88ff, 0 0 70px #ff00ff, 0 0 140px #ff00cc; transform: scale(1.04); }
+  }
+
+  #yupiCountdownText {
+    position: absolute; font-size: 110px; font-weight: 900;
+    color: #fff; letter-spacing: 0;
+    text-shadow: 0 0 30px #ffee00, 0 0 70px #ff8800, 0 0 120px #ff4400;
+    opacity: 0; z-index: 182; pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  #yupiCountdownText.show { opacity: 1; animation: countdownPop 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes countdownPop {
+    0% { transform: scale(2); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  #backToRealityText {
+    position: absolute; font-size: 22px; font-weight: 900;
+    letter-spacing: 5px; text-align: center; color: #fff;
+    text-shadow: 0 0 15px #00fff0, 0 0 35px #00fff0, 0 0 70px #0088ff;
+    opacity: 0; z-index: 182; pointer-events: none;
+    transition: opacity 0.7s ease;
+  }
+  #backToRealityText.show { opacity: 1; }
+
   /* ── REPLAY OVERLAY ── */
   #replayOverlay { gap: 14px; padding: 20px; z-index: 80; }
 
@@ -485,6 +537,14 @@
   <div id="fluctNotif"></div>
   <div id="phaseIndicator"></div>
   <div id="achieve15"><div class="achieve-text">ONLY 3% REACH HERE</div></div>
+
+  <!-- YUPILANDIA -->
+  <div id="yupiOverlay" class="hidden">
+    <canvas id="yupiVortexCanvas"></canvas>
+    <div id="yupiWelcomeText">🌈 WELCOME TO<br>YUPILANDIA! 🌈</div>
+    <div id="yupiCountdownText"></div>
+    <div id="backToRealityText">BACK TO REALITY...</div>
+  </div>
 
   <!-- START -->
   <div class="screen" id="startScreen">
@@ -985,7 +1045,169 @@ const AudioEngine = (() => {
 
   function setMusicPhase(p) {} // no-op — single energetic track
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playMockLaugh, playTreasure, startMusic, stopMusic, setMusicPhase };
+  // ── YUPILANDIA RAVE: 200 BPM, hard techno, heavy sub-bass + bright synths ──
+  let yupiMusicPlaying = false, yupiMusicTimer = null;
+  let yupiNextBar = 0, yupiBarCount = 0, yupiMusicGain = null;
+  const YCb = 60/200, YCe = YCb/2, YCs = YCb/4, YBAR = YCb*4;
+
+  // Rave lead: bright E-major stabs cycling fast
+  const YMELO = [
+    [659,784,880,1047,880,784,659,784,659,784,880,1047,1319,1047,880,784],
+    [784,880,1047,1319,1047,880,784,880,659,784,880,1047,880,784,659,880],
+    [880,1047,1319,1568,1319,1047,880,1047,784,880,1047,1319,1047,880,784,1047],
+    [659,784,880,1047,1319,1047,880,784,659,880,1047,1319,1568,1319,1047,880],
+  ];
+  // Pumping sub-bass (sine 41Hz = low E, heavyweight)
+  const YBASS_FREQS = [41, 55, 41, 62]; // E1, A1, E1, B1 — heavy rave root notes
+  // Bright chord synth
+  const YCHORDS = [
+    [659,784,988],[784,988,1175],[659,880,1047],[784,1047,1319]
+  ];
+
+  function yT(freq, st, dur, type, peak) {
+    if(!ctx||muted||!yupiMusicGain) return;
+    const osc=ctx.createOscillator(), g=ctx.createGain();
+    osc.type=type; osc.frequency.value=freq;
+    g.gain.setValueAtTime(0,st);
+    g.gain.linearRampToValueAtTime(peak,st+dur*0.04);
+    g.gain.exponentialRampToValueAtTime(0.001,st+dur);
+    osc.connect(g); g.connect(yupiMusicGain); osc.start(st); osc.stop(st+dur+0.02);
+  }
+  function yN(st, dur, peak, ftype, ffreq) {
+    if(!ctx||muted||!yupiMusicGain) return;
+    const len=Math.floor(ctx.sampleRate*Math.min(dur,1));
+    const buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    const src=ctx.createBufferSource(), flt=ctx.createBiquadFilter(), g=ctx.createGain();
+    src.buffer=buf; flt.type=ftype; flt.frequency.value=ffreq;
+    g.gain.setValueAtTime(peak,st); g.gain.exponentialRampToValueAtTime(0.001,st+dur);
+    src.connect(flt); flt.connect(g); g.connect(yupiMusicGain); src.start(st); src.stop(st+dur);
+  }
+  // Distorted kick: sub-bass punch with pitch drop
+  function yKick(st) {
+    if(!ctx||muted||!yupiMusicGain) return;
+    const osc=ctx.createOscillator(), g=ctx.createGain();
+    const dist=ctx.createWaveShaper();
+    const curve=new Float32Array(256);
+    for(let i=0;i<256;i++){const x=i*2/256-1; curve[i]=Math.tanh(x*4)*0.8;}
+    dist.curve=curve;
+    osc.type='sine';
+    osc.frequency.setValueAtTime(180,st);
+    osc.frequency.exponentialRampToValueAtTime(28,st+0.12);
+    g.gain.setValueAtTime(0,st);
+    g.gain.linearRampToValueAtTime(0.85,st+0.005);
+    g.gain.exponentialRampToValueAtTime(0.001,st+0.22);
+    osc.connect(dist); dist.connect(g); g.connect(yupiMusicGain);
+    osc.start(st); osc.stop(st+0.25);
+    // Sub layer
+    const sub=ctx.createOscillator(), sg=ctx.createGain();
+    sub.type='sine'; sub.frequency.setValueAtTime(55,st);
+    sub.frequency.exponentialRampToValueAtTime(20,st+0.18);
+    sg.gain.setValueAtTime(0,st); sg.gain.linearRampToValueAtTime(0.6,st+0.003);
+    sg.gain.exponentialRampToValueAtTime(0.001,st+0.25);
+    sub.connect(sg); sg.connect(yupiMusicGain); sub.start(st); sub.stop(st+0.28);
+  }
+  function yupiScheduleBar(st) {
+    const bar = yupiBarCount % 4; yupiBarCount++;
+
+    // ── HEAVY 4-on-floor kick every beat (200 BPM = very fast) ──
+    for(let i=0;i<4;i++) yKick(st+i*YCb);
+
+    // ── Snappy punchy snare on 2&4 with noise layer ──
+    [1,3].forEach(i=>{
+      yN(st+i*YCb,0.08,0.45,'bandpass',2200);
+      yN(st+i*YCb,0.04,0.2,'highpass',5000);
+      yT(280,st+i*YCb,0.04,'triangle',0.18);
+    });
+
+    // ── Sizzling 32nd hi-hats (ultra fast at 200 BPM) ──
+    for(let i=0;i<32;i++) {
+      const accent = (i%4===0) ? 0.14 : (i%2===0) ? 0.06 : 0.025;
+      yN(st+i*(YCb/8),0.018,accent,'highpass',14000);
+    }
+
+    // ── Open hat every half-beat (rave feel) ──
+    [0.5,1.5,2.5,3.5].forEach(beat=>{
+      yN(st+beat*YCb,0.06,0.09,'highpass',10000);
+    });
+
+    // ── HEAVY sub-bass pump on every beat ──
+    const bassFreq = YBASS_FREQS[bar];
+    for(let i=0;i<4;i++) {
+      yT(bassFreq,st+i*YCb,YCb*0.7,'sine',0.55);
+      // Octave reinforcement
+      yT(bassFreq*2,st+i*YCb,YCb*0.4,'sawtooth',0.12);
+    }
+
+    // ── Bright lead synth — 16 sixteenth notes at ultra speed ──
+    YMELO[bar].forEach((f,i)=>{
+      yT(f,st+i*YCe,YCe*0.35,'square',0.08);
+      // Bright detuned layer for width
+      yT(f*1.006,st+i*YCe,YCe*0.3,'sawtooth',0.05);
+    });
+
+    // ── Pulsing chord stabs every beat (euphoric lift) ──
+    YCHORDS[bar].forEach(f=>{
+      for(let i=0;i<4;i++) yT(f,st+i*YCb,YCb*0.4,'triangle',0.06);
+    });
+
+    // ── Bright saw supersaw lead (rave anthem) on beat 1 each bar ──
+    [1,1.01,0.99].forEach(detune=>{
+      yT(YMELO[bar][0]*detune,st,YCb*2,'sawtooth',0.07);
+    });
+
+    // ── Rising arpeggio sweep every 2 beats ──
+    [0,2].forEach(beat=>{
+      [1,2,3,4,6,8].forEach((mult,i)=>{
+        yT(82*mult,st+beat*YCb+i*YCs*0.5,YCs*0.8,'triangle',0.04);
+      });
+    });
+  }
+  function yupiScheduleLoop() {
+    if(!yupiMusicPlaying) return;
+    while(yupiNextBar < ctx.currentTime+1.5) { yupiScheduleBar(yupiNextBar); yupiNextBar+=YBAR; }
+    yupiMusicTimer=setTimeout(yupiScheduleLoop,300);
+  }
+  function startYupiMusic() {
+    if(!ctx) init(); resume();
+    stopMusic(); // stop normal music
+    if(yupiMusicPlaying) return;
+    yupiMusicGain=ctx.createGain(); yupiMusicGain.gain.value=0;
+    // Compressor to handle heavy bass without clipping
+    const comp=ctx.createDynamicsCompressor();
+    comp.threshold.value=-14; comp.knee.value=6;
+    comp.ratio.value=4; comp.attack.value=0.003; comp.release.value=0.15;
+    // HPF removes sub-rumble below 30Hz
+    const hpf=ctx.createBiquadFilter(); hpf.type='highpass'; hpf.frequency.value=30;
+    yupiMusicGain.connect(hpf); hpf.connect(comp); comp.connect(masterGain);
+    // Punch in
+    yupiMusicGain.gain.linearRampToValueAtTime(0.75, ctx.currentTime+0.3);
+    yupiBarCount=0; yupiMusicPlaying=true; yupiNextBar=ctx.currentTime+0.05;
+    yupiScheduleLoop();
+  }
+  function stopYupiMusic() {
+    yupiMusicPlaying=false;
+    if(yupiMusicTimer) clearTimeout(yupiMusicTimer);
+    if(yupiMusicGain && ctx) {
+      yupiMusicGain.gain.cancelScheduledValues(ctx.currentTime);
+      yupiMusicGain.gain.setValueAtTime(yupiMusicGain.gain.value, ctx.currentTime);
+      yupiMusicGain.gain.linearRampToValueAtTime(0, ctx.currentTime+0.5);
+    }
+    yupiMusicGain=null;
+  }
+  function playYupiEntrance() {
+    if(!ctx||muted) return;
+    const t = ctx.currentTime;
+    // Big glittery ascending fanfare
+    [523,659,784,1047,1319,1568,2093].forEach((f,i)=>{
+      playTone({type:'sine',freq:f,duration:0.25,gainPeak:0.4,startTime:t+i*0.07});
+      playTone({type:'triangle',freq:f*1.5,duration:0.18,gainPeak:0.15,startTime:t+i*0.07+0.01});
+    });
+    // Rainbow chord bloom
+    [523,659,784,1047].forEach((f,i)=>playTone({type:'triangle',freq:f,duration:1.2,gainPeak:0.08,startTime:t+0.5+i*0.04}));
+  }
+
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playMockLaugh, playTreasure, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance };
 })();
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -1008,6 +1230,14 @@ let coinsThisRun = 0;
 let speedMult = 1.0, targetSpeedMult = 1.0;
 let slowMoMult = 1.0, targetSlowMoMult = 1.0;
 let scorePhase = -1; // tracks last applied phase to detect changes
+
+// YUPILANDIA bonus world
+let yupilandiaTriggered = false;
+let yupilandiaActive = false;
+let yupilandiaFrozen = false;
+let yupilandiaRainbowT = 0;
+let yupiVortexT = 0;
+let yupiVortexAnim = null;
 const fluctNotif = document.getElementById('fluctNotif');
 const phaseIndicator = document.getElementById('phaseIndicator');
 let screenShake = { x:0, y:0, power:0 };
@@ -1089,6 +1319,226 @@ function showAchieve15() {
 function popScore() { const el=document.getElementById('scoreDisplay'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),150); }
 function popCoin() { const el=document.getElementById('coinCount'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),250); }
 
+// ══════════════════════════════════════════════
+//  YUPILANDIA BONUS WORLD
+// ══════════════════════════════════════════════
+const yupiOverlay = document.getElementById('yupiOverlay');
+const yupiVortexCanvas = document.getElementById('yupiVortexCanvas');
+const yupiVortexCtx = yupiVortexCanvas.getContext('2d');
+const yupiWelcomeText = document.getElementById('yupiWelcomeText');
+const yupiCountdownText = document.getElementById('yupiCountdownText');
+const backToRealityText = document.getElementById('backToRealityText');
+
+function resizeYupiCanvas() {
+  yupiVortexCanvas.width = wrapper.clientWidth;
+  yupiVortexCanvas.height = wrapper.clientHeight;
+}
+resizeYupiCanvas();
+
+function drawVortexFrame() {
+  const vc = yupiVortexCtx;
+  const W = yupiVortexCanvas.width, H = yupiVortexCanvas.height;
+  vc.clearRect(0, 0, W, H);
+  const cx = W/2, cy = H/2;
+  const progress = Math.min(yupiVortexT, 1);
+
+  // Swirling vortex rings
+  const rings = 18;
+  for (let i = 0; i < rings; i++) {
+    const angle = (i / rings) * Math.PI * 2 + yupiVortexT * 3;
+    const r = (i / rings) * Math.min(W, H) * 0.55 * progress;
+    const hue = (i / rings * 360 + yupiVortexT * 80) % 360;
+    vc.save();
+    vc.translate(cx, cy);
+    vc.rotate(angle + yupiVortexT * 2);
+    vc.strokeStyle = `hsla(${hue},100%,65%,${0.6 * progress})`;
+    vc.lineWidth = 2.5;
+    vc.shadowColor = `hsl(${hue},100%,60%)`;
+    vc.shadowBlur = 12;
+    vc.beginPath();
+    vc.arc(r * 0.4, 0, r * 0.18, 0, Math.PI * 2);
+    vc.stroke();
+    vc.restore();
+  }
+
+  // Central bright glow
+  const glow = vc.createRadialGradient(cx, cy, 0, cx, cy, 80 * progress);
+  glow.addColorStop(0, `rgba(255,255,255,${0.9 * progress})`);
+  glow.addColorStop(0.3, `hsla(${(yupiVortexT*120)%360},100%,70%,${0.5 * progress})`);
+  glow.addColorStop(1, 'transparent');
+  vc.fillStyle = glow;
+  vc.beginPath();
+  vc.arc(cx, cy, 80 * progress, 0, Math.PI * 2);
+  vc.fill();
+
+  // Spiral arms
+  for (let arm = 0; arm < 6; arm++) {
+    vc.save();
+    vc.translate(cx, cy);
+    vc.rotate((arm / 6) * Math.PI * 2 + yupiVortexT * 2.5);
+    vc.beginPath();
+    for (let t = 0; t < Math.PI * 3 * progress; t += 0.08) {
+      const spiralR = t * 22;
+      const sx = Math.cos(t) * spiralR;
+      const sy = Math.sin(t) * spiralR;
+      if (t === 0) vc.moveTo(sx, sy); else vc.lineTo(sx, sy);
+    }
+    const hue2 = (arm * 60 + yupiVortexT * 60) % 360;
+    vc.strokeStyle = `hsla(${hue2},100%,70%,${0.45 * progress})`;
+    vc.lineWidth = 1.5;
+    vc.shadowColor = `hsl(${hue2},100%,60%)`;
+    vc.shadowBlur = 8;
+    vc.stroke();
+    vc.restore();
+  }
+}
+
+function animateVortex(enter, onDone) {
+  if (yupiVortexAnim) cancelAnimationFrame(yupiVortexAnim);
+  yupiVortexT = enter ? 0 : 1;
+  const speed = enter ? 0.025 : -0.03;
+  const target = enter ? 1 : 0;
+  function step() {
+    yupiVortexT += speed;
+    drawVortexFrame();
+    const done = enter ? yupiVortexT >= target : yupiVortexT <= target;
+    if (!done) { yupiVortexAnim = requestAnimationFrame(step); }
+    else { yupiVortexT = target; drawVortexFrame(); if (onDone) onDone(); }
+  }
+  yupiVortexAnim = requestAnimationFrame(step);
+}
+
+// Extra chests array for YUPILANDIA multi-chest support
+let yupiChests = [];
+
+function spawnYupiCoins() {
+  // Spawn 10-14 coins scattered across the FULL screen width and height
+  const count = 10 + Math.floor(Math.random() * 5);
+  for (let i = 0; i < count; i++) {
+    // Mix of incoming coins (off right edge) and mid-screen drops
+    const xOffset = Math.random() < 0.4
+      ? Math.random() * canvas.width           // already on screen
+      : canvas.width + 20 + i * 35;            // incoming from right
+    coinPickups.push({
+      x: xOffset,
+      y: 50 + Math.random() * (canvas.height - 100),
+      r: 10, spin: 0, collected: false
+    });
+  }
+}
+
+function spawnYupiChest() {
+  // Spawn up to 3 chests simultaneously during YUPILANDIA
+  const active = yupiChests.filter(c => !c.collected && c.x > -80).length;
+  if (active < 3) {
+    const newChest = {
+      x: canvas.width + 50 + Math.random() * 80,
+      y: 80 + Math.random() * (canvas.height - 160),
+      w: 44, h: 36, collected: false, t: 0
+    };
+    yupiChests.push(newChest);
+    // Keep main treasureChest slot in sync with most recent
+    treasureChest = newChest;
+  }
+}
+
+function showYupiCountdownNum(n, onDone) {
+  yupiCountdownText.textContent = n > 0 ? n : '';
+  yupiCountdownText.classList.remove('show');
+  void yupiCountdownText.offsetWidth;
+  if (n > 0) {
+    yupiCountdownText.classList.add('show');
+    AudioEngine.playScore();
+  }
+  setTimeout(() => { yupiCountdownText.classList.remove('show'); if (onDone) onDone(); }, 900);
+}
+
+function triggerYupilandia() {
+  if (yupilandiaTriggered) return;
+  yupilandiaTriggered = true;
+  yupilandiaFrozen = true;
+  yupilandiaActive = false;
+  reached8 = true;
+  MomentRecorder.capture(document.getElementById('gameCanvas'), 2000, blob => { momentBlob = blob; });
+
+  // Clear existing SPEED UP notification
+  fluctNotif.classList.remove('show');
+
+  // Show vortex canvas
+  yupiOverlay.classList.remove('hidden');
+  yupiVortexCanvas.classList.add('show');
+  yupiWelcomeText.classList.remove('show');
+  yupiCountdownText.classList.remove('show');
+  backToRealityText.classList.remove('show');
+
+  AudioEngine.playYupiEntrance();
+  flashScreen('#ff00ff', 0.4);
+  triggerShake(10);
+
+  // Animate vortex in (1.4s)
+  animateVortex(true, () => {
+    // Show WELCOME text
+    yupiWelcomeText.classList.add('show');
+    flashScreen('#ffee00', 0.3);
+    triggerShake(5);
+
+    setTimeout(() => {
+      // Fade out vortex, begin active phase
+      yupiWelcomeText.classList.remove('show');
+      yupiVortexCanvas.classList.remove('show');
+
+      setTimeout(() => {
+        // ACTIVE PHASE BEGINS
+        yupilandiaFrozen = false;
+        yupilandiaActive = true;
+        barriers = []; // clear all barriers
+        targetSpeedMult = 3.6; // 50% faster than previous 2.4x
+        targetSlowMoMult = 1.0;
+        yupilandiaRainbowT = 0;
+
+        // Spawn initial wave of coins
+        spawnYupiCoins();
+        spawnYupiChest();
+
+        AudioEngine.startYupiMusic();
+
+        // After 5 seconds, countdown
+        setTimeout(() => {
+          // Show countdown 3-2-1
+          showYupiCountdownNum(3, () => {
+            showYupiCountdownNum(2, () => {
+              showYupiCountdownNum(1, () => {
+                showYupiCountdownNum(0, () => {
+                  // BACK TO REALITY
+                  backToRealityText.classList.add('show');
+                  yupiVortexCanvas.classList.add('show');
+                  animateVortex(true, null); // vortex out effect
+                  AudioEngine.stopYupiMusic();
+                  flashScreen('#00fff0', 0.3);
+
+                  setTimeout(() => {
+                    // Restore normal game
+                    yupilandiaActive = false;
+                    yupilandiaFrozen = false;
+                    barriers = [];
+                    backToRealityText.classList.remove('show');
+                    yupiVortexCanvas.classList.remove('show');
+                    yupiOverlay.classList.add('hidden');
+                    if (yupiVortexAnim) { cancelAnimationFrame(yupiVortexAnim); yupiVortexAnim = null; }
+                    targetSpeedMult = 1.0;
+                    speedMult = 1.0;
+                    AudioEngine.startMusic();
+                  }, 2000);
+                });
+              });
+            });
+          });
+        }, 5000); // 5 seconds of YUPILANDIA
+      }, 400);
+    }, 1200);
+  });
+}
+
 function updateCoinHud() {
   document.getElementById('coinCount').textContent = save.coins;
   document.getElementById('shopCoinCount').textContent = save.coins;
@@ -1125,7 +1575,7 @@ document.getElementById('shopBtnOver').addEventListener('click', e => { e.stopPr
 function doJump() {
   AudioEngine.init(); AudioEngine.resume();
   if (state === 'start') { startGame(); return; }
-  if (state === 'playing' && !player.dead) {
+  if (state === 'playing' && !player.dead && !yupilandiaFrozen) {
     player.vy = player.jumpForce;
     AudioEngine.playJump();
     spawnParticles(player.x, player.y, currentShip().trailColor, 5, 0.6);
@@ -1144,6 +1594,17 @@ function startGame() {
   treasureChest=null; chestSpawned=false;
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
   momentBlob=null; reached8=false; MomentRecorder.stop();
+
+  // Reset YUPILANDIA
+  yupilandiaTriggered=false; yupilandiaActive=false; yupilandiaFrozen=false;
+  yupilandiaRainbowT=0; yupiChests=[];
+  if(yupiVortexAnim){cancelAnimationFrame(yupiVortexAnim);yupiVortexAnim=null;}
+  yupiOverlay.classList.add('hidden');
+  yupiVortexCanvas.classList.remove('show');
+  yupiWelcomeText.classList.remove('show');
+  yupiCountdownText.classList.remove('show');
+  backToRealityText.classList.remove('show');
+  AudioEngine.stopYupiMusic();
 
   fluctNotif.classList.remove('show');
   phaseIndicator.classList.remove('show');
@@ -1179,6 +1640,11 @@ function awardCoins(amount, x, y) {
 
 function gameOver() {
   state='dead'; player.dead=true;
+  // Cleanup YUPILANDIA if active
+  yupilandiaActive=false; yupilandiaFrozen=false;
+  if(yupiVortexAnim){cancelAnimationFrame(yupiVortexAnim);yupiVortexAnim=null;}
+  yupiOverlay.classList.add('hidden');
+  AudioEngine.stopYupiMusic();
   const clipPromise = Replay.stop();
   AudioEngine.stopMusic(); AudioEngine.playDeath();
   flashScreen('#ff006e', 0.7); triggerShake(12);
@@ -1400,6 +1866,77 @@ function getRainbow(t) {
 //  DRAW FUNCTIONS
 // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function drawBackground() {
+  if (yupilandiaActive) {
+    // Electric disco strobe: hot pink / electric purple / bright cyan cycling fast
+    yupilandiaRainbowT += 0.055; // fast cycle
+    const t = yupilandiaRainbowT;
+
+    // Three neon disco colors strobing rapidly
+    const DISCO = [
+      { h: 320, s: 100, l: 18 },  // hot pink
+      { h: 280, s: 100, l: 15 },  // electric purple
+      { h: 185, s: 100, l: 16 },  // bright cyan
+    ];
+    const slot = Math.floor(t * 4) % 3; // switches ~4x per second
+    const next = (slot + 1) % 3;
+    const blend = (t * 4) % 1; // smooth crossfade between slots
+
+    function lerpHsl(a, b, x) {
+      return {
+        h: a.h + (b.h - a.h) * x,
+        s: a.s + (b.s - a.s) * x,
+        l: a.l + (b.l - a.l) * x
+      };
+    }
+    const c0 = lerpHsl(DISCO[slot], DISCO[next], blend);
+    const c1 = lerpHsl(DISCO[(slot+1)%3], DISCO[(slot+2)%3], blend);
+    const c2 = lerpHsl(DISCO[(slot+2)%3], DISCO[slot], blend);
+
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    grad.addColorStop(0,   `hsl(${c0.h},${c0.s}%,${c0.l}%)`);
+    grad.addColorStop(0.5, `hsl(${c1.h},${c1.s}%,${c1.l}%)`);
+    grad.addColorStop(1,   `hsl(${c2.h},${c2.s}%,${c2.l}%)`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Rapid strobe flash overlay (every ~8 frames at 60fps ≈ 7.5Hz)
+    const strobe = Math.sin(t * 25) * 0.5 + 0.5; // 0→1 fast oscillation
+    if (strobe > 0.82) {
+      ctx.fillStyle = `rgba(255,255,255,${(strobe - 0.82) * 1.8})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Scanline disco grid — thick neon lines cycling hue
+    ctx.lineWidth = 2;
+    const gridStep = 38;
+    for(let x = (frame * 3) % gridStep - gridStep; x < canvas.width + gridStep; x += gridStep) {
+      ctx.strokeStyle = `hsla(${(320 + t * 200) % 360},100%,65%,0.14)`;
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for(let y = (frame * 2) % gridStep - gridStep; y < canvas.height + gridStep; y += gridStep) {
+      ctx.strokeStyle = `hsla(${(185 + t * 200) % 360},100%,65%,0.14)`;
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // Disco radial blooms at nebula positions
+    nebula.forEach(n => {
+      const nh = [320, 280, 185][(Math.floor(t * 3 + n.hue * 0.01)) % 3];
+      const ng = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 1.4);
+      ng.addColorStop(0, `hsla(${nh},100%,70%,0.28)`);
+      ng.addColorStop(1, 'transparent');
+      ctx.fillStyle = ng; ctx.beginPath(); ctx.arc(n.x, n.y, n.r * 1.4, 0, Math.PI * 2); ctx.fill();
+    });
+
+    // Bright strobing stars
+    stars.forEach(s => {
+      const tw = 0.5 + 0.5 * Math.sin(s.twinkle + frame * 0.09);
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r * (1.2 + 0.8 * tw), 0, Math.PI * 2);
+      const sh = [320, 280, 185][Math.floor(s.twinkle + t * 5) % 3];
+      ctx.fillStyle = `hsla(${sh},100%,95%,${s.opacity * tw})`; ctx.fill();
+    });
+    return;
+  }
+
   const grad=ctx.createLinearGradient(0,0,0,canvas.height);
   grad.addColorStop(0,'#060612'); grad.addColorStop(1,'#0d0d2b');
   ctx.fillStyle=grad; ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -1653,7 +2190,7 @@ function loop() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   drawBackground();
 
-  if(state==='playing'){
+  if(state==='playing' && !yupilandiaFrozen){
     frame++;
 
     // ── Base speed progression (every 300 frames) ──
@@ -1671,21 +2208,21 @@ function loop() {
     if(phase !== scorePhase){
       scorePhase = phase;
       if(phase === 1){
-        targetSpeedMult = 1.2;
+        if(!yupilandiaActive) targetSpeedMult = 1.2;
         fluctNotif.textContent = '⚡ SPEED UP!';
         fluctNotif.style.cssText = 'color:#ffe600;font-size:22px;text-shadow:0 0 18px #ffaa00,0 0 40px #ff6600;';
         fluctNotif.classList.add('show');
         setTimeout(()=>fluctNotif.classList.remove('show'), 1500);
         flashScreen('#ffee00', 0.2);
+        // YUPILANDIA: trigger after first SPEED UP at score 8
+        if(score === 8 && !yupilandiaTriggered) {
+          setTimeout(() => triggerYupilandia(), 1200);
+        }
       } else if(phase === 2){
-        targetSpeedMult = 0.75;
-        fluctNotif.textContent = 'SLOW DOWN...';
-        fluctNotif.style.cssText = 'color:#00ccff;font-size:22px;text-shadow:0 0 18px #00ccff,0 0 40px #0099ff;';
-        fluctNotif.classList.add('show');
-        setTimeout(()=>fluctNotif.classList.remove('show'), 1500);
-        flashScreen('#00ccff', 0.2);
+        if(!yupilandiaActive) targetSpeedMult = 0.75;
+        if(!yupilandiaActive){ fluctNotif.textContent = 'SLOW DOWN...'; fluctNotif.style.cssText = 'color:#00ccff;font-size:22px;text-shadow:0 0 18px #00ccff,0 0 40px #0099ff;'; fluctNotif.classList.add('show'); setTimeout(()=>fluctNotif.classList.remove('show'), 1500); flashScreen('#00ccff', 0.2); }
       } else {
-        targetSpeedMult = 1.0;
+        if(!yupilandiaActive) targetSpeedMult = 1.0;
         fluctNotif.classList.remove('show');
       }
       phaseIndicator.classList.remove('show');
@@ -1700,11 +2237,16 @@ function loop() {
     nebula.forEach(n=>{n.x-=n.speed*(spd/3.5);if(n.x+n.r<0){n.x=canvas.width+n.r;n.y=Math.random()*canvas.height;}});
 
     const spawnInterval=Math.max(80,130-score*1.5);
-    if(frame%Math.floor(spawnInterval)===0) spawnBarrier();
+    if(!yupilandiaActive && !yupilandiaFrozen && frame%Math.floor(spawnInterval)===0) spawnBarrier();
 
+    // YUPILANDIA: rain coins and chests, no barriers
+    if(yupilandiaActive) {
+      if(frame%20===0) spawnYupiCoins();
+      if(frame%55===0) spawnYupiChest();
+    }
 
-    // Spawn monedas (cada ~200 frames, posici\u00f3n aleatoria)
-    if(frame%180===90) spawnCoinPickup();
+    // Spawn monedas (cada ~200 frames, posición aleatoria)
+    if(!yupilandiaActive && frame%180===90) spawnCoinPickup();
 
     if(!player.dead){
       player.vy+=player.gravity; player.y+=player.vy;
@@ -1720,6 +2262,26 @@ function loop() {
     if(treasureChest&&!treasureChest.collected){ treasureChest.x-=spd; }
     if(treasureChest&&treasureChest.x<-80) treasureChest=null;
 
+    // Update YUPILANDIA multi-chests
+    if(yupilandiaActive) {
+      yupiChests.forEach(c=>{ if(!c.collected) c.x-=spd; });
+      yupiChests=yupiChests.filter(c=>c.x>-80&&!c.collected);
+      // Collision check for all yupi chests
+      if(!player.dead) yupiChests.forEach(c=>{
+        if(c.collected) return;
+        const dx=player.x-c.x,dy=player.y-c.y;
+        if(Math.sqrt(dx*dx+dy*dy)<player.size+Math.max(c.w,c.h)*0.52){
+          c.collected=true;
+          AudioEngine.playTreasure();
+          flashScreen('#FFD700',0.45); triggerShake(9);
+          spawnParticles(c.x,c.y,'#FFD700',22,1.3);
+          spawnParticles(c.x,c.y,'#FFFAAA',10,0.9);
+          awardCoins(5,c.x,c.y);
+          showTreasureFloat(c.x,c.y);
+        }
+      });
+    }
+
     barriers.forEach(b=>{
       b.x-=spd;
       if(!b.scored&&b.x+BAR_W<player.x){
@@ -1727,7 +2289,6 @@ function loop() {
         updateUI(); popScore();
         spawnParticles(player.x+20,player.y,currentShip().trailColor,6,0.8);
         if(score===6&&!chestSpawned){ chestSpawned=true; treasureChest={x:canvas.width+50,y:canvas.height*0.5,w:44,h:36,collected:false,t:0}; }
-        if(score===8){setTimeout(()=>{ slowMoMult=0.3; targetSlowMoMult=0.3; showAchieve15(); setTimeout(()=>{ targetSlowMoMult=1.0; },2000); },1500);}
         if(combo>=5&&combo%5===0){AudioEngine.playCombo();showCombo(combo);flashScreen('#ffee00',0.15);}
         else AudioEngine.playScore();
       }
@@ -1740,13 +2301,20 @@ function loop() {
     if(!player.dead){
       checkCoinCollection();
       checkChestCollection();
-      if(checkCollision()){combo=0;gameOver();}
+      if(!yupilandiaActive && !yupilandiaFrozen && checkCollision()){combo=0;gameOver();}
     }
   }
 
   barriers.forEach(drawBarrier);
   drawCoinPickups();
   drawTreasureChest();
+  // Draw all YUPILANDIA extra chests
+  if(yupilandiaActive) {
+    yupiChests.forEach(c=>{
+      if(c.collected) return;
+      const saved=treasureChest; treasureChest=c; drawTreasureChest(); treasureChest=saved;
+    });
+  }
   drawParticles();
   drawPlayer();
   ctx.restore();
