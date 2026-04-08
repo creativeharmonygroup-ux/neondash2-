@@ -1454,129 +1454,169 @@ const AudioEngine = (() => {
   }
 
   // ── HANGAR AMBIENT: calm/mysterious spaceship atmosphere ──
-  let hangarPlaying = false, hangarTimer = null, hangarGain = null;
-  let hangarNextTime = 0, hangarBlock = 0;
-  const HBLK = 8; // seconds per block
+  // ── Hangar music: node-tracked so stopHangarMusic() kills everything instantly ──
+  let hangarPlaying = false, hangarTimer = null;
+  let hangarMaster = null;   // GainNode — master fader for all hangar audio
+  let hangarNodes = [];      // every started AudioNode registered here for instant kill
+  let hangarBlock = 0, hangarNextTime = 0;
+  const HBLK = 14;           // seconds per block
 
-  function hT(freq, st, dur, type, peak) {
-    if(!ctx||muted||!hangarGain) return;
-    const osc=ctx.createOscillator(), g=ctx.createGain();
-    osc.type=type; osc.frequency.value=freq;
-    g.gain.setValueAtTime(0,st);
-    g.gain.linearRampToValueAtTime(peak,st+dur*0.15);
-    g.gain.exponentialRampToValueAtTime(0.001,st+dur);
-    osc.connect(g); g.connect(hangarGain); osc.start(st); osc.stop(st+dur+0.05);
+  function hReg(node) { hangarNodes.push(node); return node; } // register + return
+
+  // Create an oscillator routed: osc → gainNode → hangarMaster
+  function hOsc(freq, type, detune, st, dur, fadeIn, fadeOut, peak) {
+    if (!ctx || !hangarMaster) return;
+    const osc = hReg(ctx.createOscillator());
+    const g   = ctx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    if (detune) osc.detune.value = detune;
+    g.gain.setValueAtTime(0, st);
+    g.gain.linearRampToValueAtTime(peak, st + fadeIn);
+    g.gain.setValueAtTime(peak, st + dur - fadeOut);
+    g.gain.linearRampToValueAtTime(0, st + dur);
+    osc.connect(g); g.connect(hangarMaster);
+    osc.start(st); osc.stop(st + dur + 0.1);
   }
-  function hN(st, dur, peak, ftype, ffreq) {
-    if(!ctx||muted||!hangarGain) return;
-    const len=Math.floor(ctx.sampleRate*Math.min(dur,2));
-    const buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
-    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
-    const src=ctx.createBufferSource(), flt=ctx.createBiquadFilter(), g=ctx.createGain();
-    src.buffer=buf; flt.type=ftype; flt.frequency.value=ffreq;
-    g.gain.setValueAtTime(0,st); g.gain.linearRampToValueAtTime(peak,st+0.4);
-    g.gain.setValueAtTime(peak,st+dur*0.6); g.gain.exponentialRampToValueAtTime(0.001,st+dur);
-    src.connect(flt); flt.connect(g); g.connect(hangarGain); src.start(st); src.stop(st+dur);
+
+  // Create a noise burst routed: buffer → filter → gainNode → hangarMaster
+  function hNoise(st, dur, peak, ftype, ffreq, fQ, fadeIn) {
+    if (!ctx || !hangarMaster) return;
+    const len = Math.floor(ctx.sampleRate * Math.min(dur, 3));
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d   = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    const src = hReg(ctx.createBufferSource());
+    const flt = ctx.createBiquadFilter();
+    const g   = ctx.createGain();
+    src.buffer = buf; flt.type = ftype; flt.frequency.value = ffreq;
+    if (fQ) flt.Q.value = fQ;
+    const fi = fadeIn || 1.0;
+    g.gain.setValueAtTime(0, st);
+    g.gain.linearRampToValueAtTime(peak, st + fi);
+    g.gain.setValueAtTime(peak, st + dur - fi);
+    g.gain.linearRampToValueAtTime(0, st + dur);
+    src.connect(flt); flt.connect(g); g.connect(hangarMaster);
+    src.start(st); src.stop(st + dur + 0.1);
   }
 
   function scheduleHangarBlock(st) {
-    const b = hangarBlock++ % 4;
+    if (!hangarPlaying || !ctx || !hangarMaster) return;
+    const b = hangarBlock++ % 6;
 
-    // ── Engine drone: detuned sine pair, always ──
-    [[55,55.4],[82.4,83.1]].forEach(([f1,f2])=>{
-      [f1,f2].forEach(f=>{
-        const osc=ctx.createOscillator(), g=ctx.createGain();
-        osc.type='sine'; osc.frequency.value=f;
-        g.gain.setValueAtTime(0,st); g.gain.linearRampToValueAtTime(0.055,st+2);
-        g.gain.setValueAtTime(0.055,st+HBLK-2); g.gain.linearRampToValueAtTime(0,st+HBLK);
-        osc.connect(g); g.connect(hangarGain); osc.start(st); osc.stop(st+HBLK+0.1);
-      });
+    // ── 1. Sub bass foundation: two detuned sine pairs, 36 Hz + 55 Hz ──
+    [[36.7,  0], [36.7, 10], [55.0, 0], [55.0, -8]].forEach(([f, det]) =>
+      hOsc(f, 'sine', det, st, HBLK, 3.5, 3.5, 0.08));
+
+    // ── 2. Slow cinematic pad: minor chord, triangle+sine chorus ──
+    const chords = [
+      [110, 138.6, 165, 220],     // Am
+      [98,  130.8, 164.8, 196],   // Gm
+      [116.5,155.6,185,  233.1],  // A#m
+      [110, 146.8, 174.6,220],    // Am9
+      [98,  123.5, 164.8,196],    // Gm7
+      [123.5,164.8,196,  246.9],  // Bm
+    ];
+    const chord   = chords[b];
+    const swellAt = st + 1.0 + Math.random() * 1.5;
+    chord.forEach((f, i) => {
+      hOsc(f, 'triangle', 0,     swellAt, HBLK - 1.5, 4.0, 3.5, 0.044 + i * 0.006);
+      hOsc(f, 'sine',     5+i*3, swellAt, HBLK - 1.5, 4.5, 3.5, 0.022 + i * 0.003);
     });
 
-    // ── Ventilation hiss: narrow bandpass noise, always ──
-    hN(st, HBLK, 0.022, 'bandpass', 320);
+    // ── 3. Space wind: soft lowpass breath, always ──
+    hNoise(st, HBLK, 0.014, 'lowpass', 260, 0.6, 2.0);
 
-    // ── Pad swell: slow Am chord triangle, every other block ──
-    if(b===0||b===2){
-      const padNotes = b===0 ? [110,131,165,220] : [98,131,196,262];
-      const swellStart = st + 0.5 + Math.random()*1.5;
-      padNotes.forEach(f=>{
-        const osc=ctx.createOscillator(), g=ctx.createGain();
-        osc.type='triangle'; osc.frequency.value=f;
-        g.gain.setValueAtTime(0,swellStart);
-        g.gain.linearRampToValueAtTime(0.065,swellStart+2.2);
-        g.gain.setValueAtTime(0.065,swellStart+3.5);
-        g.gain.linearRampToValueAtTime(0,swellStart+6.5);
-        osc.connect(g); g.connect(hangarGain);
-        osc.start(swellStart); osc.stop(swellStart+6.6);
-      });
+    // ── 4. Deep cinematic rumble: bandpass noise at 55 Hz ──
+    hNoise(st + 0.5, HBLK - 1, 0.022, 'bandpass', 55, 4.0, 2.5);
+
+    // ── 5. Crystal star pings: sparse, high, slow decay ──
+    const pingFreqs = [1108, 1319, 1568, 1760, 2093, 2637];
+    const numPings  = 1 + (b % 2);
+    for (let p = 0; p < numPings; p++) {
+      const pt = st + 2 + Math.random() * (HBLK - 5) + p * 3;
+      const pf = pingFreqs[Math.floor(Math.random() * pingFreqs.length)];
+      hOsc(pf,      'sine', 0, pt,        4.5, 0.04, 4.2, 0.028);
+      hOsc(pf * 0.5,'sine', 0, pt + 0.05, 3.5, 0.04, 3.2, 0.016);
     }
 
-    // ── Metallic ping: sparse high resonant tone ──
-    const pingTime = st + 1.5 + Math.random()*4;
-    const pingFreqs = [880,1108,1397,1760];
-    const pf = pingFreqs[Math.floor(Math.random()*pingFreqs.length)];
-    hT(pf, pingTime, 2.8, 'sine', 0.045);
-    // Sub-harmonic ghost of the ping
-    hT(pf*0.5, pingTime+0.05, 2.2, 'triangle', 0.025);
-
-    // ── Mystery tone: slow rising sawtooth filter sweep, every 3rd block ──
-    if(b===1){
-      const mystOsc=ctx.createOscillator(), mystFlt=ctx.createBiquadFilter(), mystG=ctx.createGain();
-      mystOsc.type='sawtooth'; mystOsc.frequency.value=82;
-      mystFlt.type='lowpass'; mystFlt.frequency.setValueAtTime(80,st+2); mystFlt.frequency.exponentialRampToValueAtTime(600,st+HBLK-1); mystFlt.Q.value=4;
-      mystG.gain.setValueAtTime(0,st+2); mystG.gain.linearRampToValueAtTime(0.038,st+3);
-      mystG.gain.setValueAtTime(0.038,st+HBLK-2); mystG.gain.linearRampToValueAtTime(0,st+HBLK-0.5);
-      mystOsc.connect(mystFlt); mystFlt.connect(mystG); mystG.connect(hangarGain);
-      mystOsc.start(st+2); mystOsc.stop(st+HBLK);
+    // ── 6. Legato lead melody: slow vibrato sine, alternating blocks ──
+    if (b === 0 || b === 2 || b === 4) {
+      const pairs = [[220,246.9],[196,220],[246.9,277.2]];
+      const [lf1, lf2] = pairs[(b / 2) | 0];
+      const lst = st + 3 + Math.random();
+      const losc  = hReg(ctx.createOscillator());
+      const lvib  = hReg(ctx.createOscillator());
+      const lvibG = ctx.createGain();
+      const lg    = ctx.createGain();
+      losc.type = 'sine';
+      losc.frequency.setValueAtTime(lf1, lst);
+      losc.frequency.linearRampToValueAtTime(lf2, lst + 7);
+      lvib.type = 'sine'; lvib.frequency.value = 3.8;
+      lvibG.gain.value = 4;
+      lvib.connect(lvibG); lvibG.connect(losc.frequency);
+      lg.gain.setValueAtTime(0, lst);
+      lg.gain.linearRampToValueAtTime(0.05, lst + 2.5);
+      lg.gain.setValueAtTime(0.05, lst + 6.0);
+      lg.gain.linearRampToValueAtTime(0, lst + 8.5);
+      losc.connect(lg); lg.connect(hangarMaster);
+      lvib.start(lst); lvib.stop(lst + 9);
+      losc.start(lst); losc.stop(lst + 9);
     }
 
-    // ── Distant high shimmer: soft high-freq overtone ──
-    if(b===3){
-      hT(440,st+2,5.5,'sine',0.028);
-      hT(660,st+3,4.0,'sine',0.018);
+    // ── 7. Airy high shimmer: soft highpass noise sparkle ──
+    if (b === 1 || b === 4) {
+      hNoise(st + 4, 8, 0.009, 'highpass', 3800, 0.4, 2.0);
     }
   }
 
-  function hangarScheduleLoop() {
-    if(!hangarPlaying) return;
-    while(hangarNextTime < ctx.currentTime + 2) {
+  function hangarLoop() {
+    if (!hangarPlaying) return;
+    while (hangarNextTime < ctx.currentTime + 3) {
       scheduleHangarBlock(hangarNextTime);
       hangarNextTime += HBLK;
     }
-    hangarTimer = setTimeout(hangarScheduleLoop, 1500);
+    hangarTimer = setTimeout(hangarLoop, 2000);
   }
 
   function startHangarMusic() {
-    if(!ctx) init(); resume();
-    stopMusic(); stopYupiMusic();
-    if(hangarPlaying) return;
-    hangarGain = ctx.createGain(); hangarGain.gain.value = 0;
-    // Long reverb: two parallel delays for hall-like space
-    const d1=ctx.createDelay(2.0); d1.delayTime.value=0.7;
-    const d2=ctx.createDelay(2.0); d2.delayTime.value=1.3;
-    const fb1=ctx.createGain(); fb1.gain.value=0.38;
-    const fb2=ctx.createGain(); fb2.gain.value=0.28;
-    const wet=ctx.createGain(); wet.gain.value=0.5;
-    const lpf=ctx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=1200;
-    hangarGain.connect(masterGain);           // dry
-    hangarGain.connect(d1); d1.connect(fb1); fb1.connect(d1); d1.connect(wet);
-    hangarGain.connect(d2); d2.connect(fb2); fb2.connect(d2); d2.connect(wet);
-    wet.connect(lpf); lpf.connect(masterGain); // wet through lpf
-    hangarGain.gain.linearRampToValueAtTime(0.78, ctx.currentTime+2.0); // slow fade in
-    hangarBlock=0; hangarPlaying=true; hangarNextTime=ctx.currentTime+0.1;
-    hangarScheduleLoop();
+    if (!ctx) init();
+    resume();
+    // Always kill everything else first
+    stopMusic();
+    stopYupiMusic();
+    stopHangarMusic(); // no-op if not playing, but clears any leftover state
+
+    // Build fresh master chain: gain → compressor → masterGain
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -16; comp.knee.value = 10;
+    comp.ratio.value = 5; comp.attack.value = 0.04; comp.release.value = 0.5;
+    comp.connect(masterGain);
+    hangarMaster = ctx.createGain();
+    hangarMaster.gain.setValueAtTime(0, ctx.currentTime);
+    hangarMaster.gain.linearRampToValueAtTime(0.70, ctx.currentTime + 3.0);
+    hangarMaster.connect(comp);
+
+    hangarNodes = [];
+    hangarBlock = 0;
+    hangarPlaying = true;
+    hangarNextTime = ctx.currentTime + 0.05;
+    hangarLoop();
   }
 
   function stopHangarMusic() {
-    hangarPlaying=false;
-    if(hangarTimer) clearTimeout(hangarTimer);
-    if(hangarGain&&ctx){
-      hangarGain.gain.cancelScheduledValues(ctx.currentTime);
-      hangarGain.gain.setValueAtTime(hangarGain.gain.value, ctx.currentTime);
-      hangarGain.gain.linearRampToValueAtTime(0, ctx.currentTime+0.6);
+    hangarPlaying = false;
+    if (hangarTimer) { clearTimeout(hangarTimer); hangarTimer = null; }
+    // Stop and disconnect every registered node immediately
+    hangarNodes.forEach(n => { try { n.stop(0); } catch(e){} try { n.disconnect(); } catch(e){} });
+    hangarNodes = [];
+    if (hangarMaster && ctx) {
+      try {
+        hangarMaster.gain.cancelScheduledValues(ctx.currentTime);
+        hangarMaster.gain.setValueAtTime(0, ctx.currentTime);
+        hangarMaster.disconnect();
+      } catch(e) {}
     }
-    hangarGain=null;
+    hangarMaster = null;
   }
 
   return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic };
@@ -1949,6 +1989,8 @@ document.getElementById('hangarLaunchBtn').addEventListener('click', e => { e.st
 document.getElementById('hangarLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeShop(); });
 
 function doJump() {
+  // Never fire while the hangar is open
+  if (!document.getElementById('shopScreen').classList.contains('hidden')) return;
   AudioEngine.init(); AudioEngine.resume();
   if (state === 'start') { startGame(); return; }
   if (state === 'playing' && !player.dead && !yupilandiaFrozen) {
@@ -1961,6 +2003,8 @@ function doJump() {
 document.addEventListener('keydown', e => { if(e.code==='Space') doJump(); });
 wrapper.addEventListener('click', doJump);
 wrapper.addEventListener('touchstart', e => { e.preventDefault(); doJump(); }, {passive:false});
+// Absorb all touch events inside the shop so they never reach the wrapper touchstart
+document.getElementById('shopScreen').addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
 document.getElementById('restartBtn').addEventListener('click', e => { e.stopPropagation(); startGame(); });
 document.getElementById('restartBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); startGame(); });
 
@@ -1981,6 +2025,7 @@ function startGame() {
   yupiCountdownText.classList.remove('show');
   backToRealityText.classList.remove('show');
   AudioEngine.stopYupiMusic();
+  AudioEngine.stopHangarMusic();
 
   fluctNotif.classList.remove('show');
   phaseIndicator.classList.remove('show');
