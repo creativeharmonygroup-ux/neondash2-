@@ -849,6 +849,55 @@ const AudioEngine = (() => {
   function playNewRecord() { init(); resume(); const t=ctx.currentTime; [523,659,784,1047,1319].forEach((f,i)=>{ playTone({type:'triangle',freq:f,duration:0.2,gainPeak:0.35,startTime:t+i*0.1}); }); }
   function playUnlock() { init(); resume(); const t=ctx.currentTime; [400,600,800,1200].forEach((f,i)=>playTone({type:'sine',freq:f,duration:0.18,gainPeak:0.3,startTime:t+i*0.08})); }
 
+  function playLocked() {
+    init(); resume();
+    if (muted) return;
+    const t = ctx.currentTime;
+    const lG = ctx.createGain(); lG.gain.value = 1.0; lG.connect(masterGain);
+
+    // ── Layer 1: harsh buzz — detuned sawtooth pair dropping in pitch ──
+    [{ freq: 180, detune: 18 }, { freq: 175, detune: -18 }].forEach(({ freq, detune }) => {
+      const osc = ctx.createOscillator(), oG = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, t);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.55, t + 0.28);
+      osc.detune.value = detune;
+      // Bandpass to shape the buzz — keeps it buzzy, not too harsh
+      const bpf = ctx.createBiquadFilter();
+      bpf.type = 'bandpass'; bpf.frequency.value = 320; bpf.Q.value = 1.8;
+      oG.gain.setValueAtTime(0, t);
+      oG.gain.linearRampToValueAtTime(0.38, t + 0.012);
+      oG.gain.setValueAtTime(0.38, t + 0.08);
+      oG.gain.exponentialRampToValueAtTime(0.001, t + 0.30);
+      osc.connect(bpf); bpf.connect(oG); oG.connect(lG);
+      osc.start(t); osc.stop(t + 0.32);
+    });
+
+    // ── Layer 2: two short falling beeps — classic "denied" pattern ──
+    [{ delay: 0, freq: 440 }, { delay: 0.13, freq: 330 }].forEach(({ delay, freq }) => {
+      const osc = ctx.createOscillator(), oG = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, t + delay);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.75, t + delay + 0.09);
+      oG.gain.setValueAtTime(0, t + delay);
+      oG.gain.linearRampToValueAtTime(0.18, t + delay + 0.008);
+      oG.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.11);
+      osc.connect(oG); oG.connect(lG);
+      osc.start(t + delay); osc.stop(t + delay + 0.13);
+    });
+
+    // ── Layer 3: low thud — sub sine for weight ──
+    const sub = ctx.createOscillator(), subG = ctx.createGain();
+    sub.type = 'sine';
+    sub.frequency.setValueAtTime(55, t);
+    sub.frequency.exponentialRampToValueAtTime(30, t + 0.15);
+    subG.gain.setValueAtTime(0, t);
+    subG.gain.linearRampToValueAtTime(0.55, t + 0.010);
+    subG.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    sub.connect(subG); subG.connect(lG);
+    sub.start(t); sub.stop(t + 0.20);
+  }
+
   function playHangarOpen() {
     init(); resume();
     if (muted) return;
@@ -1530,7 +1579,7 @@ const AudioEngine = (() => {
     hangarGain=null;
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playMockLaugh, playTreasure, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic };
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic };
 })();
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -2180,7 +2229,9 @@ function onShipCardClick(ship, card) {
     flashScreen(ship.color, 0.3);
     setTimeout(()=>renderShop(), 200);
   } else {
-    // Can't afford \u2014 shake card
+    // Can't afford — shake card + denied sound
+    AudioEngine.init(); AudioEngine.resume();
+    AudioEngine.playLocked();
     card.style.animation = 'none'; void card.offsetWidth;
     card.style.animation = 'shake 0.3s ease';
     setTimeout(()=>{ card.style.animation=''; },300);
