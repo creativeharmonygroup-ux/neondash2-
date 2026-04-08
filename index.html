@@ -624,7 +624,8 @@ const SHIPS = [
     wingColor: 'rgba(0,255,240,0.8)',
     glowColor: '#00fff0',
     emoji: '\ud83d\ude80',
-    description: 'Nave cl\u00e1sica'
+    description: 'Nave cl\u00e1sica',
+    worldTheme: { bgTop:'#060612', bgBot:'#0a0d22', nebulaHue:185, nebulaSpread:20, starRgb:'180,255,255', barrierHue:180, barrierSpread:30, grid:'rgba(0,255,240,0.03)' }
   },
   {
     id: 'phantom',
@@ -636,7 +637,8 @@ const SHIPS = [
     wingColor: 'rgba(191,0,255,0.8)',
     glowColor: '#bf00ff',
     emoji: '\ud83d\udef8',
-    description: 'Nave fantasma'
+    description: 'Nave fantasma',
+    worldTheme: { bgTop:'#0d0018', bgBot:'#180028', nebulaHue:280, nebulaSpread:25, starRgb:'220,160,255', barrierHue:280, barrierSpread:30, grid:'rgba(191,0,255,0.03)' }
   },
   {
     id: 'inferno',
@@ -648,7 +650,8 @@ const SHIPS = [
     wingColor: 'rgba(255,68,0,0.9)',
     glowColor: '#ff4400',
     emoji: '\ud83d\udd25',
-    description: 'Nave de fuego'
+    description: 'Nave de fuego',
+    worldTheme: { bgTop:'#130200', bgBot:'#1f0500', nebulaHue:15, nebulaSpread:20, starRgb:'255,180,120', barrierHue:15, barrierSpread:25, grid:'rgba(255,68,0,0.03)' }
   },
   {
     id: 'ghost',
@@ -660,7 +663,8 @@ const SHIPS = [
     wingColor: 'rgba(200,200,255,0.6)',
     glowColor: '#aaaaff',
     emoji: '\ud83d\udc7b',
-    description: 'Nave invisible'
+    description: 'Nave invisible',
+    worldTheme: { bgTop:'#06060f', bgBot:'#0c0c1e', nebulaHue:220, nebulaSpread:30, starRgb:'210,210,255', barrierHue:210, barrierSpread:35, grid:'rgba(200,200,255,0.025)' }
   },
   {
     id: 'nova',
@@ -672,7 +676,8 @@ const SHIPS = [
     wingColor: 'rgba(255,238,0,0.9)',
     glowColor: '#ffee00',
     emoji: '\u2b50',
-    description: 'Estrella dorada'
+    description: 'Estrella dorada',
+    worldTheme: { bgTop:'#0f0a00', bgBot:'#1a1200', nebulaHue:48, nebulaSpread:18, starRgb:'255,240,140', barrierHue:45, barrierSpread:20, grid:'rgba(255,238,0,0.03)' }
   },
   {
     id: 'abyss',
@@ -684,7 +689,8 @@ const SHIPS = [
     wingColor: 'rgba(0,102,255,0.8)',
     glowColor: '#0066ff',
     emoji: '\ud83c\udf0a',
-    description: 'Profundidades'
+    description: 'Profundidades',
+    worldTheme: { bgTop:'#00081a', bgBot:'#000d28', nebulaHue:220, nebulaSpread:15, starRgb:'100,160,255', barrierHue:215, barrierSpread:20, grid:'rgba(0,102,255,0.03)' }
   },
   {
     id: 'storm',
@@ -696,7 +702,8 @@ const SHIPS = [
     wingColor: 'rgba(0,255,136,0.8)',
     glowColor: '#00ff88',
     emoji: '\u26a1',
-    description: 'Tormenta el\u00e9ctrica'
+    description: 'Tormenta el\u00e9ctrica',
+    worldTheme: { bgTop:'#000d06', bgBot:'#001508', nebulaHue:145, nebulaSpread:20, starRgb:'140,255,190', barrierHue:140, barrierSpread:25, grid:'rgba(0,255,136,0.03)' }
   },
   {
     id: 'legend',
@@ -709,7 +716,8 @@ const SHIPS = [
     glowColor: '#ff006e',
     emoji: '\ud83d\udc51',
     description: 'La nave suprema',
-    rainbow: true
+    rainbow: true,
+    worldTheme: { bgTop:'#120008', bgBot:'#1e0012', nebulaHue:330, nebulaSpread:40, starRgb:'255,140,200', barrierHue:330, barrierSpread:40, grid:'rgba(255,0,110,0.03)' }
   }
 ];
 
@@ -1678,7 +1686,9 @@ const GAP = 200, BAR_W = 28;
 function spawnBarrier() {
   const minH=80, maxH=canvas.height-GAP-minH;
   const topH=minH+Math.random()*(maxH-minH);
-  barriers.push({ x:canvas.width+20, topH, bottomY:topH+GAP, scored:false, hue:Math.random()*60+160 });
+  const bwt = currentShip().worldTheme;
+  const bHue = bwt.barrierHue + (Math.random() - 0.5) * bwt.barrierSpread;
+  barriers.push({ x:canvas.width+20, topH, bottomY:topH+GAP, scored:false, hue:bHue });
 }
 
 let stars = [], nebula = [];
@@ -2363,21 +2373,23 @@ function drawBackground() {
     return;
   }
 
+  const wt = currentShip().worldTheme;
   const grad=ctx.createLinearGradient(0,0,0,canvas.height);
-  grad.addColorStop(0,'#060612'); grad.addColorStop(1,'#0d0d2b');
+  grad.addColorStop(0, wt.bgTop); grad.addColorStop(1, wt.bgBot);
   ctx.fillStyle=grad; ctx.fillRect(0,0,canvas.width,canvas.height);
-  nebula.forEach(n=>{
+  nebula.forEach((n,i)=>{
+    const nh = wt.nebulaHue + (i - 3) * (wt.nebulaSpread / 3);
     const ng=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
-    ng.addColorStop(0,`hsla(${n.hue},80%,50%,${n.opacity})`); ng.addColorStop(1,'transparent');
+    ng.addColorStop(0,`hsla(${nh},80%,50%,${n.opacity})`); ng.addColorStop(1,'transparent');
     ctx.fillStyle=ng; ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2); ctx.fill();
   });
-  ctx.strokeStyle='rgba(0,255,240,0.03)'; ctx.lineWidth=1;
+  ctx.strokeStyle=wt.grid; ctx.lineWidth=1;
   for(let x=0;x<canvas.width;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
   for(let y=0;y<canvas.height;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
   stars.forEach(s=>{
     const tw=0.5+0.5*Math.sin(s.twinkle+frame*0.03);
     ctx.beginPath();ctx.arc(s.x,s.y,s.r*(0.8+0.2*tw),0,Math.PI*2);
-    ctx.fillStyle=`rgba(255,255,255,${s.opacity*tw})`;ctx.fill();
+    ctx.fillStyle=`rgba(${wt.starRgb},${s.opacity*tw})`;ctx.fill();
   });
 }
 
