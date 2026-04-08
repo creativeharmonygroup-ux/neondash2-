@@ -2066,8 +2066,14 @@ let screenShake = { x:0, y:0, power:0 };
 // Coin pickups en el aire
 let coinPickups = [];
 let treasureChest = null, chestSpawned = false;
-let legendaryChest = null, legendaryChestSpawned = false;
+let legendaryChest = null;
 let nextGoldenChestScore = 4;
+// Legendary chest triggers at 100 total coins, then every 50 after (150, 200, 250...)
+function computeNextLegendaryThreshold(coins) {
+  if (coins < 100) return 100;
+  return Math.floor(coins / 50) * 50 + 50;
+}
+let nextLegendaryCoinThreshold = computeNextLegendaryThreshold(save.coins);
 function spawnCoinPickup() {
   // Enforce minimum horizontal gap so coins never cluster
   const MIN_GAP = 90;
@@ -2431,7 +2437,7 @@ document.getElementById('restartBtn').addEventListener('touchend', e => { e.stop
 function startGame() {
   state='playing'; score=0; frame=0; speed=5.45; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0;
   treasureChest=null; chestSpawned=false;
-  legendaryChest=null; legendaryChestSpawned=false; nextGoldenChestScore=4;
+  legendaryChest=null; nextGoldenChestScore=4;
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
   momentBlob=null; reached8=false; MomentRecorder.stop();
 
@@ -2470,8 +2476,14 @@ function updateUI() {
 }
 
 function awardCoins(amount, x, y) {
+  const prevCoins = save.coins;
   save.coins += amount;
   coinsThisRun += amount;
+  // Legendary chest: trigger when crossing 100-coin milestone, then every 50
+  if (state === 'playing' && !legendaryChest && save.coins >= nextLegendaryCoinThreshold && prevCoins < nextLegendaryCoinThreshold) {
+    legendaryChest = { x: canvas.width + 60, y: canvas.height * 0.4, w: 60, h: 50, collected: false, t: 0, spin: 0 };
+    nextLegendaryCoinThreshold += 50;
+  }
   writeSave(save);
   updateCoinHud();
   popCoin();
@@ -3238,12 +3250,14 @@ function drawLegendaryChest() {
   if (!legendaryChest || legendaryChest.collected) return;
   const ch = legendaryChest;
   ch.t += 0.06;
+  ch.spin = (ch.spin || 0) + 0.022; // slow full rotation
   const pulse = 1 + Math.sin(ch.t * 2.8) * 0.13;
   const W = ch.w * pulse, H = ch.h * pulse;
   const lh = H * 0.4;
 
   ctx.save();
   ctx.translate(ch.x, ch.y);
+  ctx.rotate(ch.spin); // slow spin in space
 
   // Intense rainbow/purple outer aura (multi-layer)
   const hue1 = (ch.t * 60) % 360;
@@ -3322,14 +3336,17 @@ function drawLegendaryChest() {
 function showLegendaryFloat(x, y) {
   const el = document.createElement('div');
   el.className = 'coinFloat treasure';
-  el.textContent = '+30';
-  el.style.left = (x - 22) + 'px';
-  el.style.top  = (y - 44) + 'px';
-  el.style.fontSize = '22px';
-  el.style.textShadow = '0 0 12px #bf00ff, 0 0 24px #ff00ff';
-  el.style.color = '#df80ff';
+  el.textContent = '+30 COINS';
+  el.style.left = (x - 60) + 'px';
+  el.style.top  = (y - 50) + 'px';
+  el.style.fontSize = '26px';
+  el.style.fontWeight = 'bold';
+  el.style.letterSpacing = '2px';
+  el.style.color = '#ffffff';
+  el.style.textShadow = '0 0 8px #bf00ff, 0 0 20px #ff00ff, 0 0 40px #ff00ff';
+  el.style.animation = 'coinFloat 1.6s ease-out forwards';
   wrapper.appendChild(el);
-  setTimeout(() => el.remove(), 1500);
+  setTimeout(() => el.remove(), 1600);
 }
 
 function checkLegendaryChestCollection() {
@@ -3561,7 +3578,6 @@ function loop() {
         updateUI(); popScore();
         spawnParticles(player.x+20,player.y,currentShip().trailColor,6,0.8);
         if(score===nextGoldenChestScore){ treasureChest={x:canvas.width+50,y:canvas.height*0.5,w:44,h:36,collected:false,t:0}; nextGoldenChestScore+=6; }
-        if(score===15&&!legendaryChestSpawned){ legendaryChestSpawned=true; legendaryChest={x:canvas.width+60,y:canvas.height*0.4,w:60,h:50,collected:false,t:0}; }
         if(combo>=5&&combo%5===0){AudioEngine.playCombo();showCombo(combo);flashScreen('#ffee00',0.15);}
         else AudioEngine.playScore();
       }
