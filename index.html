@@ -2069,11 +2069,8 @@ let treasureChest = null, chestSpawned = false;
 let legendaryChest = null;
 let nextGoldenChestScore = 4;
 // Legendary chest triggers at 100 total coins, then every 50 after (150, 200, 250...)
-function computeNextLegendaryThreshold(coins) {
-  if (coins < 100) return 100;
-  return Math.floor(coins / 50) * 50 + 50;
-}
-let nextLegendaryCoinThreshold = computeNextLegendaryThreshold(save.coins);
+// Legendary chest spawns at every 100-coin multiple (100, 200, 300...)
+let nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
 function spawnCoinPickup() {
   // Enforce minimum horizontal gap so coins never cluster
   const MIN_GAP = 90;
@@ -2479,10 +2476,10 @@ function awardCoins(amount, x, y) {
   const prevCoins = save.coins;
   save.coins += amount;
   coinsThisRun += amount;
-  // Legendary chest: trigger when crossing 100-coin milestone, then every 50
-  if (state === 'playing' && !legendaryChest && save.coins >= nextLegendaryCoinThreshold && prevCoins < nextLegendaryCoinThreshold) {
+  // Legendary chest: spawn whenever total coins crosses a multiple of 100
+  if (state === 'playing' && !legendaryChest && Math.floor(save.coins / 100) > Math.floor(prevCoins / 100)) {
     legendaryChest = { x: canvas.width + 60, y: canvas.height * 0.4, w: 60, h: 50, collected: false, t: 0, spin: 0 };
-    nextLegendaryCoinThreshold += 50;
+    nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
   }
   writeSave(save);
   updateCoinHud();
