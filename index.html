@@ -299,6 +299,19 @@
   }
   .shop-grid::-webkit-scrollbar { display: none; }
 
+  .hangar-launch-btn {
+    background: transparent; border: 2px solid var(--neon-cyan); color: var(--neon-cyan);
+    font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900;
+    letter-spacing: 5px; padding: 13px 48px; border-radius: 50px; cursor: pointer;
+    pointer-events: all; text-transform: uppercase; margin: 0 16px 18px;
+    text-shadow: 0 0 10px var(--neon-cyan);
+    box-shadow: 0 0 18px rgba(0,255,240,0.35), inset 0 0 14px rgba(0,255,240,0.06);
+    transition: background 0.15s, transform 0.15s;
+    animation: btnPulse 2.2s ease-in-out infinite, btnFloat 3s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  .hangar-launch-btn:active { background: var(--neon-cyan); color: #060612; transform: scale(0.96); animation: none; }
+
   .ship-card {
     border: 1.5px solid rgba(255,255,255,0.1); border-radius: 14px;
     padding: 16px 12px; display: flex; flex-direction: column;
@@ -311,7 +324,7 @@
   .ship-card.selected { border-color: var(--neon-cyan); box-shadow: 0 0 20px rgba(0,255,240,0.3), inset 0 0 20px rgba(0,255,240,0.05); }
   .ship-card.locked { opacity: 0.7; }
 
-  .ship-card-canvas { width: 70px; height: 70px; }
+  .ship-card-canvas { display: block; width: 80px; height: 80px; }
 
   .ship-card-name {
     font-size: 9px; font-weight: 700; letter-spacing: 2px; color: white;
@@ -589,6 +602,7 @@
       <button class="shop-close" id="shopClose">🔊</button>
     </div>
     <div class="shop-grid" id="shopGrid"></div>
+    <button class="hangar-launch-btn" id="hangarLaunchBtn">▶ LAUNCH</button>
   </div>
 </div>
 
@@ -834,6 +848,189 @@ const AudioEngine = (() => {
   }
   function playNewRecord() { init(); resume(); const t=ctx.currentTime; [523,659,784,1047,1319].forEach((f,i)=>{ playTone({type:'triangle',freq:f,duration:0.2,gainPeak:0.35,startTime:t+i*0.1}); }); }
   function playUnlock() { init(); resume(); const t=ctx.currentTime; [400,600,800,1200].forEach((f,i)=>playTone({type:'sine',freq:f,duration:0.18,gainPeak:0.3,startTime:t+i*0.08})); }
+
+  function playHangarOpen() {
+    init(); resume();
+    if (muted) return;
+    const t = ctx.currentTime;
+    const hG = ctx.createGain(); hG.gain.value = 1.0; hG.connect(masterGain);
+
+    // ── Whoosh body: filtered noise swept low→high→fade ──
+    // Envelope: fast attack, peak at ~35ms, smooth tail to 320ms
+    const dur = 0.32;
+    const wLen = Math.floor(ctx.sampleRate * dur);
+    const wBuf = ctx.createBuffer(1, wLen, ctx.sampleRate);
+    const wData = wBuf.getChannelData(0);
+    for (let i = 0; i < wLen; i++) wData[i] = Math.random() * 2 - 1;
+
+    const wSrc = ctx.createBufferSource();
+    wSrc.buffer = wBuf;
+
+    // Bandpass sweeps 200 Hz → 3200 Hz — air rushing through a panel opening
+    const bpf = ctx.createBiquadFilter();
+    bpf.type = 'bandpass'; bpf.Q.value = 1.2;
+    bpf.frequency.setValueAtTime(200, t);
+    bpf.frequency.exponentialRampToValueAtTime(3200, t + dur * 0.55);
+    bpf.frequency.exponentialRampToValueAtTime(1800, t + dur);
+
+    // Highpass to keep it airy, not muddy
+    const hpf = ctx.createBiquadFilter();
+    hpf.type = 'highpass'; hpf.frequency.value = 120;
+
+    const wG = ctx.createGain();
+    wG.gain.setValueAtTime(0, t);
+    wG.gain.linearRampToValueAtTime(0.55, t + 0.035);   // fast attack
+    wG.gain.setValueAtTime(0.55, t + 0.07);
+    wG.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+    wSrc.connect(bpf); bpf.connect(hpf); hpf.connect(wG); wG.connect(hG);
+    wSrc.start(t); wSrc.stop(t + dur + 0.01);
+
+    // ── Sci-fi shimmer: sine tone rising through the whoosh ──
+    // Gives it the "electronic panel" quality on top of the air
+    const shimmer = ctx.createOscillator(), shimG = ctx.createGain();
+    shimmer.type = 'sine';
+    shimmer.frequency.setValueAtTime(320, t + 0.01);
+    shimmer.frequency.exponentialRampToValueAtTime(1400, t + 0.22);
+    shimG.gain.setValueAtTime(0, t + 0.01);
+    shimG.gain.linearRampToValueAtTime(0.10, t + 0.04);
+    shimG.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+    shimmer.connect(shimG); shimG.connect(hG);
+    shimmer.start(t + 0.01); shimmer.stop(t + 0.30);
+
+    // ── Soft trailing air — quieter second noise puff for depth ──
+    const tailLen = Math.floor(ctx.sampleRate * 0.18);
+    const tailBuf = ctx.createBuffer(1, tailLen, ctx.sampleRate);
+    const tailData = tailBuf.getChannelData(0);
+    for (let i = 0; i < tailLen; i++) tailData[i] = Math.random() * 2 - 1;
+    const tailSrc = ctx.createBufferSource();
+    tailSrc.buffer = tailBuf;
+    const tailBpf = ctx.createBiquadFilter();
+    tailBpf.type = 'bandpass'; tailBpf.Q.value = 0.8;
+    tailBpf.frequency.setValueAtTime(2000, t + 0.14);
+    tailBpf.frequency.exponentialRampToValueAtTime(800, t + 0.32);
+    const tailG = ctx.createGain();
+    tailG.gain.setValueAtTime(0, t + 0.14);
+    tailG.gain.linearRampToValueAtTime(0.18, t + 0.18);
+    tailG.gain.exponentialRampToValueAtTime(0.001, t + 0.34);
+    tailSrc.connect(tailBpf); tailBpf.connect(tailG); tailG.connect(hG);
+    tailSrc.start(t + 0.14); tailSrc.stop(t + 0.35);
+  }
+
+  function playHangarClose() {
+    init(); resume();
+    if (muted) return;
+    const t = ctx.currentTime;
+    const hcG = ctx.createGain(); hcG.gain.value = 1.0; hcG.connect(masterGain);
+
+    // ── Layer 1: downward whoosh — bandpass noise sweeping high→low ──
+    const dur = 0.30;
+    const wLen = Math.floor(ctx.sampleRate * dur);
+    const wBuf = ctx.createBuffer(1, wLen, ctx.sampleRate);
+    const wData = wBuf.getChannelData(0);
+    for (let i = 0; i < wLen; i++) wData[i] = Math.random() * 2 - 1;
+    const wSrc = ctx.createBufferSource(); wSrc.buffer = wBuf;
+    const bpf = ctx.createBiquadFilter();
+    bpf.type = 'bandpass'; bpf.Q.value = 1.4;
+    bpf.frequency.setValueAtTime(3500, t);
+    bpf.frequency.exponentialRampToValueAtTime(180, t + dur);
+    const hpf = ctx.createBiquadFilter();
+    hpf.type = 'highpass'; hpf.frequency.value = 80;
+    const wG = ctx.createGain();
+    wG.gain.setValueAtTime(0, t);
+    wG.gain.linearRampToValueAtTime(0.6, t + 0.018);
+    wG.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    wSrc.connect(bpf); bpf.connect(hpf); hpf.connect(wG); wG.connect(hcG);
+    wSrc.start(t); wSrc.stop(t + dur + 0.01);
+
+    // ── Layer 2: falling dual-tone portal close ──
+    [{ f1: 1400, f2: 180, g: 0.14 }, { f1: 900, f2: 120, g: 0.09 }].forEach(({ f1, f2, g }, i) => {
+      const osc = ctx.createOscillator(), oG = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f1, t + i * 0.02);
+      osc.frequency.exponentialRampToValueAtTime(f2, t + 0.28 + i * 0.02);
+      oG.gain.setValueAtTime(g, t + i * 0.02);
+      oG.gain.exponentialRampToValueAtTime(0.001, t + 0.32 + i * 0.02);
+      osc.connect(oG); oG.connect(hcG);
+      osc.start(t + i * 0.02); osc.stop(t + 0.35);
+    });
+
+    // ── Layer 3: low thud on close — sub sine punch ──
+    const thud = ctx.createOscillator(), thudG = ctx.createGain();
+    thud.type = 'sine';
+    thud.frequency.setValueAtTime(90, t + 0.05);
+    thud.frequency.exponentialRampToValueAtTime(32, t + 0.22);
+    thudG.gain.setValueAtTime(0, t + 0.05);
+    thudG.gain.linearRampToValueAtTime(0.75, t + 0.07);
+    thudG.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+    thud.connect(thudG); thudG.connect(hcG);
+    thud.start(t + 0.05); thud.stop(t + 0.28);
+  }
+
+  function playShopOpen() {
+    init(); resume();
+    if (muted) return;
+    const t = ctx.currentTime;
+    const sG = ctx.createGain(); sG.gain.value = 1.0; sG.connect(masterGain);
+
+    // ── Layer 1: deep sub warp thud — low sine punch ──
+    const sub = ctx.createOscillator(), subG = ctx.createGain();
+    sub.type = 'sine';
+    sub.frequency.setValueAtTime(60, t);
+    sub.frequency.exponentialRampToValueAtTime(28, t + 0.18);
+    subG.gain.setValueAtTime(0, t);
+    subG.gain.linearRampToValueAtTime(0.9, t + 0.012);
+    subG.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    sub.connect(subG); subG.connect(sG);
+    sub.start(t); sub.stop(t + 0.25);
+
+    // ── Layer 2: upward warp sweep — sawtooth into bandpass rising fast ──
+    const warpLen = Math.floor(ctx.sampleRate * 0.45);
+    const warpBuf = ctx.createBuffer(1, warpLen, ctx.sampleRate);
+    const warpData = warpBuf.getChannelData(0);
+    for (let i = 0; i < warpLen; i++) warpData[i] = Math.random() * 2 - 1;
+    const warpSrc = ctx.createBufferSource(); warpSrc.buffer = warpBuf;
+    const warpBpf = ctx.createBiquadFilter();
+    warpBpf.type = 'bandpass'; warpBpf.Q.value = 3.5;
+    warpBpf.frequency.setValueAtTime(80, t);
+    warpBpf.frequency.exponentialRampToValueAtTime(6000, t + 0.38);
+    const warpHp = ctx.createBiquadFilter();
+    warpHp.type = 'highpass'; warpHp.frequency.value = 60;
+    const warpG = ctx.createGain();
+    warpG.gain.setValueAtTime(0, t);
+    warpG.gain.linearRampToValueAtTime(0.7, t + 0.02);
+    warpG.gain.setValueAtTime(0.7, t + 0.15);
+    warpG.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+    warpSrc.connect(warpBpf); warpBpf.connect(warpHp); warpHp.connect(warpG); warpG.connect(sG);
+    warpSrc.start(t); warpSrc.stop(t + 0.46);
+
+    // ── Layer 3: rising dual-tone sci-fi portal ping ──
+    [{ f1: 220, f2: 1760, g: 0.18 }, { f1: 330, f2: 2640, g: 0.12 }].forEach(({ f1, f2, g }, i) => {
+      const osc = ctx.createOscillator(), oG = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f1, t + 0.04 + i * 0.03);
+      osc.frequency.exponentialRampToValueAtTime(f2, t + 0.40 + i * 0.03);
+      oG.gain.setValueAtTime(0, t + 0.04 + i * 0.03);
+      oG.gain.linearRampToValueAtTime(g, t + 0.08 + i * 0.03);
+      oG.gain.exponentialRampToValueAtTime(0.001, t + 0.48 + i * 0.03);
+      osc.connect(oG); oG.connect(sG);
+      osc.start(t + 0.04 + i * 0.03); osc.stop(t + 0.52);
+    });
+
+    // ── Layer 4: high-frequency electric crackle at the end ──
+    const crackLen = Math.floor(ctx.sampleRate * 0.08);
+    const crackBuf = ctx.createBuffer(1, crackLen, ctx.sampleRate);
+    const crackData = crackBuf.getChannelData(0);
+    for (let i = 0; i < crackLen; i++) crackData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (crackLen * 0.3));
+    const crackSrc = ctx.createBufferSource(); crackSrc.buffer = crackBuf;
+    const crackHp = ctx.createBiquadFilter();
+    crackHp.type = 'highpass'; crackHp.frequency.value = 4000;
+    const crackG = ctx.createGain();
+    crackG.gain.setValueAtTime(0.35, t + 0.34);
+    crackG.gain.exponentialRampToValueAtTime(0.001, t + 0.44);
+    crackSrc.connect(crackHp); crackHp.connect(crackG); crackG.connect(sG);
+    crackSrc.start(t + 0.34); crackSrc.stop(t + 0.45);
+  }
 
   function playMockLaugh() {
     if(!ctx||muted) return;
@@ -1207,7 +1404,133 @@ const AudioEngine = (() => {
     [523,659,784,1047].forEach((f,i)=>playTone({type:'triangle',freq:f,duration:1.2,gainPeak:0.08,startTime:t+0.5+i*0.04}));
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playMockLaugh, playTreasure, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance };
+  // ── HANGAR AMBIENT: calm/mysterious spaceship atmosphere ──
+  let hangarPlaying = false, hangarTimer = null, hangarGain = null;
+  let hangarNextTime = 0, hangarBlock = 0;
+  const HBLK = 8; // seconds per block
+
+  function hT(freq, st, dur, type, peak) {
+    if(!ctx||muted||!hangarGain) return;
+    const osc=ctx.createOscillator(), g=ctx.createGain();
+    osc.type=type; osc.frequency.value=freq;
+    g.gain.setValueAtTime(0,st);
+    g.gain.linearRampToValueAtTime(peak,st+dur*0.15);
+    g.gain.exponentialRampToValueAtTime(0.001,st+dur);
+    osc.connect(g); g.connect(hangarGain); osc.start(st); osc.stop(st+dur+0.05);
+  }
+  function hN(st, dur, peak, ftype, ffreq) {
+    if(!ctx||muted||!hangarGain) return;
+    const len=Math.floor(ctx.sampleRate*Math.min(dur,2));
+    const buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    const src=ctx.createBufferSource(), flt=ctx.createBiquadFilter(), g=ctx.createGain();
+    src.buffer=buf; flt.type=ftype; flt.frequency.value=ffreq;
+    g.gain.setValueAtTime(0,st); g.gain.linearRampToValueAtTime(peak,st+0.4);
+    g.gain.setValueAtTime(peak,st+dur*0.6); g.gain.exponentialRampToValueAtTime(0.001,st+dur);
+    src.connect(flt); flt.connect(g); g.connect(hangarGain); src.start(st); src.stop(st+dur);
+  }
+
+  function scheduleHangarBlock(st) {
+    const b = hangarBlock++ % 4;
+
+    // ── Engine drone: detuned sine pair, always ──
+    [[55,55.4],[82.4,83.1]].forEach(([f1,f2])=>{
+      [f1,f2].forEach(f=>{
+        const osc=ctx.createOscillator(), g=ctx.createGain();
+        osc.type='sine'; osc.frequency.value=f;
+        g.gain.setValueAtTime(0,st); g.gain.linearRampToValueAtTime(0.055,st+2);
+        g.gain.setValueAtTime(0.055,st+HBLK-2); g.gain.linearRampToValueAtTime(0,st+HBLK);
+        osc.connect(g); g.connect(hangarGain); osc.start(st); osc.stop(st+HBLK+0.1);
+      });
+    });
+
+    // ── Ventilation hiss: narrow bandpass noise, always ──
+    hN(st, HBLK, 0.022, 'bandpass', 320);
+
+    // ── Pad swell: slow Am chord triangle, every other block ──
+    if(b===0||b===2){
+      const padNotes = b===0 ? [110,131,165,220] : [98,131,196,262];
+      const swellStart = st + 0.5 + Math.random()*1.5;
+      padNotes.forEach(f=>{
+        const osc=ctx.createOscillator(), g=ctx.createGain();
+        osc.type='triangle'; osc.frequency.value=f;
+        g.gain.setValueAtTime(0,swellStart);
+        g.gain.linearRampToValueAtTime(0.065,swellStart+2.2);
+        g.gain.setValueAtTime(0.065,swellStart+3.5);
+        g.gain.linearRampToValueAtTime(0,swellStart+6.5);
+        osc.connect(g); g.connect(hangarGain);
+        osc.start(swellStart); osc.stop(swellStart+6.6);
+      });
+    }
+
+    // ── Metallic ping: sparse high resonant tone ──
+    const pingTime = st + 1.5 + Math.random()*4;
+    const pingFreqs = [880,1108,1397,1760];
+    const pf = pingFreqs[Math.floor(Math.random()*pingFreqs.length)];
+    hT(pf, pingTime, 2.8, 'sine', 0.045);
+    // Sub-harmonic ghost of the ping
+    hT(pf*0.5, pingTime+0.05, 2.2, 'triangle', 0.025);
+
+    // ── Mystery tone: slow rising sawtooth filter sweep, every 3rd block ──
+    if(b===1){
+      const mystOsc=ctx.createOscillator(), mystFlt=ctx.createBiquadFilter(), mystG=ctx.createGain();
+      mystOsc.type='sawtooth'; mystOsc.frequency.value=82;
+      mystFlt.type='lowpass'; mystFlt.frequency.setValueAtTime(80,st+2); mystFlt.frequency.exponentialRampToValueAtTime(600,st+HBLK-1); mystFlt.Q.value=4;
+      mystG.gain.setValueAtTime(0,st+2); mystG.gain.linearRampToValueAtTime(0.038,st+3);
+      mystG.gain.setValueAtTime(0.038,st+HBLK-2); mystG.gain.linearRampToValueAtTime(0,st+HBLK-0.5);
+      mystOsc.connect(mystFlt); mystFlt.connect(mystG); mystG.connect(hangarGain);
+      mystOsc.start(st+2); mystOsc.stop(st+HBLK);
+    }
+
+    // ── Distant high shimmer: soft high-freq overtone ──
+    if(b===3){
+      hT(440,st+2,5.5,'sine',0.028);
+      hT(660,st+3,4.0,'sine',0.018);
+    }
+  }
+
+  function hangarScheduleLoop() {
+    if(!hangarPlaying) return;
+    while(hangarNextTime < ctx.currentTime + 2) {
+      scheduleHangarBlock(hangarNextTime);
+      hangarNextTime += HBLK;
+    }
+    hangarTimer = setTimeout(hangarScheduleLoop, 1500);
+  }
+
+  function startHangarMusic() {
+    if(!ctx) init(); resume();
+    stopMusic(); stopYupiMusic();
+    if(hangarPlaying) return;
+    hangarGain = ctx.createGain(); hangarGain.gain.value = 0;
+    // Long reverb: two parallel delays for hall-like space
+    const d1=ctx.createDelay(2.0); d1.delayTime.value=0.7;
+    const d2=ctx.createDelay(2.0); d2.delayTime.value=1.3;
+    const fb1=ctx.createGain(); fb1.gain.value=0.38;
+    const fb2=ctx.createGain(); fb2.gain.value=0.28;
+    const wet=ctx.createGain(); wet.gain.value=0.5;
+    const lpf=ctx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=1200;
+    hangarGain.connect(masterGain);           // dry
+    hangarGain.connect(d1); d1.connect(fb1); fb1.connect(d1); d1.connect(wet);
+    hangarGain.connect(d2); d2.connect(fb2); fb2.connect(d2); d2.connect(wet);
+    wet.connect(lpf); lpf.connect(masterGain); // wet through lpf
+    hangarGain.gain.linearRampToValueAtTime(0.78, ctx.currentTime+2.0); // slow fade in
+    hangarBlock=0; hangarPlaying=true; hangarNextTime=ctx.currentTime+0.1;
+    hangarScheduleLoop();
+  }
+
+  function stopHangarMusic() {
+    hangarPlaying=false;
+    if(hangarTimer) clearTimeout(hangarTimer);
+    if(hangarGain&&ctx){
+      hangarGain.gain.cancelScheduledValues(ctx.currentTime);
+      hangarGain.gain.setValueAtTime(hangarGain.gain.value, ctx.currentTime);
+      hangarGain.gain.linearRampToValueAtTime(0, ctx.currentTime+0.6);
+    }
+    hangarGain=null;
+  }
+
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playMockLaugh, playTreasure, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic };
 })();
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -1569,8 +1892,12 @@ shopSoundBtn.addEventListener('click', e => {
   applySoundIcon(nowMuted);
 });
 
-document.getElementById('shopBtn').addEventListener('click', e => { e.stopPropagation(); openShop(); });
-document.getElementById('shopBtnOver').addEventListener('click', e => { e.stopPropagation(); openShop(); });
+document.getElementById('shopBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openShop(); }, { passive: false });
+document.getElementById('shopBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playShopOpen(); openShop(); });
+document.getElementById('shopBtnOver').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openShop(); }, { passive: false });
+document.getElementById('shopBtnOver').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); openShop(); });
+document.getElementById('hangarLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeShop(); });
+document.getElementById('hangarLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeShop(); });
 
 function doJump() {
   AudioEngine.init(); AudioEngine.resume();
@@ -1684,11 +2011,14 @@ function gameOver() {
 // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function openShop() {
   AudioEngine.init(); AudioEngine.resume();
+  AudioEngine.playHangarOpen();
+  AudioEngine.startHangarMusic();
   shopSoundBtn.textContent = AudioEngine.isMuted() ? '🔇' : '🔊';
   renderShop();
   document.getElementById('shopScreen').classList.remove('hidden');
 }
 function closeShop() {
+  AudioEngine.stopHangarMusic();
   document.getElementById('shopScreen').classList.add('hidden');
   updateStartShipEmoji();
 }
@@ -1714,7 +2044,7 @@ function renderShop() {
     // Mini canvas preview
     const miniCanvas = document.createElement('canvas');
     miniCanvas.className = 'ship-card-canvas';
-    miniCanvas.width = 70; miniCanvas.height = 70;
+    miniCanvas.width = 80; miniCanvas.height = 80;
     drawShipPreview(miniCanvas, ship, selected);
     card.appendChild(miniCanvas);
 
@@ -1750,14 +2080,14 @@ function renderShop() {
 // Dibuja la nave en el mini canvas
 function drawShipPreview(c, ship, selected) {
   const gfx = c.getContext('2d');
-  const cx = 35, cy = 35, size = 16;
-  gfx.clearRect(0, 0, 70, 70);
+  const W = 80, H = 80, cx = 40, cy = 33, size = 16;
+  gfx.clearRect(0, 0, W, H);
 
   // Glow de fondo si seleccionada
   if (selected) {
-    const bg = gfx.createRadialGradient(cx,cy,0,cx,cy,30);
+    const bg = gfx.createRadialGradient(cx,cx,0,cx,cx,34);
     bg.addColorStop(0, `${ship.color}22`); bg.addColorStop(1,'transparent');
-    gfx.fillStyle=bg; gfx.fillRect(0,0,70,70);
+    gfx.fillStyle=bg; gfx.fillRect(0,0,W,H);
   }
 
   gfx.shadowColor = ship.glowColor; gfx.shadowBlur = 15;
@@ -1782,8 +2112,8 @@ function drawShipPreview(c, ship, selected) {
   // Lock overlay
   if (!save.owned.includes(ship.id)) {
     gfx.restore();
-    gfx.fillStyle='rgba(6,6,18,0.55)'; gfx.fillRect(0,0,70,70);
-    gfx.fillStyle='rgba(255,255,255,0.5)'; gfx.font='bold 22px serif'; gfx.textAlign='center'; gfx.textBaseline='middle'; gfx.fillText('\ud83d\udd12',35,35);
+    gfx.fillStyle='rgba(6,6,18,0.55)'; gfx.fillRect(0,0,80,80);
+    gfx.fillStyle='rgba(255,255,255,0.5)'; gfx.font='bold 22px serif'; gfx.textAlign='center'; gfx.textBaseline='middle'; gfx.fillText('\ud83d\udd12',40,40);
   } else {
     gfx.restore();
   }
@@ -1796,13 +2126,13 @@ function animateShipPreview(c, ship) {
     if (!c.isConnected) return;
     flicker += 0.15;
     const gfx = c.getContext('2d');
-    const cx=35, cy=35, size=16;
-    gfx.clearRect(0,0,70,70);
+    const W=80, H=80, cx=40, cy=33, size=16;
+    gfx.clearRect(0,0,W,H);
     const selected = save.selected === ship.id;
     if (selected) {
-      const bg=gfx.createRadialGradient(cx,cy,0,cx,cy,30);
+      const bg=gfx.createRadialGradient(cx,cx,0,cx,cx,34);
       bg.addColorStop(0,`${ship.color}22`); bg.addColorStop(1,'transparent');
-      gfx.fillStyle=bg; gfx.fillRect(0,0,70,70);
+      gfx.fillStyle=bg; gfx.fillRect(0,0,W,H);
     }
     gfx.shadowColor=ship.glowColor; gfx.shadowBlur=15;
     gfx.save(); gfx.translate(cx,cy);
@@ -1821,8 +2151,8 @@ function animateShipPreview(c, ship) {
 
     if (!save.owned.includes(ship.id)) {
       gfx.restore();
-      gfx.fillStyle='rgba(6,6,18,0.55)'; gfx.fillRect(0,0,70,70);
-      gfx.font='bold 22px serif'; gfx.textAlign='center'; gfx.textBaseline='middle'; gfx.fillText('\ud83d\udd12',35,35);
+      gfx.fillStyle='rgba(6,6,18,0.55)'; gfx.fillRect(0,0,80,80);
+      gfx.font='bold 22px serif'; gfx.textAlign='center'; gfx.textBaseline='middle'; gfx.fillText('\ud83d\udd12',40,40);
     } else { gfx.restore(); }
 
     requestAnimationFrame(frame);
