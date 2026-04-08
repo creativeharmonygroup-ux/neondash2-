@@ -2506,6 +2506,7 @@ function startGame() {
   state='playing'; score=0; frame=0; speed=5.45; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0; nearMissCooldown=0;
   treasureChest=null; chestSpawned=false;
   legendaryChest=null; nextGoldenChestScore=4;
+  nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
   surpriseObstacle=null; nextSurpriseScore=10+Math.floor(Math.random()*6);
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
   momentBlob=null; reached8=false; MomentRecorder.stop();
@@ -2548,11 +2549,6 @@ function awardCoins(amount, x, y) {
   const prevCoins = save.coins;
   save.coins += amount;
   coinsThisRun += amount;
-  // Legendary chest: spawn whenever total coins crosses a multiple of 100
-  if (state === 'playing' && !legendaryChest && Math.floor(save.coins / 100) > Math.floor(prevCoins / 100)) {
-    legendaryChest = { x: canvas.width + 60, y: canvas.height * 0.4, w: 60, h: 50, collected: false, t: 0, spin: 0 };
-    nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
-  }
   writeSave(save);
   updateCoinHud();
   popCoin();
@@ -3402,12 +3398,12 @@ function drawLegendaryChest() {
   ctx.restore();
 }
 
-function showLegendaryFloat(x, y) {
+function showLegendaryFloat() {
   const el = document.createElement('div');
   el.className = 'coinFloat treasure';
   el.textContent = '+30 COINS';
-  el.style.left = (x - 60) + 'px';
-  el.style.top  = (y - 50) + 'px';
+  el.style.left = (wrapper.clientWidth / 2 - 80) + 'px';
+  el.style.top  = (wrapper.clientHeight / 2 - 40) + 'px';
   el.style.fontSize = '26px';
   el.style.fontWeight = 'bold';
   el.style.letterSpacing = '2px';
@@ -3438,11 +3434,12 @@ function checkLegendaryChestCollection() {
     AudioEngine.playLegendary();
     flashScreen('#bf00ff', 0.6);
     triggerShake(14);
-    spawnParticles(ch.x, ch.y, '#bf00ff', 30, 1.8);
-    spawnParticles(ch.x, ch.y, '#ff80ff', 20, 1.4);
-    spawnParticles(ch.x, ch.y, '#ffffff', 12, 1.0);
+    const cx = canvas.width * 0.5, cy = canvas.height * 0.5;
+    spawnParticles(cx, cy, '#bf00ff', 30, 1.8);
+    spawnParticles(cx, cy, '#ff80ff', 20, 1.4);
+    spawnParticles(cx, cy, '#ffffff', 12, 1.0);
     awardCoins(30, ch.x, ch.y);
-    showLegendaryFloat(ch.x, ch.y);
+    showLegendaryFloat();
   }
 }
 
@@ -3826,9 +3823,17 @@ function loop() {
     if(treasureChest&&!treasureChest.collected){ treasureChest.x-=spd; }
     if(treasureChest&&treasureChest.x<-80) treasureChest=null;
 
-    // Update legendary chest
+    // Update legendary chest — null it once collected or off-screen
+    if(legendaryChest&&legendaryChest.collected) legendaryChest=null;
     if(legendaryChest&&!legendaryChest.collected){ legendaryChest.x-=spd; }
     if(legendaryChest&&legendaryChest.x<-100) legendaryChest=null;
+
+    // Legendary chest milestone check — runs every frame, catches any coin source
+    if(!legendaryChest && save.coins >= nextLegendaryCoinThreshold) {
+      console.log(`[LegendaryChest] SPAWN — coins:${save.coins} threshold:${nextLegendaryCoinThreshold}`);
+      legendaryChest = { x: canvas.width + 60, y: canvas.height * 0.5, w: 60, h: 50, collected: false, t: 0, spin: 0 };
+      nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
+    }
 
     // Update surprise obstacle
     if(surpriseObstacle){
