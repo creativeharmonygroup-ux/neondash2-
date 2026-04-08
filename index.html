@@ -1734,34 +1734,12 @@ const AudioEngine = (() => {
 
   function setMusicPhase(p) {} // no-op — single energetic track
 
-  // ── YUPILANDIA RAVE: 200 BPM, hard techno, heavy sub-bass + bright synths ──
+  // ── YUPILANDIA: 180 BPM BERLIN TECHNO — four-on-the-floor, claps, fast hats ──
   let yupiMusicPlaying = false, yupiMusicTimer = null;
   let yupiNextBar = 0, yupiBarCount = 0, yupiMusicGain = null;
-  const YCb = 60/200, YCe = YCb/2, YCs = YCb/4, YBAR = YCb*4;
+  const YCb = 60/180, YCe = YCb/2, YCs = YCb/4, YBAR = YCb*4;
 
-  // Rave lead: bright E-major stabs cycling fast
-  const YMELO = [
-    [659,784,880,1047,880,784,659,784,659,784,880,1047,1319,1047,880,784],
-    [784,880,1047,1319,1047,880,784,880,659,784,880,1047,880,784,659,880],
-    [880,1047,1319,1568,1319,1047,880,1047,784,880,1047,1319,1047,880,784,1047],
-    [659,784,880,1047,1319,1047,880,784,659,880,1047,1319,1568,1319,1047,880],
-  ];
-  // Pumping sub-bass (sine 41Hz = low E, heavyweight)
-  const YBASS_FREQS = [41, 55, 41, 62]; // E1, A1, E1, B1 — heavy rave root notes
-  // Bright chord synth
-  const YCHORDS = [
-    [659,784,988],[784,988,1175],[659,880,1047],[784,1047,1319]
-  ];
-
-  function yT(freq, st, dur, type, peak) {
-    if(!ctx||muted||!yupiMusicGain) return;
-    const osc=ctx.createOscillator(), g=ctx.createGain();
-    osc.type=type; osc.frequency.value=freq;
-    g.gain.setValueAtTime(0,st);
-    g.gain.linearRampToValueAtTime(peak,st+dur*0.04);
-    g.gain.exponentialRampToValueAtTime(0.001,st+dur);
-    osc.connect(g); g.connect(yupiMusicGain); osc.start(st); osc.stop(st+dur+0.02);
-  }
+  // White noise burst through a filter
   function yN(st, dur, peak, ftype, ffreq) {
     if(!ctx||muted||!yupiMusicGain) return;
     const len=Math.floor(ctx.sampleRate*Math.min(dur,1));
@@ -1772,85 +1750,96 @@ const AudioEngine = (() => {
     g.gain.setValueAtTime(peak,st); g.gain.exponentialRampToValueAtTime(0.001,st+dur);
     src.connect(flt); flt.connect(g); g.connect(yupiMusicGain); src.start(st); src.stop(st+dur);
   }
-  // Distorted kick: sub-bass punch with pitch drop
+
+  // Deep Berlin techno kick: long sub tail, clean thud, no distortion crunch
   function yKick(st) {
     if(!ctx||muted||!yupiMusicGain) return;
+    // Main body: long pitch drop for that deep thud
     const osc=ctx.createOscillator(), g=ctx.createGain();
-    const dist=ctx.createWaveShaper();
-    const curve=new Float32Array(256);
-    for(let i=0;i<256;i++){const x=i*2/256-1; curve[i]=Math.tanh(x*4)*0.8;}
-    dist.curve=curve;
     osc.type='sine';
-    osc.frequency.setValueAtTime(180,st);
-    osc.frequency.exponentialRampToValueAtTime(28,st+0.12);
+    osc.frequency.setValueAtTime(160,st);
+    osc.frequency.exponentialRampToValueAtTime(42,st+0.08);
+    osc.frequency.exponentialRampToValueAtTime(38,st+0.35);
     g.gain.setValueAtTime(0,st);
-    g.gain.linearRampToValueAtTime(0.85,st+0.005);
-    g.gain.exponentialRampToValueAtTime(0.001,st+0.22);
-    osc.connect(dist); dist.connect(g); g.connect(yupiMusicGain);
-    osc.start(st); osc.stop(st+0.25);
-    // Sub layer
+    g.gain.linearRampToValueAtTime(1.0,st+0.004);
+    g.gain.exponentialRampToValueAtTime(0.3,st+0.08);
+    g.gain.exponentialRampToValueAtTime(0.001,st+0.38);
+    osc.connect(g); g.connect(yupiMusicGain);
+    osc.start(st); osc.stop(st+0.40);
+    // Sub reinforcement layer
     const sub=ctx.createOscillator(), sg=ctx.createGain();
-    sub.type='sine'; sub.frequency.setValueAtTime(55,st);
-    sub.frequency.exponentialRampToValueAtTime(20,st+0.18);
-    sg.gain.setValueAtTime(0,st); sg.gain.linearRampToValueAtTime(0.6,st+0.003);
-    sg.gain.exponentialRampToValueAtTime(0.001,st+0.25);
-    sub.connect(sg); sg.connect(yupiMusicGain); sub.start(st); sub.stop(st+0.28);
+    sub.type='sine'; sub.frequency.setValueAtTime(50,st);
+    sub.frequency.exponentialRampToValueAtTime(28,st+0.25);
+    sg.gain.setValueAtTime(0,st); sg.gain.linearRampToValueAtTime(0.65,st+0.003);
+    sg.gain.exponentialRampToValueAtTime(0.001,st+0.30);
+    sub.connect(sg); sg.connect(yupiMusicGain); sub.start(st); sub.stop(st+0.32);
+    // Click transient
+    yN(st, 0.010, 0.45, 'bandpass', 900);
   }
+
+  // Techno clap: layered noise offsets for that sharp slap texture
+  function yClap(st) {
+    if(!ctx||muted||!yupiMusicGain) return;
+    // Three offset noise bursts simulate multiple hands
+    [0, 0.008, 0.016].forEach((offset, i) => {
+      yN(st+offset, 0.09-i*0.015, 0.50-i*0.08, 'bandpass', 1800+i*300);
+      yN(st+offset, 0.05-i*0.010, 0.25-i*0.04, 'highpass', 5000+i*500);
+    });
+    // Sharp high crack on top
+    yN(st, 0.030, 0.35, 'highpass', 8000);
+  }
+
+  // Closed hi-hat: tight metallic tick
+  function yHH(st, peak) {
+    yN(st, 0.014, peak,      'highpass', 14000);
+    yN(st, 0.008, peak*0.35, 'highpass', 9000);
+  }
+
+  // Open hi-hat: longer metallic hiss on upbeats
+  function yOHH(st, peak) {
+    yN(st, 0.10, peak,       'highpass', 10000);
+    yN(st, 0.06, peak*0.45,  'bandpass', 6500);
+  }
+
+  // Ride cymbal accent
+  function yRide(st) {
+    yN(st, 0.18, 0.12, 'highpass', 7000);
+    yN(st, 0.10, 0.07, 'bandpass', 3500);
+  }
+
   function yupiScheduleBar(st) {
     const bar = yupiBarCount % 4; yupiBarCount++;
 
-    // ── HEAVY 4-on-floor kick every beat (200 BPM = very fast) ──
+    // ── FOUR-ON-THE-FLOOR KICK: strictly every beat, deep and mechanical ──
     for(let i=0;i<4;i++) yKick(st+i*YCb);
 
-    // ── Snappy punchy snare on 2&4 with noise layer ──
-    [1,3].forEach(i=>{
-      yN(st+i*YCb,0.08,0.45,'bandpass',2200);
-      yN(st+i*YCb,0.04,0.2,'highpass',5000);
-      yT(280,st+i*YCb,0.04,'triangle',0.18);
-    });
+    // ── CLAPS on beats 2 & 4 (techno backbone) ──
+    yClap(st + 1*YCb);
+    yClap(st + 3*YCb);
 
-    // ── Sizzling 32nd hi-hats (ultra fast at 200 BPM) ──
-    for(let i=0;i<32;i++) {
-      const accent = (i%4===0) ? 0.14 : (i%2===0) ? 0.06 : 0.025;
-      yN(st+i*(YCb/8),0.018,accent,'highpass',14000);
+    // ── CLOSED HI-HATS: 16th notes, every sixteenth ──
+    // Accent on beats (louder on downbeats, medium on 8th offbeats, quieter on 16th)
+    for(let i=0;i<16;i++) {
+      const accent = (i%4===0) ? 0.20 : (i%2===0) ? 0.11 : 0.055;
+      yHH(st+i*YCe, accent);
     }
 
-    // ── Open hat every half-beat (rave feel) ──
-    [0.5,1.5,2.5,3.5].forEach(beat=>{
-      yN(st+beat*YCb,0.06,0.09,'highpass',10000);
+    // ── OPEN HI-HAT on every upbeat (8th offbeats) — classic techno "chk" ──
+    [0.5,1.5,2.5,3.5].forEach(b=>{
+      yOHH(st+b*YCb, 0.13);
     });
 
-    // ── HEAVY sub-bass pump on every beat ──
-    const bassFreq = YBASS_FREQS[bar];
-    for(let i=0;i<4;i++) {
-      yT(bassFreq,st+i*YCb,YCb*0.7,'sine',0.55);
-      // Octave reinforcement
-      yT(bassFreq*2,st+i*YCb,YCb*0.4,'sawtooth',0.12);
+    // ── RIDE accents on bars 2 & 4 for forward momentum ──
+    if(bar===1||bar===3) {
+      [0,1,2,3].forEach(i=>yRide(st+i*YCb+YCe));
     }
 
-    // ── Bright lead synth — 16 sixteenth notes at ultra speed ──
-    YMELO[bar].forEach((f,i)=>{
-      yT(f,st+i*YCe,YCe*0.35,'square',0.08);
-      // Bright detuned layer for width
-      yT(f*1.006,st+i*YCe,YCe*0.3,'sawtooth',0.05);
-    });
-
-    // ── Pulsing chord stabs every beat (euphoric lift) ──
-    YCHORDS[bar].forEach(f=>{
-      for(let i=0;i<4;i++) yT(f,st+i*YCb,YCb*0.4,'triangle',0.06);
-    });
-
-    // ── Bright saw supersaw lead (rave anthem) on beat 1 each bar ──
-    [1,1.01,0.99].forEach(detune=>{
-      yT(YMELO[bar][0]*detune,st,YCb*2,'sawtooth',0.07);
-    });
-
-    // ── Rising arpeggio sweep every 2 beats ──
-    [0,2].forEach(beat=>{
-      [1,2,3,4,6,8].forEach((mult,i)=>{
-        yT(82*mult,st+beat*YCb+i*YCs*0.5,YCs*0.8,'triangle',0.04);
-      });
-    });
+    // ── BAR 4 BUILDUP: 32nd hi-hat roll into the next cycle ──
+    if(bar===3) {
+      for(let i=0;i<16;i++) {
+        yHH(st+2*YCb+i*(YCe/4), 0.06+i*0.006);
+      }
+    }
   }
   function yupiScheduleLoop() {
     if(!yupiMusicPlaying) return;
