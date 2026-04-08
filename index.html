@@ -382,6 +382,184 @@
     text-shadow: 0 0 12px rgba(255,238,0,0.9);
   }
 
+  /* Purchase modal — military tactical overlay */
+  #purchaseModal {
+    position: absolute; inset: 0; z-index: 999;
+    display: flex; flex-direction: column;
+    background: #010a04;
+    overflow: hidden;
+    animation: pmBoot 0.28s cubic-bezier(0.22,1,0.36,1);
+  }
+  #purchaseModal.hidden { display: none; }
+  @keyframes pmBoot {
+    from { opacity: 0; clip-path: inset(48% 0 48% 0); }
+    to   { opacity: 1; clip-path: inset(0% 0 0% 0); }
+  }
+  /* Scanlines */
+  #purchaseModal::before {
+    content: '';
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px, transparent 3px,
+      rgba(0,255,70,0.018) 3px, rgba(0,255,70,0.018) 4px
+    );
+  }
+  /* CRT vignette */
+  #purchaseModal::after {
+    content: '';
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.75) 100%);
+  }
+  .pm-inner {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    height: 100%; padding: 0 18px 20px;
+    overflow: hidden;
+  }
+  /* Moving scan sweep line */
+  .pm-scan-sweep {
+    position: absolute; left: 0; right: 0; height: 80px; z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent, rgba(0,255,70,0.045) 50%, transparent);
+    animation: pmSweep 4s linear infinite;
+  }
+  @keyframes pmSweep {
+    from { top: -80px; }
+    to   { top: 100%; }
+  }
+  /* Particle canvas overlay */
+  #pmParticleCanvas {
+    position: absolute; inset: 0; z-index: 20; pointer-events: none;
+  }
+  /* Rotating ship canvas */
+  #pmShipCanvas {
+    display: block; margin: 0 auto 4px;
+    flex-shrink: 0; width: 100px; height: 100px;
+  }
+  /* Top status bar */
+  .pm-statusbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 0 9px;
+    border-bottom: 1px solid rgba(0,255,70,0.18);
+    font-family: 'Orbitron', monospace; font-size: 7px; font-weight: 700;
+    letter-spacing: 2px; color: rgba(0,255,70,0.45);
+  }
+  .pm-blink { animation: pmBlink 1.1s step-end infinite; }
+  @keyframes pmBlink { 50% { opacity: 0; } }
+  /* Classification banner */
+  .pm-classification {
+    text-align: center; padding: 10px 0 8px;
+    font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 900;
+    letter-spacing: 5px; color: rgba(255,55,55,0.8);
+    text-shadow: 0 0 12px rgba(255,40,40,0.45);
+    border-bottom: 1px solid rgba(255,50,50,0.18);
+  }
+  /* Acquire title */
+  .pm-acquire-title {
+    text-align: center; padding: 10px 0 2px;
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 5px; color: rgba(0,255,70,0.55); flex-shrink: 0;
+  }
+  /* Ship name */
+  .pm-ship-name {
+    text-align: center; padding: 4px 0 6px;
+    font-family: 'Orbitron', monospace; font-size: 26px; font-weight: 900;
+    letter-spacing: 4px; line-height: 1; text-transform: uppercase; flex-shrink: 0;
+  }
+  /* Corner-bracket stats container */
+  .pm-brackets {
+    position: relative; flex: 1; min-height: 0;
+    border: 1px solid rgba(0,255,70,0.12);
+    margin-bottom: 12px; overflow: hidden;
+  }
+  .pm-brackets::before, .pm-brackets::after,
+  .pm-brackets .pm-br-bl, .pm-brackets .pm-br-br {
+    content: ''; position: absolute;
+    width: 14px; height: 14px;
+  }
+  .pm-brackets::before { top:-1px; left:-1px; border-top:2px solid rgba(0,255,70,0.7); border-left:2px solid rgba(0,255,70,0.7); }
+  .pm-brackets::after  { top:-1px; right:-1px; border-top:2px solid rgba(0,255,70,0.7); border-right:2px solid rgba(0,255,70,0.7); }
+  .pm-brackets .pm-br-bl { bottom:-1px; left:-1px; border-bottom:2px solid rgba(0,255,70,0.7); border-left:2px solid rgba(0,255,70,0.7); }
+  .pm-brackets .pm-br-br { bottom:-1px; right:-1px; border-bottom:2px solid rgba(0,255,70,0.7); border-right:2px solid rgba(0,255,70,0.7); }
+  /* Stats table */
+  .pm-stats { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+  .pm-stat-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 14px;
+    border-bottom: 1px solid rgba(0,255,70,0.07);
+    opacity: 0; transform: translateX(10px);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .pm-stat-row.pm-revealed { opacity: 1; transform: translateX(0); }
+  .pm-stat-row:last-child { border-bottom: none; }
+  .pm-stat-label {
+    font-family: 'Orbitron', monospace; font-size: 8px; font-weight: 600;
+    letter-spacing: 2px; color: rgba(0,255,70,0.42);
+  }
+  .pm-stat-val {
+    font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 800;
+    letter-spacing: 1px; color: rgba(0,255,70,0.85);
+  }
+  .pm-stat-val.pm-ship-accent { font-size: 11px; } /* colored per ship in JS */
+  .pm-stat-val.pm-yellow { color: #ffee00; text-shadow: 0 0 10px rgba(255,238,0,0.55); }
+  .pm-stat-val.pm-green  { color: #00ff46; text-shadow: 0 0 10px rgba(0,255,70,0.65); font-size: 11px; }
+  .pm-stat-val.pm-red    { color: #ff4444; text-shadow: 0 0 8px rgba(255,50,50,0.5); }
+  /* Divider */
+  .pm-rule {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,255,70,0.35) 30%, rgba(0,255,70,0.35) 70%, transparent);
+    margin-bottom: 14px;
+  }
+  /* Buttons */
+  .pm-buttons { display: flex; gap: 12px; flex-shrink: 0; }
+  .pm-btn {
+    flex: 1; padding: 16px 0; border: none;
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 900;
+    letter-spacing: 3px; cursor: pointer; border-radius: 6px;
+    transition: opacity 0.1s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pm-btn:active { transform: scale(0.96); opacity: 0.8; }
+  .pm-btn-abort {
+    background: rgba(255,40,40,0.10); color: #ff4444;
+    border: 1px solid rgba(255,50,50,0.35);
+    text-shadow: 0 0 8px rgba(255,50,50,0.5);
+    animation: pmAbortPulse 2.8s ease-in-out infinite;
+  }
+  @keyframes pmAbortPulse {
+    0%,100% { box-shadow: 0 0 6px rgba(255,50,50,0.2); }
+    50%     { box-shadow: 0 0 18px rgba(255,50,50,0.55), 0 0 4px rgba(255,50,50,0.3) inset; }
+  }
+  .pm-btn-acquire {
+    background: linear-gradient(135deg, #00c43a 0%, #009e2e 100%);
+    color: #001a08;
+    animation: pmAcquirePulse 1.9s ease-in-out infinite;
+  }
+  @keyframes pmAcquirePulse {
+    0%,100% { box-shadow: 0 0 18px rgba(0,196,58,0.45), inset 0 1px 0 rgba(255,255,255,0.18); }
+    50%     { box-shadow: 0 0 38px rgba(0,196,58,0.80), 0 0 60px rgba(0,196,58,0.25), inset 0 1px 0 rgba(255,255,255,0.25); }
+  }
+  .pm-btn-acquire.pm-charging {
+    animation: pmCharge 0.35s ease-in-out infinite;
+    background: linear-gradient(135deg, #00ff55 0%, #00c43a 100%);
+    color: #000d04;
+  }
+  @keyframes pmCharge {
+    0%   { box-shadow: 0 0 25px rgba(0,255,70,0.65), 0 0 55px rgba(0,255,70,0.25); transform: scale(1.00); }
+    50%  { box-shadow: 0 0 55px rgba(0,255,70,1.0),  0 0 100px rgba(0,255,70,0.45); transform: scale(1.025); }
+    100% { box-shadow: 0 0 25px rgba(0,255,70,0.65), 0 0 55px rgba(0,255,70,0.25); transform: scale(1.00); }
+  }
+  /* Confirm flash */
+  #purchaseModal.pm-flash {
+    animation: pmFlash 0.5s ease-out forwards;
+  }
+  @keyframes pmFlash {
+    0%  { filter: brightness(1); }
+    20% { filter: brightness(2.5); }
+    100%{ filter: brightness(1); }
+  }
+
   /* Unlock animation */
   .ship-card.unlocking { animation: unlockPulse 0.55s cubic-bezier(0.34,1.56,0.64,1); }
   @keyframes unlockPulse {
@@ -634,6 +812,65 @@
     </div>
     <div class="shop-grid" id="shopGrid"></div>
     <button class="hangar-launch-btn" id="hangarLaunchBtn">▶ LAUNCH</button>
+
+    <!-- Purchase confirmation — military tactical overlay -->
+    <div id="purchaseModal" class="hidden">
+      <div class="pm-inner">
+
+        <div class="pm-scan-sweep"></div>
+        <canvas id="pmParticleCanvas"></canvas>
+
+        <div class="pm-statusbar">
+          <span>NEON DASH // TACTICAL OPS</span>
+          <span class="pm-blink">● ONLINE</span>
+          <span>SYS-7742</span>
+        </div>
+
+        <div class="pm-classification">⬛ TOP SECRET // CLASSIFIED ⬛</div>
+
+        <div class="pm-acquire-title">— ACQUIRE VESSEL? —</div>
+        <div class="pm-ship-name" id="pmShipName">VESSEL</div>
+
+        <canvas id="pmShipCanvas" width="100" height="100"></canvas>
+
+        <div class="pm-brackets">
+          <span class="pm-br-bl"></span><span class="pm-br-br"></span>
+          <div class="pm-stats">
+            <div class="pm-stat-row">
+              <span class="pm-stat-label">DESIGNATION</span>
+              <span class="pm-stat-val pm-ship-accent" id="pmStatDesig">—</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-label">HULL CLASS</span>
+              <span class="pm-stat-val" id="pmStatHull">—</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-label">CLEARANCE LVL</span>
+              <span class="pm-stat-val" id="pmStatClear">—</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-label">COST</span>
+              <span class="pm-stat-val pm-yellow" id="pmCost">— CREDITS</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-label">AVAILABLE FUNDS</span>
+              <span class="pm-stat-val pm-green" id="pmBalance">— CREDITS</span>
+            </div>
+            <div class="pm-stat-row">
+              <span class="pm-stat-label">POST-ACQUISITION</span>
+              <span class="pm-stat-val pm-green" id="pmAfter">— CREDITS</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pm-rule"></div>
+        <div class="pm-buttons">
+          <button class="pm-btn pm-btn-abort" id="pmCancel">✕ ABORT</button>
+          <button class="pm-btn pm-btn-acquire" id="pmConfirm">✓ ACQUIRE</button>
+        </div>
+
+      </div>
+    </div>
   </div>
 </div>
 
@@ -935,6 +1172,117 @@ const AudioEngine = (() => {
     subG.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
     sub.connect(subG); subG.connect(lG);
     sub.start(t); sub.stop(t + 0.20);
+  }
+
+  function playMissionAccepted() {
+    init(); resume();
+    if (muted) return;
+    const t = ctx.currentTime;
+    const mG = ctx.createGain(); mG.gain.value = 1.0; mG.connect(masterGain);
+
+    // ── Layer 1: rising military synth chord — 3 staggered sine tones ──
+    // Starts low and tense, sweeps up to a triumphant resolution
+    [
+      { freq: 220, freqEnd: 440,  delay: 0.00, dur: 0.55, peak: 0.28, type: 'sine' },
+      { freq: 277, freqEnd: 554,  delay: 0.06, dur: 0.50, peak: 0.22, type: 'sine' },
+      { freq: 330, freqEnd: 659,  delay: 0.12, dur: 0.45, peak: 0.18, type: 'sine' },
+    ].forEach(({ freq, freqEnd, delay, dur, peak, type }) => {
+      const osc = ctx.createOscillator(), oG = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t + delay);
+      osc.frequency.exponentialRampToValueAtTime(freqEnd, t + delay + dur);
+      oG.gain.setValueAtTime(0, t + delay);
+      oG.gain.linearRampToValueAtTime(peak, t + delay + 0.02);
+      oG.gain.setValueAtTime(peak, t + delay + dur * 0.6);
+      oG.gain.exponentialRampToValueAtTime(0.001, t + delay + dur + 0.05);
+      osc.connect(oG); oG.connect(mG);
+      osc.start(t + delay); osc.stop(t + delay + dur + 0.08);
+    });
+
+    // ── Layer 2: punchy low-end confirmation thud ──
+    const kick = ctx.createOscillator(), kG = ctx.createGain();
+    kick.type = 'sine';
+    kick.frequency.setValueAtTime(90, t);
+    kick.frequency.exponentialRampToValueAtTime(35, t + 0.12);
+    kG.gain.setValueAtTime(0, t);
+    kG.gain.linearRampToValueAtTime(0.7, t + 0.008);
+    kG.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    kick.connect(kG); kG.connect(mG);
+    kick.start(t); kick.stop(t + 0.18);
+
+    // ── Layer 3: sharp attack transient — military snare crack ──
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf;
+    const hpf = ctx.createBiquadFilter();
+    hpf.type = 'highpass'; hpf.frequency.value = 2000;
+    const nG = ctx.createGain();
+    nG.gain.setValueAtTime(0, t);
+    nG.gain.linearRampToValueAtTime(0.35, t + 0.004);
+    nG.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+    noise.connect(hpf); hpf.connect(nG); nG.connect(mG);
+    noise.start(t); noise.stop(t + 0.07);
+
+    // ── Layer 4: final high ping — mission confirmed beacon ──
+    const ping = ctx.createOscillator(), pG = ctx.createGain();
+    ping.type = 'sine';
+    ping.frequency.setValueAtTime(1320, t + 0.22);
+    ping.frequency.exponentialRampToValueAtTime(1760, t + 0.40);
+    pG.gain.setValueAtTime(0, t + 0.22);
+    pG.gain.linearRampToValueAtTime(0.22, t + 0.235);
+    pG.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+    ping.connect(pG); pG.connect(mG);
+    ping.start(t + 0.22); ping.stop(t + 0.58);
+  }
+
+  function playMissionAborted() {
+    init(); resume();
+    if (muted) return;
+    const t = ctx.currentTime;
+    const aG = ctx.createGain(); aG.gain.value = 1.0; aG.connect(masterGain);
+
+    // ── Layer 1: harsh falling alarm — two detuned sawtooths dropping fast ──
+    [{ detune: 12 }, { detune: -12 }].forEach(({ detune }) => {
+      const osc = ctx.createOscillator(), oG = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(520, t);
+      osc.frequency.exponentialRampToValueAtTime(160, t + 0.22);
+      osc.detune.value = detune;
+      const lpf = ctx.createBiquadFilter();
+      lpf.type = 'lowpass'; lpf.frequency.value = 900; lpf.Q.value = 2;
+      oG.gain.setValueAtTime(0, t);
+      oG.gain.linearRampToValueAtTime(0.30, t + 0.010);
+      oG.gain.setValueAtTime(0.30, t + 0.06);
+      oG.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+      osc.connect(lpf); lpf.connect(oG); oG.connect(aG);
+      osc.start(t); osc.stop(t + 0.28);
+    });
+
+    // ── Layer 2: two short falling square beeps — classic abort/error ──
+    [{ delay: 0.00, freq: 480 }, { delay: 0.14, freq: 300 }].forEach(({ delay, freq }) => {
+      const osc = ctx.createOscillator(), oG = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, t + delay);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.6, t + delay + 0.10);
+      oG.gain.setValueAtTime(0, t + delay);
+      oG.gain.linearRampToValueAtTime(0.20, t + delay + 0.006);
+      oG.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.12);
+      osc.connect(oG); oG.connect(aG);
+      osc.start(t + delay); osc.stop(t + delay + 0.14);
+    });
+
+    // ── Layer 3: heavy sub thud for impact ──
+    const sub = ctx.createOscillator(), sG = ctx.createGain();
+    sub.type = 'sine';
+    sub.frequency.setValueAtTime(70, t);
+    sub.frequency.exponentialRampToValueAtTime(28, t + 0.14);
+    sG.gain.setValueAtTime(0, t);
+    sG.gain.linearRampToValueAtTime(0.55, t + 0.008);
+    sG.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+    sub.connect(sG); sG.connect(aG);
+    sub.start(t); sub.stop(t + 0.18);
   }
 
   function playHangarOpen() {
@@ -1658,7 +2006,7 @@ const AudioEngine = (() => {
     hangarMaster = null;
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic };
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted };
 })();
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -2346,6 +2694,222 @@ function animateShipPreview(c, ship) {
   frame();
 }
 
+// ── Purchase Modal State ─────────────────────────────────────────────────────
+let _pmShip = null, _pmCard = null;
+let _pmRotRaf = null, _pmPartRaf = null;
+let _pmConfirmed = false;
+
+// Typewriter: fills element character by character
+function pmTypewriter(el, text, charMs) {
+  let i = 0; el.textContent = '';
+  const t = setInterval(() => {
+    el.textContent = text.slice(0, ++i);
+    if (i >= text.length) clearInterval(t);
+  }, charMs);
+}
+
+// Rotating ship on pmShipCanvas (pseudo-3D yaw)
+function pmStartShipRotation(ship) {
+  cancelAnimationFrame(_pmRotRaf);
+  const canvas = document.getElementById('pmShipCanvas');
+  const gfx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H * 0.46;
+  let angle = 0, flicker = 0;
+
+  function frame() {
+    gfx.clearRect(0, 0, W, H);
+    angle += 0.010; flicker += 0.09;
+    const size = 18;
+    const yaw = Math.cos(angle); // -1..1, squishes X for pseudo-3D
+
+    gfx.save();
+    gfx.translate(cx, cy);
+    gfx.scale(yaw, 1);
+
+    const bodyColor = ship.rainbow ? getRainbow(Date.now() * 0.002) : ship.color;
+
+    // outer glow halo
+    gfx.shadowColor = ship.glowColor || ship.color;
+    gfx.shadowBlur  = 22 + Math.sin(flicker) * 6;
+
+    // body
+    gfx.fillStyle = bodyColor;
+    gfx.beginPath(); gfx.ellipse(0, 0, size * 0.5, size, 0, 0, Math.PI * 2); gfx.fill();
+
+    // nose
+    gfx.shadowBlur = 0;
+    gfx.fillStyle = '#ffffff';
+    gfx.beginPath(); gfx.moveTo(0,-size); gfx.lineTo(-size*0.4,-size*0.3); gfx.lineTo(size*0.4,-size*0.3); gfx.closePath(); gfx.fill();
+
+    // wings
+    gfx.fillStyle = ship.wingColor;
+    gfx.beginPath(); gfx.moveTo(-size*0.4,size*0.3); gfx.lineTo(-size*1.1,size*0.9); gfx.lineTo(-size*0.4,size*0.7); gfx.closePath(); gfx.fill();
+    gfx.beginPath(); gfx.moveTo( size*0.4,size*0.3); gfx.lineTo( size*1.1,size*0.9); gfx.lineTo( size*0.4,size*0.7); gfx.closePath(); gfx.fill();
+
+    // flame
+    const fs = 11 + Math.sin(flicker) * 3;
+    const fg = gfx.createRadialGradient(0, size+fs*0.4, 0, 0, size, fs * 1.6);
+    fg.addColorStop(0, ship.flameColors[0]); fg.addColorStop(0.3, ship.flameColors[1]);
+    fg.addColorStop(0.7, ship.flameColors[2]); fg.addColorStop(1, 'transparent');
+    gfx.fillStyle = fg;
+    gfx.beginPath(); gfx.ellipse(0, size+fs*0.4, size*0.25, fs, 0, 0, Math.PI*2); gfx.fill();
+
+    gfx.restore();
+    _pmRotRaf = requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+// Particle burst on pmParticleCanvas
+function pmParticleBurst(ship) {
+  const canvas = document.getElementById('pmParticleCanvas');
+  canvas.width  = canvas.offsetWidth  || 360;
+  canvas.height = canvas.offsetHeight || 700;
+  const gfx = canvas.getContext('2d');
+  const cx = canvas.width / 2, cy = canvas.height * 0.32;
+
+  const pts = [];
+  for (let i = 0; i < 65; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const spd = 2 + Math.random() * 6;
+    pts.push({
+      x: cx, y: cy, vx: Math.cos(a)*spd, vy: Math.sin(a)*spd,
+      alpha: 1, decay: 0.018 + Math.random() * 0.022,
+      size: 1.5 + Math.random() * 3.5,
+      color: Math.random() < 0.35 ? '#ffffff' : ship.color
+    });
+  }
+
+  function frame() {
+    gfx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = 0;
+    pts.forEach(p => {
+      if (p.alpha <= 0) return; alive++;
+      p.x += p.vx; p.y += p.vy;
+      p.vx *= 0.96; p.vy *= 0.96;
+      p.alpha -= p.decay;
+      gfx.globalAlpha = Math.max(0, p.alpha);
+      gfx.shadowColor = p.color; gfx.shadowBlur = 8;
+      gfx.fillStyle = p.color;
+      gfx.beginPath(); gfx.arc(p.x, p.y, p.size, 0, Math.PI*2); gfx.fill();
+    });
+    gfx.globalAlpha = 1; gfx.shadowBlur = 0;
+    if (alive > 0) _pmPartRaf = requestAnimationFrame(frame);
+    else { gfx.clearRect(0,0,canvas.width,canvas.height); }
+  }
+  frame();
+}
+
+function showPurchaseModal(ship, card) {
+  _pmShip = ship; _pmCard = card; _pmConfirmed = false;
+  const idx = SHIPS.indexOf(ship);
+  const hullClasses = ['SCOUT','INTERCEPTOR','FIGHTER','SPECTER','ASSAULT','DREADNOUGHT','WARSHIP','APEX'];
+  const clearances  = ['STANDARD','RESTRICTED','CONFIDENTIAL','SECRET','TOP SECRET','TOP SECRET','CLASSIFIED','EYES ONLY'];
+  const after = save.coins - ship.price;
+
+  // Ship name
+  const nameEl = document.getElementById('pmShipName');
+  nameEl.textContent = ship.name;
+  nameEl.style.color = ship.color;
+  nameEl.style.textShadow = `0 0 24px ${ship.color}, 0 0 8px ${ship.color}`;
+
+  // Reset stat rows
+  document.querySelectorAll('.pm-stat-row').forEach(r => r.classList.remove('pm-revealed'));
+  ['pmStatDesig','pmStatHull','pmStatClear','pmCost','pmBalance','pmAfter'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = '';
+    el.style.color = ''; el.style.textShadow = '';
+  });
+
+  // Reveal each row with staggered delay + typewriter on value
+  const statData = [
+    { rowIdx: 0, id: 'pmStatDesig', val: ship.name + '-' + String(idx+1).padStart(2,'0'), color: ship.color, shadow: `0 0 8px ${ship.color}` },
+    { rowIdx: 1, id: 'pmStatHull',  val: hullClasses[idx] || 'UNKNOWN' },
+    { rowIdx: 2, id: 'pmStatClear', val: clearances[idx]  || 'CLASSIFIED' },
+    { rowIdx: 3, id: 'pmCost',      val: ship.price + ' CREDITS' },
+    { rowIdx: 4, id: 'pmBalance',   val: save.coins + ' CREDITS' },
+    { rowIdx: 5, id: 'pmAfter',     val: after + ' CREDITS', extraClass: after < 50 ? 'pm-red' : 'pm-green' },
+  ];
+  const rows = document.querySelectorAll('.pm-stat-row');
+  statData.forEach((d, i) => {
+    setTimeout(() => {
+      if (rows[d.rowIdx]) rows[d.rowIdx].classList.add('pm-revealed');
+      const el = document.getElementById(d.id);
+      if (d.color) { el.style.color = d.color; el.style.textShadow = d.shadow || ''; }
+      if (d.extraClass) el.className = 'pm-stat-val ' + d.extraClass;
+      pmTypewriter(el, d.val, 28);
+    }, 160 + i * 110);
+  });
+
+  document.getElementById('purchaseModal').classList.remove('hidden');
+  pmStartShipRotation(ship);
+}
+
+function hidePurchaseModal() {
+  cancelAnimationFrame(_pmRotRaf);  _pmRotRaf  = null;
+  cancelAnimationFrame(_pmPartRaf); _pmPartRaf = null;
+  document.getElementById('purchaseModal').classList.add('hidden');
+  document.getElementById('purchaseModal').classList.remove('pm-flash');
+  _pmShip = null; _pmCard = null;
+}
+
+// Charging state on ACQUIRE press-and-hold
+const pmAcquireBtn = document.getElementById('pmConfirm');
+function pmStartCharge() { pmAcquireBtn.classList.add('pm-charging'); }
+function pmStopCharge()  { pmAcquireBtn.classList.remove('pm-charging'); }
+pmAcquireBtn.addEventListener('mousedown',    pmStartCharge);
+pmAcquireBtn.addEventListener('touchstart',   pmStartCharge, { passive: true });
+pmAcquireBtn.addEventListener('mouseup',      pmStopCharge);
+pmAcquireBtn.addEventListener('mouseleave',   pmStopCharge);
+pmAcquireBtn.addEventListener('touchend',     pmStopCharge);
+pmAcquireBtn.addEventListener('touchcancel',  pmStopCharge);
+
+pmAcquireBtn.addEventListener('click', () => {
+  if (!_pmShip || !_pmCard || _pmConfirmed) return;
+  _pmConfirmed = true;
+  pmStopCharge();
+
+  AudioEngine.init(); AudioEngine.resume();
+  AudioEngine.playMissionAccepted();
+
+  const ship = _pmShip, card = _pmCard;
+
+  // Flash the modal
+  const modal = document.getElementById('purchaseModal');
+  modal.classList.add('pm-flash');
+
+  // Particle burst from ship position
+  pmParticleBurst(ship);
+
+  // After burst settle — do the unlock
+  setTimeout(() => {
+    hidePurchaseModal();
+    save.coins -= ship.price;
+    save.owned.push(ship.id);
+    save.selected = ship.id;
+    writeSave(save);
+    AudioEngine.playUnlock();
+    card.classList.add('unlocking');
+    flashScreen(ship.color, 0.35);
+    setTimeout(() => renderShop(), 200);
+  }, 650);
+});
+
+document.getElementById('pmCancel').addEventListener('click', () => {
+  AudioEngine.init(); AudioEngine.resume();
+  AudioEngine.playMissionAborted();
+  hidePurchaseModal();
+});
+document.getElementById('pmCancel').addEventListener('touchend', e => {
+  e.preventDefault();
+  AudioEngine.init(); AudioEngine.resume();
+  AudioEngine.playMissionAborted();
+  hidePurchaseModal();
+});
+
+document.getElementById('purchaseModal').addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
+
 function onShipCardClick(ship, card) {
   const owned = save.owned.includes(ship.id);
   if (owned || ship.price === 0) {
@@ -2356,15 +2920,9 @@ function onShipCardClick(ship, card) {
     AudioEngine.playScore();
     renderShop();
   } else if (save.coins >= ship.price) {
-    // Buy
-    save.coins -= ship.price;
-    save.owned.push(ship.id);
-    save.selected = ship.id;
-    writeSave(save);
-    AudioEngine.playUnlock();
-    card.classList.add('unlocking');
-    flashScreen(ship.color, 0.3);
-    setTimeout(()=>renderShop(), 200);
+    // Show confirmation modal
+    AudioEngine.init(); AudioEngine.resume();
+    showPurchaseModal(ship, card);
   } else {
     // Can't afford — shake card + denied sound
     AudioEngine.init(); AudioEngine.resume();
