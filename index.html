@@ -93,6 +93,17 @@
     0% { opacity: 1; transform: translateY(0) scale(1.2); }
     100% { opacity: 0; transform: translateY(-40px) scale(0.8); }
   }
+  .coinFloat.nearMiss {
+    font-size: 20px;
+    color: #ffee00;
+    text-shadow: 0 0 10px #ffee00, 0 0 22px #ff8800, 0 0 40px #ffee00;
+    animation: floatUpNearMiss 1.1s ease-out forwards;
+  }
+  @keyframes floatUpNearMiss {
+    0%   { opacity: 1; transform: translateY(0) scale(1.6); }
+    20%  { opacity: 1; transform: translateY(-10px) scale(1.15); }
+    100% { opacity: 0; transform: translateY(-55px) scale(0.85); }
+  }
 
   #soundToggle {
     position: absolute; top: 16px; right: 16px;
@@ -1676,6 +1687,27 @@ const AudioEngine = (() => {
     });
   }
 
+  function playNearMiss() {
+    init(); resume();
+    const t = ctx.currentTime;
+    // Quick tension stutter (3 rapid sawtooth blips)
+    [0, 0.045, 0.09].forEach(dt => {
+      playTone({ type: 'sawtooth', freq: 780, duration: 0.06, gainPeak: 0.12, startTime: t + dt });
+    });
+    // Descending relief sweep — "whew" feeling
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, t + 0.12);
+    osc.frequency.exponentialRampToValueAtTime(180, t + 0.5);
+    g.gain.setValueAtTime(0, t + 0.12);
+    g.gain.linearRampToValueAtTime(0.28, t + 0.16);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.52);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t + 0.12); osc.stop(t + 0.55);
+    // Soft resolution ping
+    playTone({ type: 'triangle', freq: 1047, duration: 0.22, gainPeak: 0.12, startTime: t + 0.38 });
+  }
+
   function playLegendary() {
     init(); resume();
     const t = ctx.currentTime;
@@ -2028,7 +2060,7 @@ const AudioEngine = (() => {
     hangarMaster = null;
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted };
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted };
 })();
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -2046,6 +2078,7 @@ resize();
 let state = 'start';
 let score = 0, frame = 0, speed = 4.55, combo = 0;
 let coinsThisRun = 0;
+let nearMissCooldown = 0;
 
 // Speed fluctuation
 let speedMult = 1.0, targetSpeedMult = 1.0;
@@ -2100,7 +2133,7 @@ function spawnBarrier() {
   const topH=minH+Math.random()*(maxH-minH);
   const bwt = currentShip().worldTheme;
   const bHue = bwt.barrierHue + (Math.random() - 0.5) * bwt.barrierSpread;
-  barriers.push({ x:canvas.width+20, topH, bottomY:topH+GAP, scored:false, hue:bHue });
+  barriers.push({ x:canvas.width+20, topH, bottomY:topH+GAP, scored:false, hue:bHue, minGapDist:Infinity });
 }
 
 let stars = [], nebula = [];
@@ -2432,7 +2465,7 @@ document.getElementById('restartBtn').addEventListener('touchend', e => { e.stop
 
 // \u2500\u2500 Game lifecycle \u2500\u2500
 function startGame() {
-  state='playing'; score=0; frame=0; speed=5.45; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0;
+  state='playing'; score=0; frame=0; speed=5.45; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0; nearMissCooldown=0;
   treasureChest=null; chestSpawned=false;
   legendaryChest=null; nextGoldenChestScore=4;
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
@@ -3346,6 +3379,16 @@ function showLegendaryFloat(x, y) {
   setTimeout(() => el.remove(), 1600);
 }
 
+function showNearMissFloat(x, y) {
+  const el = document.createElement('div');
+  el.className = 'coinFloat nearMiss';
+  el.textContent = '+1 NEAR MISS!';
+  el.style.left = (x - 70) + 'px';
+  el.style.top  = (y - 30) + 'px';
+  wrapper.appendChild(el);
+  setTimeout(() => el.remove(), 1100);
+}
+
 function checkLegendaryChestCollection() {
   if (!legendaryChest || legendaryChest.collected || player.dead) return;
   const ch = legendaryChest;
@@ -3568,12 +3611,34 @@ function loop() {
       });
     }
 
+    if(nearMissCooldown>0) nearMissCooldown--;
     barriers.forEach(b=>{
       b.x-=spd;
+      // Track closest approach to gap edges while player horizontally overlaps barrier
+      if(!b.scored && !player.dead) {
+        const r = player.size * 0.62;
+        if(player.x + r >= b.x && player.x - r <= b.x + BAR_W) {
+          const distTop = (player.y - r) - b.topH;
+          const distBot = b.bottomY - (player.y + r);
+          const closest = Math.min(distTop, distBot);
+          if(closest >= 0) b.minGapDist = Math.min(b.minGapDist, closest);
+          console.log(`[NearMiss] barrier overlap — distTop:${distTop.toFixed(1)} distBot:${distBot.toFixed(1)} closest:${closest.toFixed(1)} minGapDist:${b.minGapDist.toFixed(1)}`);
+        }
+      }
       if(!b.scored&&b.x+BAR_W<player.x){
         b.scored=true; score++; combo++;
         updateUI(); popScore();
         spawnParticles(player.x+20,player.y,currentShip().trailColor,6,0.8);
+        // Near miss: check closest approach recorded during overlap
+        if(!nearMissCooldown && !player.dead && b.minGapDist < 25) {
+          nearMissCooldown = 50;
+          console.log(`[NearMiss] TRIGGERED — minGapDist:${b.minGapDist.toFixed(1)}`);
+          awardCoins(1, player.x, player.y - 28);
+          showNearMissFloat(player.x, player.y);
+          flashScreen('#ffee00', 0.3);
+          triggerShake(4);
+          AudioEngine.playNearMiss();
+        }
         if(score===nextGoldenChestScore){ treasureChest={x:canvas.width+50,y:canvas.height*0.5,w:44,h:36,collected:false,t:0}; nextGoldenChestScore+=6; }
         if(combo>=5&&combo%5===0){AudioEngine.playCombo();showCombo(combo);flashScreen('#ffee00',0.15);}
         else AudioEngine.playScore();
