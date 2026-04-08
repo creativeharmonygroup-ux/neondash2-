@@ -129,6 +129,209 @@
   }
   #shopBtn:hover { border-color: var(--neon-cyan); box-shadow: 0 0 14px rgba(0,255,240,0.4); }
 
+  /* Luxury Hangar button */
+  #luxuryBtn {
+    position: absolute; bottom: 124px; right: 16px;
+    width: 44px; height: 44px; background: transparent;
+    border: 1.5px solid rgba(212,175,55,0.55); border-radius: 10px;
+    cursor: pointer; pointer-events: all;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; transition: all 0.2s; z-index: 10;
+  }
+  #luxuryBtn:hover { border-color: #d4af37; box-shadow: 0 0 16px rgba(212,175,55,0.5); }
+
+  /* ── LUXURY HANGAR SCREEN ────────────────────────────────────────── */
+  #luxuryScreen {
+    position: absolute; inset: 0; z-index: 50;
+    display: flex; flex-direction: column; align-items: stretch;
+    background: radial-gradient(ellipse at 50% -10%, rgba(60,42,0,0.75) 0%, #040302 50%);
+    overflow: hidden; pointer-events: all;
+  }
+  #luxuryScreen::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background: repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(212,175,55,0.012) 3px, rgba(212,175,55,0.012) 4px);
+  }
+  #luxuryScreen.hidden { display: none; }
+
+  .luxury-header {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px 10px;
+    border-bottom: 1px solid rgba(212,175,55,0.18);
+    background: linear-gradient(180deg, rgba(50,35,0,0.45) 0%, transparent 100%);
+  }
+  .luxury-title-col { display: flex; flex-direction: column; gap: 2px; }
+  .luxury-eyebrow {
+    font-size: 8px; letter-spacing: 4px; color: rgba(212,175,55,0.55);
+    font-family: 'Orbitron', monospace; text-transform: uppercase;
+  }
+  .luxury-title {
+    font-family: 'Orbitron', monospace; font-size: 19px; font-weight: 900;
+    letter-spacing: 5px;
+    background: linear-gradient(90deg, #d4af37 0%, #fff8dc 45%, #c9a227 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    text-shadow: none;
+    animation: goldShimmer 3.5s ease-in-out infinite;
+  }
+  @keyframes goldShimmer {
+    0%,100% { filter: brightness(1); }
+    50%      { filter: brightness(1.25) drop-shadow(0 0 8px rgba(212,175,55,0.6)); }
+  }
+  .luxury-close-btn {
+    background: transparent; border: 1.5px solid rgba(212,175,55,0.35); color: #d4af37;
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 1;
+  }
+  .luxury-close-btn:hover { border-color: #d4af37; box-shadow: 0 0 12px rgba(212,175,55,0.45); }
+
+  /* Pack banner */
+  .luxury-pack-banner {
+    position: relative; z-index: 1; margin: 10px 14px 6px;
+    padding: 12px 16px; border-radius: 14px; flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(40,28,0,0.9) 0%, rgba(20,14,0,0.95) 100%);
+    border: 1px solid rgba(212,175,55,0.45);
+    box-shadow: 0 0 20px rgba(212,175,55,0.12), inset 0 1px 0 rgba(212,175,55,0.18);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .lpb-crown { font-size: 28px; filter: drop-shadow(0 0 8px rgba(212,175,55,0.6)); }
+  .lpb-text { flex: 1; }
+  .lpb-label {
+    font-size: 8px; letter-spacing: 4px; color: rgba(212,175,55,0.6);
+    font-family: 'Orbitron', monospace; margin-bottom: 2px;
+  }
+  .lpb-main { font-size: 13px; font-weight: 900; letter-spacing: 1px; color: #fff; font-family: 'Orbitron', monospace; }
+  .lpb-desc { font-size: 9px; color: rgba(255,255,255,0.38); letter-spacing: 0.5px; margin-top: 2px; }
+  .lpb-buy-btn {
+    background: linear-gradient(135deg, #d4af37 0%, #a07820 100%);
+    border: none; color: #040302; font-family: 'Orbitron', monospace;
+    font-size: 10px; font-weight: 900; letter-spacing: 2px;
+    padding: 10px 14px; border-radius: 10px; cursor: pointer;
+    box-shadow: 0 0 14px rgba(212,175,55,0.45); transition: all 0.18s;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .lpb-buy-btn:active { transform: scale(0.95); }
+
+  .luxury-grid {
+    position: relative; z-index: 1;
+    width: 100%; padding: 6px 14px; display: flex; flex-direction: column; gap: 8px;
+    overflow-y: auto; flex: 1; scrollbar-width: none;
+  }
+  .luxury-grid::-webkit-scrollbar { display: none; }
+
+  .luxury-card {
+    display: flex; flex-direction: row; align-items: stretch;
+    border-radius: 14px; overflow: hidden; cursor: pointer;
+    border: 1px solid rgba(212,175,55,0.12);
+    background: linear-gradient(120deg, rgba(12,9,2,0.98) 0%, rgba(6,4,1,0.99) 100%);
+    transition: transform 0.16s, box-shadow 0.16s;
+    position: relative; min-height: 90px;
+  }
+  .luxury-card:active { transform: scale(0.984); }
+  /* Gold top-edge shimmer */
+  .luxury-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.35), transparent);
+    pointer-events: none;
+  }
+
+  .luxury-card-preview {
+    width: 96px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .luxury-card-canvas { display: block; width: 90px; height: 90px; position: relative; z-index: 1; }
+
+  .luxury-card-info {
+    flex: 1; padding: 12px 14px 10px 10px;
+    display: flex; flex-direction: column; justify-content: center; gap: 4px;
+    border-left: 1px solid rgba(212,175,55,0.08); position: relative;
+  }
+  .luxury-card-name {
+    font-size: 17px; font-weight: 900; letter-spacing: 2px;
+    color: #fff; text-transform: uppercase; line-height: 1;
+  }
+  .luxury-card-desc { font-size: 9px; color: rgba(255,255,255,0.35); letter-spacing: 0.8px; }
+  .luxury-card-price { font-size: 11px; font-weight: 700; color: #d4af37; letter-spacing: 1px; }
+  .luxury-card-badge {
+    align-self: flex-start; font-size: 9px; font-weight: 700;
+    letter-spacing: 2px; padding: 3px 11px; border-radius: 4px;
+    font-family: 'Orbitron', monospace;
+  }
+  .lbadge-locked {
+    background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.35);
+    color: #d4af37;
+  }
+  .lbadge-active {
+    background: linear-gradient(90deg, #d4af37, #c9a227);
+    color: #040302; box-shadow: 0 0 12px rgba(212,175,55,0.55);
+  }
+  .lbadge-owned {
+    background: transparent; border: 1px solid rgba(212,175,55,0.28);
+    color: rgba(212,175,55,0.7);
+  }
+
+  .luxury-launch-btn {
+    position: relative; z-index: 1;
+    background: transparent;
+    border: 2px solid #d4af37; color: #d4af37;
+    font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900;
+    letter-spacing: 5px; padding: 13px 48px; border-radius: 50px; cursor: pointer;
+    pointer-events: all; margin: 0 16px 18px; flex-shrink: 0;
+    text-shadow: 0 0 10px rgba(212,175,55,0.7);
+    box-shadow: 0 0 18px rgba(212,175,55,0.30), inset 0 0 14px rgba(212,175,55,0.06);
+    transition: background 0.15s, transform 0.15s;
+    animation: btnPulse 2.4s ease-in-out infinite, btnFloat 3.2s ease-in-out infinite;
+  }
+  .luxury-launch-btn:active { background: #d4af37; color: #040302; transform: scale(0.96); animation: none; }
+
+  /* Luxury Purchase Modal */
+  #luxuryPurchaseModal {
+    position: absolute; inset: 0; z-index: 999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(4,3,2,0.96);
+    animation: pmBoot 0.22s cubic-bezier(0.22,1,0.36,1);
+  }
+  #luxuryPurchaseModal.hidden { display: none; }
+  .lpm-inner {
+    width: 88%; max-width: 340px;
+    background: linear-gradient(160deg, rgba(40,28,0,0.95) 0%, rgba(10,7,0,0.98) 100%);
+    border: 1px solid rgba(212,175,55,0.50); border-radius: 20px;
+    padding: 24px 22px; display: flex; flex-direction: column; align-items: center; gap: 14px;
+    box-shadow: 0 0 60px rgba(212,175,55,0.15), 0 0 120px rgba(212,175,55,0.06);
+  }
+  .lpm-crown { font-size: 36px; }
+  .lpm-ship-name { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 900; letter-spacing: 4px; background: linear-gradient(90deg,#d4af37,#fff8dc,#c9a227); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .lpm-desc { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 1px; text-align: center; }
+  .lpm-price { font-family: 'Orbitron', monospace; font-size: 32px; font-weight: 900; color: #d4af37; text-shadow: 0 0 20px rgba(212,175,55,0.6); }
+  .lpm-per { font-size: 9px; color: rgba(212,175,55,0.5); letter-spacing: 2px; margin-top: -8px; }
+  .lpm-btn-row { display: flex; gap: 10px; width: 100%; }
+  .lpm-buy-btn {
+    flex: 1; background: linear-gradient(135deg, #d4af37 0%, #a07820 100%);
+    border: none; color: #040302; font-family: 'Orbitron', monospace;
+    font-size: 12px; font-weight: 900; letter-spacing: 2px;
+    padding: 14px; border-radius: 12px; cursor: pointer;
+    box-shadow: 0 0 20px rgba(212,175,55,0.5); transition: transform 0.15s;
+  }
+  .lpm-buy-btn:active { transform: scale(0.96); }
+  .lpm-cancel-btn {
+    background: transparent; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.4);
+    font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px;
+    padding: 14px 18px; border-radius: 12px; cursor: pointer; transition: all 0.15s;
+  }
+  .lpm-cancel-btn:hover { color: rgba(255,255,255,0.7); }
+  .lpm-bundle-row {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid rgba(212,175,55,0.18); padding-top: 12px;
+  }
+  .lpm-bundle-label { font-size: 9px; color: rgba(212,175,55,0.6); letter-spacing: 2px; }
+  .lpm-bundle-price { font-size: 13px; font-weight: 900; color: #d4af37; font-family: 'Orbitron', monospace; }
+  .lpm-bundle-btn {
+    background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.4); color: #d4af37;
+    font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 1px;
+    padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  }
+  .lpm-bundle-btn:active { background: rgba(212,175,55,0.25); }
+
   /* World/Universe button */
   #worldBtn {
     position: absolute; bottom: 70px; right: 16px;
@@ -868,6 +1071,7 @@
     <button id="soundToggle" title="Toggle Sound">🔊</button>
     <button id="shopBtn" title="Ship Shop">🛸</button>
     <button id="worldBtn" title="Universe">🌌</button>
+    <button id="luxuryBtn" title="Luxury Hangar">💎</button>
   </div>
 
   <div id="flashOverlay"></div>
@@ -917,6 +1121,50 @@
       SHARE TO TIKTOK
     </button>
     <button class="rv-play-again" id="rvPlayAgainBtn">↺ PLAY AGAIN</button>
+  </div>
+
+  <!-- LUXURY HANGAR -->
+  <div id="luxuryScreen" class="hidden">
+    <div class="luxury-header">
+      <div class="luxury-title-col">
+        <div class="luxury-eyebrow">💎 EXCLUSIVE COLLECTION</div>
+        <div class="luxury-title">LUXURY HANGAR</div>
+      </div>
+      <button class="luxury-close-btn" id="luxuryCloseBtn">🔊</button>
+    </div>
+    <div class="luxury-pack-banner" id="luxuryPackBanner">
+      <div class="lpb-crown">👑</div>
+      <div class="lpb-text">
+        <div class="lpb-label">FULL COLLECTION · 7 SHIPS</div>
+        <div class="lpb-main">ALL ACCESS PASS</div>
+        <div class="lpb-desc">Every luxury ship · Exclusive worlds · Special effects</div>
+      </div>
+      <button class="lpb-buy-btn" id="luxuryPackBtn">$19.99</button>
+    </div>
+    <div class="luxury-grid" id="luxuryGrid"></div>
+    <button class="luxury-launch-btn" id="luxuryLaunchBtn">▶ LAUNCH</button>
+    <!-- Purchase Modal -->
+    <div id="luxuryPurchaseModal" class="hidden">
+      <div class="lpm-inner">
+        <div class="lpm-crown">👑</div>
+        <canvas id="lpmShipCanvas" width="100" height="100"></canvas>
+        <div class="lpm-ship-name" id="lpmShipName">—</div>
+        <div class="lpm-desc" id="lpmShipDesc">—</div>
+        <div class="lpm-price">$4.99</div>
+        <div class="lpm-per">PER SHIP</div>
+        <div class="lpm-btn-row">
+          <button class="lpm-buy-btn" id="lpmBuyBtn">PURCHASE</button>
+          <button class="lpm-cancel-btn" id="lpmCancelBtn">CANCEL</button>
+        </div>
+        <div class="lpm-bundle-row">
+          <div>
+            <div class="lpm-bundle-label">FULL COLLECTION</div>
+            <div class="lpm-bundle-price">$19.99</div>
+          </div>
+          <button class="lpm-bundle-btn" id="lpmBundleBtn">GET ALL 7</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- UNIVERSE WORLD SELECTOR -->
@@ -1168,6 +1416,73 @@ const SHIPS = [
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 //  SAVE SYSTEM
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+// ── LUXURY SHIPS ─────────────────────────────────────────────────────────────
+const LUXURY_SHIPS = [
+  {
+    id:'obsidian', name:'OBSIDIAN', premiumPrice:4.99,
+    color:'#1e1e1e', trailColor:'#aaaaaa',
+    flameColors:['#ffffff','#e0e0e0','#888888','#303030'],
+    wingColor:'rgba(150,150,150,0.75)', glowColor:'#cccccc', emoji:'⚫',
+    description:'Sleek · Silent · Invincible',
+    luxury:true,
+    worldTheme:{ bgTop:'#040404', bgBot:'#0c0c0c', nebulaHue:0, nebulaSpread:5, starRgb:'200,200,200', barrierHue:0, barrierSpread:5, grid:'rgba(160,160,160,0.018)', worldId:'obsidian', barrierStyle:'chrome', ambientColor:'#aaaaaa' }
+  },
+  {
+    id:'scuderia', name:'SCUDERIA', premiumPrice:4.99,
+    color:'#cc0000', trailColor:'#ff2200',
+    flameColors:['#ffffff','#ffff44','#ff1100','#660000'],
+    wingColor:'rgba(200,0,0,0.9)', glowColor:'#ff0000', emoji:'🔴',
+    description:'Born on the track · Pure fire',
+    luxury:true,
+    worldTheme:{ bgTop:'#050000', bgBot:'#0e0000', nebulaHue:5, nebulaSpread:8, starRgb:'255,120,60', barrierHue:3, barrierSpread:8, grid:'rgba(200,0,0,0.028)', worldId:'scuderia', barrierStyle:'carbonfiber', ambientColor:'#ff2200' }
+  },
+  {
+    id:'tridente', name:'TRIDENTE', premiumPrice:4.99,
+    color:'#002d7a', trailColor:'#4488ff',
+    flameColors:['#ffffff','#aaccff','#0055cc','#001050'],
+    wingColor:'rgba(0,45,122,0.9)', glowColor:'#3366ff', emoji:'🔱',
+    description:'Italian elegance · Ocean blue',
+    luxury:true,
+    worldTheme:{ bgTop:'#000814', bgBot:'#001028', nebulaHue:220, nebulaSpread:20, starRgb:'100,155,255', barrierHue:218, barrierSpread:15, grid:'rgba(60,110,210,0.022)', worldId:'tridente', barrierStyle:'carbonfiber', ambientColor:'#d4af37' }
+  },
+  {
+    id:'veyron', name:'VEYRON', premiumPrice:4.99,
+    color:'#001050', trailColor:'#0055ff',
+    flameColors:['#ffffff','#88aaff','#0033ee','#000820'],
+    wingColor:'rgba(0,20,88,0.9)', glowColor:'#0055ff', emoji:'💙',
+    description:'W16 perfection · 1001 horsepower',
+    luxury:true,
+    worldTheme:{ bgTop:'#010108', bgBot:'#020214', nebulaHue:228, nebulaSpread:10, starRgb:'70,110,255', barrierHue:228, barrierSpread:12, grid:'rgba(0,55,200,0.028)', worldId:'veyron', barrierStyle:'chrome', ambientColor:'#0044ff' }
+  },
+  {
+    id:'stuttgart', name:'STUTTGART', premiumPrice:4.99,
+    color:'#c85800', trailColor:'#ff8800',
+    flameColors:['#ffffff','#ffee44','#ff7700','#771400'],
+    wingColor:'rgba(200,88,0,0.9)', glowColor:'#ff8800', emoji:'🟠',
+    description:'Flat-six symphony · Racing heritage',
+    luxury:true,
+    worldTheme:{ bgTop:'#060300', bgBot:'#0e0500', nebulaHue:28, nebulaSpread:15, starRgb:'255,155,55', barrierHue:26, barrierSpread:12, grid:'rgba(200,96,0,0.028)', worldId:'stuttgart', barrierStyle:'racing', ambientColor:'#ff8800' }
+  },
+  {
+    id:'stingray', name:'STINGRAY', premiumPrice:4.99,
+    color:'#006600', trailColor:'#44ff00',
+    flameColors:['#ffffff','#aaff88','#00cc00','#003300'],
+    wingColor:'rgba(0,96,0,0.9)', glowColor:'#44ff00', emoji:'🐍',
+    description:'Venom · Power · American muscle',
+    luxury:true,
+    worldTheme:{ bgTop:'#010801', bgBot:'#020e02', nebulaHue:118, nebulaSpread:14, starRgb:'70,255,50', barrierHue:118, barrierSpread:12, grid:'rgba(0,180,0,0.022)', worldId:'stingray', barrierStyle:'racing', ambientColor:'#44ff00' }
+  },
+  {
+    id:'ragingbull', name:'RAGING BULL', premiumPrice:4.99,
+    color:'#9fff00', trailColor:'#ccff00',
+    flameColors:['#ffffff','#eeff88','#ccff00','#446600'],
+    wingColor:'rgba(148,220,0,0.9)', glowColor:'#aaff00', emoji:'🐂',
+    description:'Furia · Velocità · Lambo DNA',
+    luxury:true,
+    worldTheme:{ bgTop:'#030400', bgBot:'#060800', nebulaHue:78, nebulaSpread:12, starRgb:'195,255,20', barrierHue:78, barrierSpread:10, grid:'rgba(155,220,0,0.028)', worldId:'ragingbull', barrierStyle:'angular', ambientColor:'#aaff00' }
+  },
+];
+
 // World definitions for UNIVERSE hangar
 const WORLD_DEFS = [
   { id:'auto',       name:'AUTO',        emoji:'✨',  desc:"Follows the active ship's own world", accent:'#aaaaaa', bgA:'#060612', bgB:'#0a0d22' },
@@ -1187,20 +1502,22 @@ function loadSave() {
       best: s.best || 0,
       owned: s.owned || ['classic'],
       selected: s.selected || 'classic',
-      selectedWorld: s.selectedWorld || 'auto'
+      selectedWorld: s.selectedWorld || 'auto',
+      luxuryOwned: s.luxuryOwned || []
     };
-  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'classic', selectedWorld: 'auto' }; }
+  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'classic', selectedWorld: 'auto', luxuryOwned: [] }; }
 }
 function writeSave(s) { localStorage.setItem('neonDashSave', JSON.stringify(s)); }
 
 let save = loadSave();
 
-function getShip(id) { return SHIPS.find(s => s.id === id) || SHIPS[0]; }
+function getShip(id) { return SHIPS.find(s => s.id === id) || LUXURY_SHIPS.find(s => s.id === id) || SHIPS[0]; }
 function currentShip() { return getShip(save.selected); }
 function currentWorldTheme() {
   const wid = save.selectedWorld;
   if(wid && wid !== 'auto') {
-    const ws = SHIPS.find(s => s.worldTheme && s.worldTheme.worldId === wid);
+    const ws = SHIPS.find(s => s.worldTheme && s.worldTheme.worldId === wid)
+             || LUXURY_SHIPS.find(s => s.worldTheme && s.worldTheme.worldId === wid);
     if(ws) return ws.worldTheme;
   }
   return currentShip().worldTheme;
@@ -2416,6 +2733,53 @@ const AudioEngine = (() => {
     if(bar===3) for(let i=0;i<16;i++) nHat(st+NCb*2+i*(NCb/4),0.05+i*0.008);
   }
 
+  // ── LUXURY AMBIENT: 62 BPM cinematic dark ──────────────────────────────────
+  const LAb=60/62,LAe=LAb/2,LABAR=LAb*4;
+  function scheduleLuxuryAmbient(st){
+    const bar=wmBarCount%4;
+    // Deep heartbeat kick
+    wmKick(st,55,32,0.55,0.65); wmKick(st+LAb*2,55,32,0.55,0.5);
+    // Sub bass held tone
+    wmT(36,st,LAb*3.6,'sine',0.20);
+    // Slow atmospheric pad chords (minor/dramatic)
+    const padChords=[[196,233,294],[220,261,330],[175,220,277],[185,233,293]];
+    padChords[bar].forEach(f=>{
+      if(!ctx||muted||!wmGain) return;
+      const osc=ctx.createOscillator(),g=ctx.createGain();
+      osc.type='sawtooth'; osc.frequency.value=f;
+      g.gain.setValueAtTime(0,st); g.gain.linearRampToValueAtTime(0.032,st+LAb*1.2);
+      g.gain.exponentialRampToValueAtTime(0.001,st+LABAR*0.95);
+      osc.connect(g); g.connect(wmGain); osc.start(st); osc.stop(st+LABAR);
+    });
+    // Sparse high chime on bar 2+4
+    if(bar===1||bar===3){ wmT(1318,st+LAb*0.5,LAb*1.5,'sine',0.04); wmT(1568,st+LAb*2.5,LAb*1.2,'sine',0.03); }
+    // Soft metallic hi-hat on 8ths
+    for(let i=0;i<8;i++) if(i%4!==0) wmN(st+i*LAe,0.018,0.04,'highpass',12000);
+  }
+
+  // ── RACETRACK: 176 BPM aggressive racing ────────────────────────────────────
+  const RTb=60/176,RTe=RTb/2,RTs=RTb/4,RTBAR=RTb*4;
+  function scheduleRacetrack(st){
+    const bar=wmBarCount%4;
+    function rtKick(t){ wmKick(t,175,30,0.20,0.95); wmN(t,0.012,0.5,'lowpass',280); }
+    function rtSnare(t){ wmN(t,0.075,0.50,'bandpass',2600); wmN(t,0.04,0.30,'highpass',6500); wmT(280,t,0.035,'triangle',0.18); }
+    function rtHat(t,v){ wmN(t,0.010,v,'highpass',14000); }
+    // 4-on-floor + snare 2&4
+    for(let i=0;i<4;i++) rtKick(st+i*RTb);
+    rtSnare(st+RTb); rtSnare(st+RTb*3);
+    // Extra syncopated kick on odd bars
+    if(bar%2===1){ rtKick(st+RTb*0.5); rtKick(st+RTb*2.5); }
+    // Fast 16th hats
+    for(let i=0;i<16;i++) rtHat(st+i*RTs, i%4===0?0.16:i%2===0?0.09:0.045);
+    // Revving sawtooth sweep (engine sound)
+    const revFreq=200+bar*80;
+    wmT(revFreq,st,RTb*3.5,'sawtooth',0.06); wmT(revFreq*1.5,st+RTb,RTb*2.5,'sawtooth',0.04);
+    // Sub bass
+    wmT(44,st,RTb*0.45,'sine',0.38);
+    // Bar 4 snare roll
+    if(bar===3) for(let i=0;i<8;i++) rtSnare(st+RTb*3+i*RTs*0.5);
+  }
+
   const WM_SCHED={
     prehistoric:{fn:schedulePrehistoric,bar:PCBAR},
     thegrid:    {fn:scheduleGrid,       bar:GCBAR},
@@ -2423,6 +2787,14 @@ const AudioEngine = (() => {
     pandora:    {fn:schedulePandora,    bar:ACBAR},
     machinewar: {fn:scheduleMachineWar, bar:WCBAR},
     nitro:      {fn:scheduleNitro,      bar:NCBAR},
+    // Luxury worlds
+    obsidian:   {fn:scheduleLuxuryAmbient,bar:LABAR},
+    tridente:   {fn:scheduleLuxuryAmbient,bar:LABAR},
+    veyron:     {fn:scheduleLuxuryAmbient,bar:LABAR},
+    scuderia:   {fn:scheduleRacetrack,    bar:RTBAR},
+    stuttgart:  {fn:scheduleRacetrack,    bar:RTBAR},
+    stingray:   {fn:scheduleRacetrack,    bar:RTBAR},
+    ragingbull: {fn:scheduleRacetrack,    bar:RTBAR},
   };
   function wmLoop(){
     if(!wmPlaying) return;
@@ -2579,6 +2951,35 @@ function spawnWorldAmbient() {
   if(wid==='nitro' && frame%4===0) {
     // Tire smoke drifting back from player
     particles.push({x:player.x+(Math.random()-0.5)*20, y:player.y+player.size*0.8+Math.random()*8, vx:(Math.random()-0.5)*1.2-speed*0.5, vy:(Math.random()-0.5)*1.0, life:0.7+Math.random()*0.3, decay:0.014+Math.random()*0.014, r:Math.random()*7+3, color:'rgba(160,160,160,0.5)', glow:false});
+  }
+  // ── Luxury ambient particles ──
+  if(wid==='obsidian' && frame%5===0) {
+    // Chrome silver dust drifting slowly
+    particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.4, vy:-(Math.random()*0.6+0.1), life:0.9+Math.random()*0.3, decay:0.008+Math.random()*0.008, r:Math.random()*2.5+0.5, color:['#aaaaaa','#cccccc','#e0e0e0'][Math.floor(Math.random()*3)], glow:true});
+  }
+  if(wid==='scuderia' && frame%3===0) {
+    // Ferrari red sparks + rare gold glitter
+    particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height*0.9+canvas.height*0.05, vx:(Math.random()-0.5)*2.8, vy:-(Math.random()*3.5+0.8), life:1, decay:0.032+Math.random()*0.022, r:Math.random()*2.5+0.6, color:Math.random()<0.12?'#d4af37':'#ff2200', glow:true});
+  }
+  if(wid==='tridente' && frame%4===0) {
+    // Maserati blue droplets + gold shimmer
+    particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.8, vy:Math.random()*1.2+0.3, life:0.85+Math.random()*0.35, decay:0.012+Math.random()*0.01, r:Math.random()*3+0.8, color:Math.random()<0.18?'#d4af37':'#4488ff', glow:true});
+  }
+  if(wid==='veyron' && frame%4===0) {
+    // Electric blue sparks
+    particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*2.0, vy:-(Math.random()*2.5+0.5), life:0.7+Math.random()*0.4, decay:0.022+Math.random()*0.018, r:Math.random()*2.5+0.6, color:Math.random()<0.5?'#0055ff':'#88aaff', glow:true});
+  }
+  if(wid==='stuttgart' && frame%3===0) {
+    // Porsche orange racing sparks
+    particles.push({x:Math.random()*canvas.width, y:canvas.height*(0.3+Math.random()*0.7), vx:(Math.random()-0.5)*3.0, vy:-(Math.random()*3.2+1.0), life:0.9, decay:0.028+Math.random()*0.02, r:Math.random()*2.5+0.7, color:Math.random()<0.5?'#ff8800':'#ffee44', glow:true});
+  }
+  if(wid==='stingray' && frame%4===0) {
+    // Toxic venom green drops
+    particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height*0.8, vx:(Math.random()-0.5)*0.7, vy:Math.random()*1.5+0.4, life:0.85+Math.random()*0.3, decay:0.011+Math.random()*0.012, r:Math.random()*3.5+0.8, color:Math.random()<0.5?'#44ff00':'#00cc00', glow:true});
+  }
+  if(wid==='ragingbull' && frame%3===0) {
+    // Lamborghini electric lime bursts
+    particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*4.0, vy:-(Math.random()*4.5+1.2), life:0.8+Math.random()*0.3, decay:0.030+Math.random()*0.025, r:Math.random()*3+0.6, color:Math.random()<0.6?'#ccff00':'#9fff00', glow:true});
   }
 }
 
@@ -2895,6 +3296,18 @@ wrapper.addEventListener('click', doJump);
 wrapper.addEventListener('touchstart', e => { e.preventDefault(); doJump(); }, {passive:false});
 // Absorb all touch events inside the shop so they never reach the wrapper touchstart
 document.getElementById('shopScreen').addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
+document.getElementById('luxuryScreen').addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
+
+// ── Luxury hangar events ──────────────────────────────────────────────────────
+document.getElementById('luxuryBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playShopOpen(); openLuxuryShop(); });
+document.getElementById('luxuryBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openLuxuryShop(); }, { passive: false });
+document.getElementById('luxuryCloseBtn').addEventListener('click', e => { e.stopPropagation(); const nm=!AudioEngine.isMuted(); AudioEngine.setMuted(nm); applySoundIcon(nm); document.getElementById('luxuryCloseBtn').textContent = nm ? '🔇' : '🔊'; });
+document.getElementById('luxuryLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeLuxuryShop(); updateStartShipEmoji(); });
+document.getElementById('luxuryLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeLuxuryShop(); updateStartShipEmoji(); });
+document.getElementById('luxuryPackBtn').addEventListener('click', e => { e.stopPropagation(); handleLuxuryBundlePurchase(); });
+document.getElementById('lpmBuyBtn').addEventListener('click', e => { e.stopPropagation(); if(_luxuryPendingShip) handleLuxuryPurchase(_luxuryPendingShip.id); });
+document.getElementById('lpmCancelBtn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('luxuryPurchaseModal').classList.add('hidden'); _luxuryPendingShip=null; });
+document.getElementById('lpmBundleBtn').addEventListener('click', e => { e.stopPropagation(); handleLuxuryBundlePurchase(); });
 document.getElementById('restartBtn').addEventListener('click', e => { e.stopPropagation(); startGame(); });
 document.getElementById('restartBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); startGame(); });
 
@@ -3028,6 +3441,155 @@ function openWorldShop() {
 function closeWorldShop() {
   AudioEngine.stopHangarMusic();
   document.getElementById('worldScreen').classList.add('hidden');
+}
+
+// ── LUXURY HANGAR ─────────────────────────────────────────────────────────────
+let _luxuryPendingShip = null;
+
+function openLuxuryShop() {
+  AudioEngine.init(); AudioEngine.resume();
+  AudioEngine.playHangarOpen();
+  AudioEngine.startHangarMusic();
+  document.getElementById('luxuryCloseBtn').textContent = AudioEngine.isMuted() ? '🔇' : '🔊';
+  renderLuxuryShop();
+  document.getElementById('luxuryScreen').classList.remove('hidden');
+}
+function closeLuxuryShop() {
+  AudioEngine.stopHangarMusic();
+  document.getElementById('luxuryScreen').classList.add('hidden');
+  document.getElementById('luxuryPurchaseModal').classList.add('hidden');
+  _luxuryPendingShip = null;
+}
+
+function renderLuxuryShop() {
+  const grid = document.getElementById('luxuryGrid');
+  grid.innerHTML = '';
+  const allOwned = LUXURY_SHIPS.every(s => save.luxuryOwned.includes(s.id));
+  document.getElementById('luxuryPackBanner').style.display = allOwned ? 'none' : 'flex';
+
+  LUXURY_SHIPS.forEach(ship => {
+    const owned = save.luxuryOwned.includes(ship.id);
+    const selected = save.selected === ship.id;
+
+    const card = document.createElement('div');
+    card.className = 'luxury-card';
+    card.style.borderColor = selected ? 'rgba(212,175,55,0.55)' : (owned ? 'rgba(212,175,55,0.22)' : 'rgba(212,175,55,0.10)');
+    if(selected) card.style.boxShadow = '0 0 22px rgba(212,175,55,0.32), 0 0 48px rgba(212,175,55,0.10)';
+
+    const previewDiv = document.createElement('div');
+    previewDiv.className = 'luxury-card-preview';
+    const mc = document.createElement('canvas');
+    mc.className = 'luxury-card-canvas';
+    mc.width = 90; mc.height = 90;
+    drawLuxuryShipPreview(mc, ship, selected);
+    previewDiv.appendChild(mc);
+    card.appendChild(previewDiv);
+
+    const info = document.createElement('div');
+    info.className = 'luxury-card-info';
+
+    const nm = document.createElement('div');
+    nm.className = 'luxury-card-name';
+    nm.textContent = ship.emoji + ' ' + ship.name;
+    if(selected) nm.style.color = '#d4af37';
+    info.appendChild(nm);
+
+    const desc = document.createElement('div');
+    desc.className = 'luxury-card-desc';
+    desc.textContent = ship.description;
+    info.appendChild(desc);
+
+    const badge = document.createElement('div');
+    badge.className = 'luxury-card-badge';
+    if(owned && selected) {
+      badge.textContent = '✓ ACTIVE';
+      badge.style.cssText = 'background:linear-gradient(90deg,#d4af37,#c9a227);color:#040302;box-shadow:0 0 12px rgba(212,175,55,0.55);';
+    } else if(owned) {
+      badge.textContent = 'SELECT';
+      badge.style.cssText = 'background:transparent;border:1px solid rgba(212,175,55,0.35);color:rgba(212,175,55,0.85);';
+    } else {
+      badge.textContent = '$4.99';
+      badge.style.cssText = 'background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.32);color:#d4af37;';
+    }
+    info.appendChild(badge);
+    card.appendChild(info);
+
+    card.addEventListener('click', () => {
+      if(owned) {
+        save.selected = ship.id;
+        save.selectedWorld = 'auto';
+        writeSave(save);
+        renderLuxuryShop();
+      } else {
+        showLuxuryPurchaseModal(ship);
+      }
+    });
+    grid.appendChild(card);
+  });
+}
+
+function drawLuxuryShipPreview(c, ship, selected) {
+  const g = c.getContext('2d');
+  const W = c.width, H = c.height;
+  const wt = ship.worldTheme;
+  const h2r = h => { if(!h||!h.startsWith('#')) return '212,175,55'; return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(','); };
+
+  const bg = g.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0, wt.bgTop||'#040404'); bg.addColorStop(1, wt.bgBot||'#0c0c0c');
+  g.fillStyle=bg; g.fillRect(0,0,W,H);
+
+  const rgb = h2r(ship.color);
+  const ng = g.createRadialGradient(W/2,H/2,0,W/2,H/2,30);
+  ng.addColorStop(0,`rgba(${rgb},0.22)`); ng.addColorStop(1,'transparent');
+  g.fillStyle=ng; g.beginPath(); g.arc(W/2,H/2,30,0,Math.PI*2); g.fill();
+
+  for(let i=0;i<14;i++){
+    const sx=(i*41+7)%W, sy=(i*23+11)%H;
+    g.fillStyle=`rgba(${h2r(wt.ambientColor||'#ffffff')},${0.2+i%3*0.16})`;
+    g.beginPath(); g.arc(sx,sy,0.65+i%2*0.5,0,Math.PI*2); g.fill();
+  }
+
+  g.shadowColor=ship.glowColor; g.shadowBlur=14;
+  g.save(); g.translate(W/2, H/2);
+  g.fillStyle=ship.color;
+  g.beginPath(); g.moveTo(18,0); g.lineTo(-11,-9); g.lineTo(-7,0); g.lineTo(-11,9); g.closePath(); g.fill();
+  g.fillStyle=ship.wingColor||ship.color;
+  g.beginPath(); g.moveTo(-4,-6); g.lineTo(-13,-15); g.lineTo(-17,-2); g.lineTo(-9,0); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(-4,6); g.lineTo(-13,15); g.lineTo(-17,2); g.lineTo(-9,0); g.closePath(); g.fill();
+  g.shadowBlur=10; g.fillStyle=ship.flameColors[0]||'#ffffff';
+  g.beginPath(); g.moveTo(-11,0); g.lineTo(-20,-4); g.lineTo(-15,0); g.lineTo(-20,4); g.closePath(); g.fill();
+  g.restore(); g.shadowBlur=0;
+
+  if(selected) { g.strokeStyle='rgba(212,175,55,0.8)'; g.lineWidth=2; g.strokeRect(1,1,W-2,H-2); }
+}
+
+function showLuxuryPurchaseModal(ship) {
+  _luxuryPendingShip = ship;
+  document.getElementById('lpmShipName').textContent = ship.emoji + ' ' + ship.name;
+  document.getElementById('lpmShipDesc').textContent = ship.description;
+  const mc = document.getElementById('lpmShipCanvas');
+  drawLuxuryShipPreview(mc, ship, false);
+  document.getElementById('luxuryPurchaseModal').classList.remove('hidden');
+}
+
+function handleLuxuryPurchase(shipId) {
+  // TODO: integrate payment API before production — currently unlocks immediately for prototype
+  if(!save.luxuryOwned.includes(shipId)) save.luxuryOwned.push(shipId);
+  save.selected = shipId;
+  save.selectedWorld = 'auto';
+  writeSave(save);
+  document.getElementById('luxuryPurchaseModal').classList.add('hidden');
+  _luxuryPendingShip = null;
+  renderLuxuryShop();
+}
+
+function handleLuxuryBundlePurchase() {
+  // TODO: integrate bundle payment API before production — currently unlocks all immediately for prototype
+  LUXURY_SHIPS.forEach(s => { if(!save.luxuryOwned.includes(s.id)) save.luxuryOwned.push(s.id); });
+  writeSave(save);
+  document.getElementById('luxuryPurchaseModal').classList.add('hidden');
+  _luxuryPendingShip = null;
+  renderLuxuryShop();
 }
 
 function renderWorldShop() {
@@ -4404,6 +4966,72 @@ function drawBarrier(b) {
     for(let y=b.bottomY+22;y<canvas.height-14;y+=24){ ctx.beginPath(); ctx.moveTo(b.x+2,y-cv); ctx.lineTo(b.x+BAR_W/2,y); ctx.lineTo(b.x+BAR_W-2,y-cv); ctx.stroke(); }
     ctx.shadowBlur=32; ctx.fillStyle=`hsl(${b.hue},100%,70%)`;
     ctx.fillRect(b.x-4,b.topH-12,BAR_W+8,12); ctx.fillRect(b.x-4,b.bottomY,BAR_W+8,12);
+
+  } else if(bStyle==='chrome') {
+    // Silver chrome metallic — gradient sheen + reflection strip
+    ctx.fillStyle=`hsl(${b.hue},0%,11%)`; ctx.fillRect(b.x,0,BAR_W,b.topH); ctx.fillRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
+    ctx.save(); ctx.beginPath(); ctx.rect(b.x,0,BAR_W,b.topH); ctx.clip();
+    const _cg=ctx.createLinearGradient(b.x,0,b.x+BAR_W,0);
+    _cg.addColorStop(0,'rgba(30,30,30,0.9)'); _cg.addColorStop(0.32,'rgba(210,210,210,0.65)'); _cg.addColorStop(0.58,'rgba(90,90,90,0.5)'); _cg.addColorStop(1,'rgba(22,22,22,0.9)');
+    ctx.fillStyle=_cg; ctx.fillRect(b.x,0,BAR_W,b.topH); ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.rect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY); ctx.clip();
+    ctx.fillStyle=_cg; ctx.fillRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY); ctx.restore();
+    ctx.shadowBlur=20; ctx.strokeStyle=`hsl(${b.hue},0%,72%)`; ctx.lineWidth=1.5;
+    ctx.strokeRect(b.x,0,BAR_W,b.topH); ctx.strokeRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
+    ctx.shadowBlur=30; ctx.fillStyle=`hsl(${b.hue},0%,82%)`;
+    ctx.fillRect(b.x-4,b.topH-10,BAR_W+8,10); ctx.fillRect(b.x-4,b.bottomY,BAR_W+8,10);
+
+  } else if(bStyle==='carbonfiber') {
+    // Dark carbon fiber weave + vivid accent edge
+    ctx.fillStyle=`hsl(${b.hue},10%,5%)`; ctx.fillRect(b.x,0,BAR_W,b.topH); ctx.fillRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
+    ctx.shadowBlur=0;
+    const _cf=5;
+    ctx.save(); ctx.beginPath(); ctx.rect(b.x,0,BAR_W,b.topH); ctx.clip();
+    for(let _y=0;_y<b.topH;_y+=_cf*2) for(let _x=b.x;_x<b.x+BAR_W;_x+=_cf*2){
+      ctx.fillStyle=(Math.floor(_y/(_cf*2))+Math.floor((_x-b.x)/(_cf*2)))%2?'rgba(255,255,255,0.048)':'rgba(0,0,0,0.07)';
+      ctx.fillRect(_x,_y,_cf,_cf); ctx.fillRect(_x+_cf,_y+_cf,_cf,_cf);
+    }
+    ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.rect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY); ctx.clip();
+    for(let _y=b.bottomY;_y<canvas.height;_y+=_cf*2) for(let _x=b.x;_x<b.x+BAR_W;_x+=_cf*2){
+      ctx.fillStyle=(Math.floor(_y/(_cf*2))+Math.floor((_x-b.x)/(_cf*2)))%2?'rgba(255,255,255,0.048)':'rgba(0,0,0,0.07)';
+      ctx.fillRect(_x,_y,_cf,_cf); ctx.fillRect(_x+_cf,_y+_cf,_cf,_cf);
+    }
+    ctx.restore();
+    ctx.shadowBlur=26; ctx.strokeStyle=`hsl(${b.hue},100%,55%)`; ctx.lineWidth=2;
+    ctx.strokeRect(b.x,0,BAR_W,b.topH); ctx.strokeRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
+    ctx.shadowBlur=33; ctx.fillStyle=`hsl(${b.hue},100%,65%)`;
+    ctx.fillRect(b.x-4,b.topH-10,BAR_W+8,10); ctx.fillRect(b.x-4,b.bottomY,BAR_W+8,10);
+
+  } else if(bStyle==='racing') {
+    // Racing stripes — diagonal colored speed lines
+    ctx.fillStyle=`hsl(${b.hue},38%,7%)`; ctx.fillRect(b.x,0,BAR_W,b.topH); ctx.fillRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
+    ctx.save(); ctx.beginPath(); ctx.rect(b.x,0,BAR_W,b.topH); ctx.clip();
+    ctx.strokeStyle=`hsla(${b.hue},100%,62%,0.26)`; ctx.lineWidth=6;
+    for(let _d=-80;_d<b.topH+40;_d+=14){ ctx.beginPath(); ctx.moveTo(b.x,_d); ctx.lineTo(b.x+BAR_W,_d-20); ctx.stroke(); }
+    ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.rect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY); ctx.clip();
+    for(let _d=b.bottomY-20;_d<canvas.height+40;_d+=14){ ctx.beginPath(); ctx.moveTo(b.x,_d); ctx.lineTo(b.x+BAR_W,_d-20); ctx.stroke(); }
+    ctx.restore();
+    ctx.shadowBlur=22; ctx.strokeStyle=`hsl(${b.hue},100%,62%)`; ctx.lineWidth=2;
+    ctx.strokeRect(b.x,0,BAR_W,b.topH); ctx.strokeRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
+    ctx.shadowBlur=30; ctx.fillStyle=`hsl(${b.hue},100%,68%)`;
+    ctx.fillRect(b.x-4,b.topH-10,BAR_W+8,10); ctx.fillRect(b.x-4,b.bottomY,BAR_W+8,10);
+
+  } else if(bStyle==='angular') {
+    // Sharp geometric angular notch cuts
+    ctx.fillStyle=`hsl(${b.hue},52%,7%)`; ctx.fillRect(b.x,0,BAR_W,b.topH); ctx.fillRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
+    ctx.shadowBlur=8; ctx.fillStyle=`hsla(${b.hue},100%,55%,0.17)`;
+    for(let _y=12;_y<b.topH-8;_y+=20){
+      ctx.beginPath(); ctx.moveTo(b.x,_y); ctx.lineTo(b.x+BAR_W*0.6,_y+5); ctx.lineTo(b.x+BAR_W,_y); ctx.lineTo(b.x+BAR_W,_y+8); ctx.lineTo(b.x+BAR_W*0.6,_y+13); ctx.lineTo(b.x,_y+8); ctx.closePath(); ctx.fill();
+    }
+    for(let _y=b.bottomY+12;_y<canvas.height-8;_y+=20){
+      ctx.beginPath(); ctx.moveTo(b.x,_y); ctx.lineTo(b.x+BAR_W*0.6,_y+5); ctx.lineTo(b.x+BAR_W,_y); ctx.lineTo(b.x+BAR_W,_y+8); ctx.lineTo(b.x+BAR_W*0.6,_y+13); ctx.lineTo(b.x,_y+8); ctx.closePath(); ctx.fill();
+    }
+    ctx.shadowBlur=28; ctx.strokeStyle=`hsl(${b.hue},100%,65%)`; ctx.lineWidth=2.5;
+    ctx.strokeRect(b.x,0,BAR_W,b.topH); ctx.strokeRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
+    ctx.shadowBlur=35; ctx.fillStyle=`hsl(${b.hue},100%,72%)`;
+    ctx.fillRect(b.x-4,b.topH-10,BAR_W+8,10); ctx.fillRect(b.x-4,b.bottomY,BAR_W+8,10);
 
   } else {
     // Default neon barrier
