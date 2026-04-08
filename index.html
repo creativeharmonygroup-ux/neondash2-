@@ -1676,6 +1676,28 @@ const AudioEngine = (() => {
     });
   }
 
+  function playLegendary() {
+    init(); resume();
+    const t = ctx.currentTime;
+    // Epic rising fanfare: low rumble + soaring arpeggio + shimmering chord burst
+    // Sub boom
+    playTone({ type: 'sine', freq: 55, duration: 0.5, gainPeak: 0.45, startTime: t });
+    playTone({ type: 'sine', freq: 110, duration: 0.4, gainPeak: 0.3, startTime: t + 0.05 });
+    // Heroic arpeggio ascent
+    [262, 330, 392, 523, 659, 784, 1047, 1319, 1568].forEach((freq, i) => {
+      playTone({ type: 'sine',     freq, duration: 0.22, gainPeak: 0.4, startTime: t + i * 0.07 });
+      playTone({ type: 'triangle', freq: freq * 2, duration: 0.16, gainPeak: 0.12, startTime: t + i * 0.07 + 0.01 });
+    });
+    // Grand shimmer chord at the peak
+    [1047, 1319, 1568, 2093].forEach((freq, i) => {
+      playTone({ type: 'sine', freq, duration: 0.9, gainPeak: 0.22, startTime: t + 0.68 + i * 0.02 });
+    });
+    // Sparkling high overtones
+    [3136, 4186].forEach((freq, i) => {
+      playTone({ type: 'sine', freq, duration: 0.5, gainPeak: 0.08, startTime: t + 0.72 + i * 0.03 });
+    });
+  }
+
   function setMusicPhase(p) {} // no-op — single energetic track
 
   // ── YUPILANDIA RAVE: 200 BPM, hard techno, heavy sub-bass + bright synths ──
@@ -2006,7 +2028,7 @@ const AudioEngine = (() => {
     hangarMaster = null;
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted };
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted };
 })();
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -2044,11 +2066,19 @@ let screenShake = { x:0, y:0, power:0 };
 // Coin pickups en el aire
 let coinPickups = [];
 let treasureChest = null, chestSpawned = false;
+let legendaryChest = null, legendaryChestSpawned = false;
+let nextGoldenChestScore = 4;
 function spawnCoinPickup() {
+  // Enforce minimum horizontal gap so coins never cluster
+  const MIN_GAP = 90;
+  let spawnX = canvas.width + 20;
+  coinPickups.forEach(c => {
+    if (!c.collected && c.x > spawnX - MIN_GAP) spawnX = c.x + MIN_GAP;
+  });
   coinPickups.push({
-    x: canvas.width + 20,
+    x: spawnX,
     y: 80 + Math.random() * (canvas.height - 160),
-    r: 8,
+    r: 12,
     spin: 0,
     collected: false
   });
@@ -2401,6 +2431,7 @@ document.getElementById('restartBtn').addEventListener('touchend', e => { e.stop
 function startGame() {
   state='playing'; score=0; frame=0; speed=5.45; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0;
   treasureChest=null; chestSpawned=false;
+  legendaryChest=null; legendaryChestSpawned=false; nextGoldenChestScore=4;
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
   momentBlob=null; reached8=false; MomentRecorder.stop();
 
@@ -3036,24 +3067,68 @@ function drawBackground() {
 function drawCoinPickups() {
   coinPickups.forEach(c => {
     if (c.collected) return;
-    c.spin += 0.08;
-    const squish = Math.abs(Math.cos(c.spin));
+    c.spin += 0.045;
+    const tilt = Math.cos(c.spin); // -1..1 perspective rotation
+    const scaleX = 0.82 + Math.abs(tilt) * 0.18; // subtle perspective tilt
+
     ctx.save();
     ctx.translate(c.x, c.y);
-    ctx.shadowColor='#ffee00'; ctx.shadowBlur=15;
-    // Coin body
-    const cg=ctx.createRadialGradient(0,0,0,0,0,c.r);
-    cg.addColorStop(0,'#ffffff'); cg.addColorStop(0.4,'#ffee00'); cg.addColorStop(1,'#cc8800');
-    ctx.fillStyle=cg;
-    ctx.beginPath(); ctx.ellipse(0,0,c.r*(0.3+0.7*squish),c.r,0,0,Math.PI*2); ctx.fill();
-    // \u25cf symbol
-    if(squish>0.3){
-      ctx.fillStyle='rgba(0,0,0,0.5)';
-      ctx.font=`bold ${c.r}px Orbitron`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('\u25cf',0,1);
+    ctx.scale(scaleX, 1);
+
+    const r = c.r;
+
+    // Outer glow
+    ctx.shadowColor = '#FFD700';
+    ctx.shadowBlur = 22 + Math.sin(c.spin * 2) * 6;
+
+    // Coin edge / depth shadow (offset circle beneath)
+    ctx.fillStyle = '#6B4500';
+    ctx.beginPath(); ctx.arc(0, 3, r, 0, Math.PI * 2); ctx.fill();
+
+    // Main face — metallic radial gradient (highlight top-left to dark edge)
+    const mg = ctx.createRadialGradient(-r * 0.32, -r * 0.32, r * 0.05, 0, 0, r);
+    mg.addColorStop(0,    '#FFFBE8');
+    mg.addColorStop(0.18, '#FFE657');
+    mg.addColorStop(0.5,  '#FFD700');
+    mg.addColorStop(0.78, '#E8A000');
+    mg.addColorStop(1,    '#8B5E00');
+    ctx.fillStyle = mg;
+    ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+
+    // Embossed inner ring
+    ctx.strokeStyle = 'rgba(100,64,0,0.45)';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.76, 0, Math.PI * 2); ctx.stroke();
+
+    // "D" letter — visible when facing viewer
+    const faceAmt = Math.abs(tilt);
+    if (faceAmt > 0.15) {
+      const letterAlpha = Math.min(1, (faceAmt - 0.15) / 0.25);
+      ctx.globalAlpha = letterAlpha;
+      ctx.font = `bold ${Math.round(r * 1.15)}px Orbitron`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      // Embossed shadow
+      ctx.fillStyle = 'rgba(80,48,0,0.7)';
+      ctx.fillText('D', 1, 2);
+      // Main letter
+      ctx.fillStyle = '#7A4800';
+      ctx.fillText('D', 0, 1);
+      ctx.globalAlpha = 1;
     }
-    ctx.shadowBlur=0; ctx.restore();
+
+    // Shine streak (top-left highlight arc)
+    if (tilt > 0) {
+      const sg = ctx.createLinearGradient(-r * 0.55, -r * 0.65, r * 0.05, -r * 0.05);
+      sg.addColorStop(0, `rgba(255,255,255,${tilt * 0.55})`);
+      sg.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = sg;
+      ctx.beginPath();
+      ctx.ellipse(-r * 0.18, -r * 0.34, r * 0.38, r * 0.17, -0.45, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
   });
 }
 
@@ -3156,6 +3231,121 @@ function checkChestCollection() {
     spawnParticles(ch.x, ch.y, '#FFFAAA', 10, 0.9);
     awardCoins(5, ch.x, ch.y);
     showTreasureFloat(ch.x, ch.y);
+  }
+}
+
+function drawLegendaryChest() {
+  if (!legendaryChest || legendaryChest.collected) return;
+  const ch = legendaryChest;
+  ch.t += 0.06;
+  const pulse = 1 + Math.sin(ch.t * 2.8) * 0.13;
+  const W = ch.w * pulse, H = ch.h * pulse;
+  const lh = H * 0.4;
+
+  ctx.save();
+  ctx.translate(ch.x, ch.y);
+
+  // Intense rainbow/purple outer aura (multi-layer)
+  const hue1 = (ch.t * 60) % 360;
+  const hue2 = (hue1 + 120) % 360;
+  const hue3 = (hue1 + 240) % 360;
+  ctx.shadowColor = `hsl(${hue1},100%,65%)`;
+  ctx.shadowBlur = 50 + Math.sin(ch.t * 3) * 20;
+
+  // Body — deep purple base with rainbow shimmer
+  const bodyG = ctx.createLinearGradient(0, -H/2+lh, 0, H/2);
+  bodyG.addColorStop(0, `hsl(${hue1},100%,55%)`);
+  bodyG.addColorStop(0.35, `hsl(${hue2},100%,35%)`);
+  bodyG.addColorStop(0.7, `hsl(${hue3},100%,25%)`);
+  bodyG.addColorStop(1, '#1a003a');
+  ctx.fillStyle = bodyG;
+  rrect(ctx, -W/2, -H/2+lh, W, H*(1-0.4), 5); ctx.fill();
+
+  // Lid — bright rainbow top
+  ctx.shadowBlur = 14;
+  const lidG = ctx.createLinearGradient(0, -H/2, 0, -H/2+lh);
+  lidG.addColorStop(0, `hsl(${hue3},100%,80%)`);
+  lidG.addColorStop(0.5, `hsl(${hue1},100%,60%)`);
+  lidG.addColorStop(1, `hsl(${hue2},100%,45%)`);
+  ctx.fillStyle = lidG;
+  rrect(ctx, -W/2, -H/2, W, lh+4, 6); ctx.fill();
+
+  // Lid highlight
+  ctx.shadowBlur = 0; ctx.globalAlpha = 0.5;
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+  rrect(ctx, -W/2+4, -H/2+4, W-8, lh-4, 4); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Lock band — glowing purple
+  ctx.fillStyle = '#3d0066'; ctx.shadowColor=`hsl(${hue2},100%,60%)`; ctx.shadowBlur=8;
+  ctx.fillRect(-W/2, -H/2+lh-3, W, 7);
+
+  // Lock disc — rainbow pulse
+  ctx.shadowColor=`hsl(${hue1},100%,70%)`; ctx.shadowBlur=20;
+  ctx.fillStyle=`hsl(${hue1},100%,65%)`;
+  ctx.beginPath(); ctx.arc(0, -H/2+lh, 9, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#2a0045';
+  ctx.beginPath(); ctx.arc(0, -H/2+lh-1, 4, 0, Math.PI*2); ctx.fill();
+
+  // "LEGENDARY" label on chest body
+  ctx.shadowBlur = 6; ctx.shadowColor = '#fff';
+  ctx.fillStyle = `hsl(${hue3},100%,85%)`;
+  ctx.font = `bold ${Math.round(W*0.18)}px Orbitron`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('LEGENDARY', 0, H*0.12);
+
+  // Orbiting sparkle stars — more intense, more stars
+  for (let i = 0; i < 14; i++) {
+    const dir = i % 2 === 0 ? 1 : -1;
+    const starHue = (hue1 + i * (360/14)) % 360;
+    const ang = (i / 14) * Math.PI * 2 + ch.t * 0.9 * dir;
+    const orbit = 34 + (i % 4) * 11;
+    const sx = Math.cos(ang) * orbit, sy = Math.sin(ang) * orbit;
+    const bright = Math.sin(ch.t * 4 + i * 1.1) * 0.5 + 0.5;
+    const sz = (3 + bright * 5) * pulse;
+    ctx.shadowColor = `hsl(${starHue},100%,70%)`;
+    ctx.shadowBlur = 14 * bright;
+    ctx.fillStyle = `hsla(${starHue},100%,70%,${0.4+bright*0.6})`;
+    ctx.save(); ctx.translate(sx, sy); ctx.rotate(ch.t * dir + i);
+    ctx.beginPath();
+    for (let s = 0; s < 4; s++) {
+      const a1 = (s/4)*Math.PI*2, a2 = ((s+0.5)/4)*Math.PI*2;
+      ctx.lineTo(Math.cos(a1)*sz, Math.sin(a1)*sz);
+      ctx.lineTo(Math.cos(a2)*sz*0.25, Math.sin(a2)*sz*0.25);
+    }
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+function showLegendaryFloat(x, y) {
+  const el = document.createElement('div');
+  el.className = 'coinFloat treasure';
+  el.textContent = '+30';
+  el.style.left = (x - 22) + 'px';
+  el.style.top  = (y - 44) + 'px';
+  el.style.fontSize = '22px';
+  el.style.textShadow = '0 0 12px #bf00ff, 0 0 24px #ff00ff';
+  el.style.color = '#df80ff';
+  wrapper.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+}
+
+function checkLegendaryChestCollection() {
+  if (!legendaryChest || legendaryChest.collected || player.dead) return;
+  const ch = legendaryChest;
+  const dx = player.x - ch.x, dy = player.y - ch.y;
+  if (Math.sqrt(dx*dx+dy*dy) < player.size + Math.max(ch.w,ch.h)*0.55) {
+    ch.collected = true;
+    AudioEngine.playLegendary();
+    flashScreen('#bf00ff', 0.6);
+    triggerShake(14);
+    spawnParticles(ch.x, ch.y, '#bf00ff', 30, 1.8);
+    spawnParticles(ch.x, ch.y, '#ff80ff', 20, 1.4);
+    spawnParticles(ch.x, ch.y, '#ffffff', 12, 1.0);
+    awardCoins(30, ch.x, ch.y);
+    showLegendaryFloat(ch.x, ch.y);
   }
 }
 
@@ -3324,7 +3514,7 @@ function loop() {
     }
 
     // Spawn monedas (cada ~200 frames, posición aleatoria)
-    if(!yupilandiaActive && frame%180===90) spawnCoinPickup();
+    if(!yupilandiaActive && frame%90===45) { spawnCoinPickup(); spawnCoinPickup(); if(Math.random()<0.4) spawnCoinPickup(); }
 
     if(!player.dead){
       player.vy+=player.gravity; player.y+=player.vy;
@@ -3339,6 +3529,10 @@ function loop() {
     // Update treasure chest
     if(treasureChest&&!treasureChest.collected){ treasureChest.x-=spd; }
     if(treasureChest&&treasureChest.x<-80) treasureChest=null;
+
+    // Update legendary chest
+    if(legendaryChest&&!legendaryChest.collected){ legendaryChest.x-=spd; }
+    if(legendaryChest&&legendaryChest.x<-100) legendaryChest=null;
 
     // Update YUPILANDIA multi-chests
     if(yupilandiaActive) {
@@ -3366,7 +3560,8 @@ function loop() {
         b.scored=true; score++; combo++;
         updateUI(); popScore();
         spawnParticles(player.x+20,player.y,currentShip().trailColor,6,0.8);
-        if(score===6&&!chestSpawned){ chestSpawned=true; treasureChest={x:canvas.width+50,y:canvas.height*0.5,w:44,h:36,collected:false,t:0}; }
+        if(score===nextGoldenChestScore){ treasureChest={x:canvas.width+50,y:canvas.height*0.5,w:44,h:36,collected:false,t:0}; nextGoldenChestScore+=6; }
+        if(score===15&&!legendaryChestSpawned){ legendaryChestSpawned=true; legendaryChest={x:canvas.width+60,y:canvas.height*0.4,w:60,h:50,collected:false,t:0}; }
         if(combo>=5&&combo%5===0){AudioEngine.playCombo();showCombo(combo);flashScreen('#ffee00',0.15);}
         else AudioEngine.playScore();
       }
@@ -3379,6 +3574,7 @@ function loop() {
     if(!player.dead){
       checkCoinCollection();
       checkChestCollection();
+      checkLegendaryChestCollection();
       if(!yupilandiaActive && !yupilandiaFrozen && checkCollision()){combo=0;gameOver();}
     }
   }
@@ -3386,6 +3582,7 @@ function loop() {
   barriers.forEach(drawBarrier);
   drawCoinPickups();
   drawTreasureChest();
+  drawLegendaryChest();
   // Draw all YUPILANDIA extra chests
   if(yupilandiaActive) {
     yupiChests.forEach(c=>{
