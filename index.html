@@ -1491,6 +1491,9 @@ function loadSave() {
 function writeSave(s) { localStorage.setItem('neonDashSave', JSON.stringify(s)); }
 
 let save = loadSave();
+// DEV: unlock all regular ships for testing
+save.owned = SHIPS.map(s => s.id);
+writeSave(save);
 
 function getShip(id) { return SHIPS.find(s => s.id === id) || LUXURY_SHIPS.find(s => s.id === id) || SHIPS[0]; }
 function currentShip() { return getShip(save.selected); }
