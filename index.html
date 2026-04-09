@@ -616,13 +616,15 @@
 
 </div>
 
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
 <script>
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 //  SHIP CATALOGUE \u2014 8 naves \u00fanicas
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
-// Force fresh start — wipe save so player begins with only VIPER and 0 coins
-localStorage.removeItem('neonDashSave');
-
 const SHIPS = [
   {
     id: 'classic',
@@ -832,13 +834,62 @@ function loadSave() {
     };
   } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'classic', selectedWorld: 'auto', luxuryOwned: [] }; }
 }
-function writeSave(s) { localStorage.setItem('neonDashSave', JSON.stringify(s)); }
+function writeSave(s) {
+  localStorage.setItem('neonDashSave', JSON.stringify(s));
+  writeCloudSave(s);
+}
 
 let save = loadSave();
-// DEV: unlock all regular ships for testing
-save.owned = SHIPS.map(s => s.id);
-save.luxuryOwned = LUXURY_SHIPS.map(s => s.id);
-writeSave(save);
+
+// ── FIREBASE CLOUD SAVE ───────────────────────────────────────────────────────
+let _fbDb = null, _fbUid = null;
+
+function writeCloudSave(s) {
+  if (!_fbDb || !_fbUid) return;
+  _fbDb.collection('players').doc(_fbUid).set({
+    coins: s.coins || 0,
+    best: s.best || 0,
+    owned: s.owned || ['classic'],
+    luxuryOwned: s.luxuryOwned || [],
+    selected: s.selected || 'classic',
+    selectedWorld: s.selectedWorld || 'auto',
+    ts: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true }).catch(() => {});
+}
+
+(function initFirebase() {
+  try {
+    firebase.initializeApp({
+      apiKey: 'AIzaSyBmcz8b-SG6mjXIc9xogn2eAQLN7F_h3Zs',
+      authDomain: 'neondash-56149.firebaseapp.com',
+      projectId: 'neondash-56149',
+      storageBucket: 'neondash-56149.firebasestorage.app',
+      messagingSenderId: '959414711333',
+      appId: '1:959414711333:web:0493eaceec0e98026c7bcc'
+    });
+    _fbDb = firebase.firestore();
+    firebase.auth().signInAnonymously()
+      .then(cred => {
+        _fbUid = cred.user.uid;
+        return _fbDb.collection('players').doc(_fbUid).get();
+      })
+      .then(doc => {
+        if (!doc.exists) { writeCloudSave(save); return; }
+        const d = doc.data();
+        save.coins        = Math.max(save.coins, d.coins || 0);
+        save.best         = Math.max(save.best,  d.best  || 0);
+        if ((d.owned       || []).length > save.owned.length)       save.owned       = d.owned;
+        if ((d.luxuryOwned || []).length > save.luxuryOwned.length) save.luxuryOwned = d.luxuryOwned;
+        if (d.selected)     save.selected     = d.selected;
+        if (d.selectedWorld) save.selectedWorld = d.selectedWorld;
+        localStorage.setItem('neonDashSave', JSON.stringify(save));
+        updateCoinHud();
+        document.getElementById('bestDisplay').textContent = 'BEST: ' + save.best;
+      })
+      .catch(e => console.warn('[Firebase]', e));
+  } catch(e) { console.warn('[Firebase init]', e); }
+})();
+// ─────────────────────────────────────────────────────────────────────────────
 
 function getShip(id) { return SHIPS.find(s => s.id === id) || LUXURY_SHIPS.find(s => s.id === id) || SHIPS[0]; }
 function currentShip() { return getShip(save.selected); }
