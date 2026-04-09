@@ -3481,7 +3481,6 @@ function renderLuxuryShop() {
     const mc = document.createElement('canvas');
     mc.className = 'luxury-card-canvas';
     mc.width = 90; mc.height = 90;
-    animateLuxuryShipPreview(mc, ship, selected);
     previewDiv.appendChild(mc);
     card.appendChild(previewDiv);
 
@@ -3525,14 +3524,17 @@ function renderLuxuryShop() {
       }
     });
     grid.appendChild(card);
+    animateLuxuryShipPreview(mc, ship, selected);
   });
 }
 
 function animateLuxuryShipPreview(c, ship, selected) {
   const h2r = h => { if(!h||!h.startsWith('#')) return '212,175,55'; return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(','); };
+  c._luxGen = (c._luxGen || 0) + 1;
+  const myGen = c._luxGen;
   let flicker = 0;
   function frame() {
-    if (!c.isConnected) return;
+    if (!c.isConnected || c._luxGen !== myGen) return;
     flicker += 0.15;
     const g = c.getContext('2d');
     const W = c.width, H = c.height;
