@@ -1170,7 +1170,7 @@
   <!-- UNIVERSE WORLD SELECTOR -->
   <div id="worldScreen" class="hidden">
     <div class="world-header">
-      <div class="world-title">UNIVERSE</div>
+      <div class="world-title">THE UNIVERSE</div>
       <div class="shop-coins"><span id="worldCoinCount">0</span></div>
       <button class="world-close-btn" id="worldCloseBtn">🔊</button>
     </div>
@@ -1470,7 +1470,6 @@ const WORLD_DEFS = [
   { id:'auto',       name:'AUTO',        emoji:'✨',  desc:"Follows the active ship's own world", accent:'#aaaaaa', bgA:'#060612', bgB:'#0a0d22' },
   { id:'prehistoric',name:'PREHISTORIC', emoji:'🦕',  desc:'Dark jungle · Lava particles · Tribal drums', accent:'#ff6600', bgA:'#071409', bgB:'#0e2210' },
   { id:'thegrid',    name:'THE GRID',    emoji:'💻',  desc:'Matrix code rain · Glitch barriers · Electronic', accent:'#00ff41', bgA:'#000000', bgB:'#000800' },
-  { id:'malibu',     name:'MALIBU',      emoji:'🌸',  desc:'Hot pink · Sparkle particles · Pop synth', accent:'#ff69b4', bgA:'#1a000e', bgB:'#2d0020' },
   { id:'pandora',    name:'PANDORA',     emoji:'🌿',  desc:'Bioluminescent · Floating spores · Ethereal', accent:'#00cfff', bgA:'#000812', bgB:'#001020' },
   { id:'machinewar', name:'MACHINE WAR', emoji:'🤖',  desc:'Dark metal · Fire sparks · Industrial metal', accent:'#cc2200', bgA:'#0c0000', bgB:'#140000' },
   { id:'nitro',      name:'NITRO',       emoji:'🏎️', desc:'Speed streaks · Tire smoke · Trap beat', accent:'#ff7700', bgA:'#0d0500', bgB:'#1a0a00' },
@@ -2631,24 +2630,6 @@ const AudioEngine = (() => {
     if(bar===3) for(let i=0;i<8;i++) gGlitch(st+GCb*3+i*GCs*0.5);
   }
 
-  // ── MALIBU: 128 BPM pop synth ──────────────────────────────────────────────
-  const MCb=60/128,MCe=MCb/2,MCs=MCb/4,MCBAR=MCb*4;
-  const MCHORDS=[[392,494,587],[523,659,784],[440,523,659],[349,440,523]];
-  const MLEAD=[[784,880,988,1047],[1047,988,880,784],[880,784,659,784],[659,784,880,659]];
-  function scheduleMalibu(st){
-    const bar=wmBarCount%4;
-    function mKick(t){ wmKick(t,55,32,0.28,0.88); wmN(t,0.012,0.45,'lowpass',280); }
-    function mClap(t){ wmN(t,0.08,0.48,'bandpass',2200); wmN(t,0.05,0.3,'highpass',5000); wmN(t+0.009,0.065,0.35,'bandpass',1700); }
-    function mHat(t,v){ wmN(t,0.013,v,'highpass',14000); }
-    for(let i=0;i<4;i++) mKick(st+i*MCb);
-    mClap(st+MCb); mClap(st+MCb*3);
-    for(let i=0;i<16;i++) mHat(st+i*MCs, i%4===0?0.17:i%2===0?0.09:0.045);
-    MCHORDS[bar].forEach(f=>{
-      [0,0.5,1,1.5,2,2.5,3,3.5].forEach(b=>{ wmT(f,st+b*MCb,MCb*0.35,'sawtooth',0.032); wmT(f*0.5,st+b*MCb,MCb*0.32,'sawtooth',0.022); });
-    });
-    MLEAD[bar].forEach((f,i)=>{ wmT(f,st+i*MCb,MCb*0.65,'sine',0.09); wmT(f,st+i*MCb,MCb*0.28,'triangle',0.04); });
-  }
-
   // ── PANDORA: 90 BPM ethereal ambient ───────────────────────────────────────
   const ACb=60/90,ACe=ACb/2,ACBAR=ACb*4;
   const ACHORDS=[[147,220,294,370],[175,262,349,440],[220,330,440,523],[196,294,392,494]];
@@ -2765,7 +2746,6 @@ const AudioEngine = (() => {
   const WM_SCHED={
     prehistoric:{fn:schedulePrehistoric,bar:PCBAR},
     thegrid:    {fn:scheduleGrid,       bar:GCBAR},
-    malibu:     {fn:scheduleMalibu,     bar:MCBAR},
     pandora:    {fn:schedulePandora,    bar:ACBAR},
     machinewar: {fn:scheduleMachineWar, bar:WCBAR},
     nitro:      {fn:scheduleNitro,      bar:NCBAR},
@@ -2915,10 +2895,6 @@ function spawnWorldAmbient() {
   if(wid==='thegrid' && frame%6===0) {
     // Glitch data sparks at random points
     particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*1.5, vy:(Math.random()-0.5)*1.5, life:0.8, decay:0.06+Math.random()*0.04, r:1.5+Math.random()*2, color:'#00ff41', glow:true});
-  }
-  if(wid==='malibu' && frame%4===0) {
-    // Sparkle stars floating upward
-    particles.push({x:Math.random()*canvas.width, y:canvas.height*0.2+Math.random()*canvas.height*0.8, vx:(Math.random()-0.5)*0.6, vy:-(Math.random()*1.2+0.4), life:1, decay:0.025+Math.random()*0.025, r:Math.random()*2.5+0.8, color:Math.random()<0.5?'#ffdd00':'#ff69b4', glow:true});
   }
   if(wid==='pandora' && frame%5===0) {
     // Bioluminescent spores floating slowly upward
@@ -3652,13 +3628,6 @@ function drawWorldPreview(c, wd, selected) {
     gfx.font='8px monospace'; gfx.fillStyle='rgba(0,255,65,0.45)';
     for(let cx=0;cx<W;cx+=11) for(let ry=8;ry<H;ry+=11) gfx.fillText((cx+ry)%22<11?'1':'0',cx,ry);
   }
-  if(wd.id==='malibu') {
-    const hx=W*0.78,hy=H*0.32,s=12;
-    gfx.fillStyle='rgba(255,105,180,0.30)'; gfx.shadowColor='#ff69b4'; gfx.shadowBlur=8;
-    gfx.beginPath(); gfx.moveTo(hx,hy+s*0.28); gfx.bezierCurveTo(hx+s*0.5,hy-s*0.55,hx+s,hy,hx,hy+s*0.72); gfx.bezierCurveTo(hx-s,hy,hx-s*0.5,hy-s*0.55,hx,hy+s*0.28); gfx.fill(); gfx.shadowBlur=0;
-    // sparkles
-    [[W*0.2,H*0.2],[W*0.5,H*0.7],[W*0.1,H*0.8]].forEach(([sx,sy])=>{ gfx.fillStyle='rgba(255,220,0,0.55)'; gfx.beginPath(); gfx.arc(sx,sy,1.5,0,Math.PI*2); gfx.fill(); });
-  }
   if(wd.id==='pandora') {
     [[W*0.28,H*0.58,16,172],[W*0.72,H*0.35,12,155]].forEach(([nx,ny,nr,nh])=>{
       const ng2=gfx.createRadialGradient(nx,ny,0,nx,ny,nr);
@@ -4293,23 +4262,6 @@ function drawBackground() {
     // Horizontal scan flash every ~90 frames
     const scanY=(frame*1.8)%canvas.height;
     ctx.fillStyle='rgba(0,255,65,0.04)'; ctx.fillRect(0,scanY-1,canvas.width,3);
-  }
-
-  // ── MALIBU: rose-gold shimmer + floating hearts ──────────────────────────
-  if(wid==='malibu') {
-    const shim=0.5+0.5*Math.sin(frame*0.04);
-    const mG=ctx.createLinearGradient(0,0,canvas.width,canvas.height);
-    mG.addColorStop(0,`rgba(255,160,120,${shim*0.07})`); mG.addColorStop(0.5,'rgba(255,80,160,0.04)'); mG.addColorStop(1,`rgba(255,200,220,${shim*0.06})`);
-    ctx.fillStyle=mG; ctx.fillRect(0,0,canvas.width,canvas.height);
-    // Floating hearts
-    [{x:0.12,y:0.22,ph:0},{x:0.78,y:0.30,ph:1.2},{x:0.50,y:0.68,ph:2.4},{x:0.88,y:0.55,ph:0.7}].forEach(hp=>{
-      const hy=canvas.height*(hp.y)+Math.sin(frame*0.022+hp.ph)*22;
-      ctx.save(); ctx.translate(canvas.width*hp.x,hy); ctx.globalAlpha=0.10+0.04*Math.sin(frame*0.03+hp.ph);
-      ctx.fillStyle='#ff69b4'; ctx.shadowColor='#ff69b4'; ctx.shadowBlur=18;
-      const s=28; ctx.beginPath(); ctx.moveTo(0,s*0.3); ctx.bezierCurveTo(s*0.5,-s*0.55,s*0.95,s*0.05,0,s*0.75); ctx.bezierCurveTo(-s*0.95,s*0.05,-s*0.5,-s*0.55,0,s*0.3); ctx.fill();
-      ctx.restore();
-    });
-    ctx.shadowBlur=0; ctx.globalAlpha=1;
   }
 
   // ── PANDORA: bioluminescent ground glow + pulsing bloom pools ────────────
