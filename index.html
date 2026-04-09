@@ -1264,19 +1264,6 @@ const SHIPS = [
     worldTheme: { bgTop:'#130200', bgBot:'#1f0500', nebulaHue:15, nebulaSpread:20, starRgb:'255,180,120', barrierHue:15, barrierSpread:25, grid:'rgba(255,68,0,0.03)' }
   },
   {
-    id: 'ghost',
-    name: 'SPECTER',
-    price: 350,
-    color: '#ffffff',
-    trailColor: 'rgba(255,255,255,0.5)',
-    flameColors: ['#ffffff','#ccffff','#aaaaaa','#333333'],
-    wingColor: 'rgba(200,200,255,0.6)',
-    glowColor: '#aaaaff',
-    emoji: '\ud83d\udc7b',
-    description: 'Nave invisible',
-    worldTheme: { bgTop:'#06060f', bgBot:'#0c0c1e', nebulaHue:220, nebulaSpread:30, starRgb:'210,210,255', barrierHue:210, barrierSpread:35, grid:'rgba(200,200,255,0.025)' }
-  },
-  {
     id: 'nova',
     name: 'NOVA',
     price: 500,
@@ -1354,14 +1341,6 @@ const SHIPS = [
     worldTheme:{ bgTop:'#1a000e', bgBot:'#2d0020', nebulaHue:340, nebulaSpread:35, starRgb:'255,160,220', barrierHue:340, barrierSpread:35, grid:'rgba(255,45,122,0.03)', worldId:'malibu', barrierStyle:'heart', ambientColor:'#ffdd00' }
   },
   {
-    id:'pandora', name:'PANDORA', price:3000,
-    color:'#00cfff', trailColor:'#00cfff',
-    flameColors:['#ffffff','#aaeeff','#0099ff','#003366'],
-    wingColor:'rgba(0,207,255,0.8)', glowColor:'#00cfff', emoji:'\uD83C\uDF3F',
-    description:'Planeta Bioluminiscente',
-    worldTheme:{ bgTop:'#000812', bgBot:'#001020', nebulaHue:195, nebulaSpread:25, starRgb:'100,220,255', barrierHue:160, barrierSpread:45, grid:'rgba(0,207,255,0.02)', worldId:'pandora', barrierStyle:'vine', ambientColor:'#00ffaa' }
-  },
-  {
     id:'machinewar', name:'T-800', price:3500,
     color:'#cc2200', trailColor:'#ff4400',
     flameColors:['#ffffff','#ffaa44','#cc2200','#440000'],
@@ -1436,7 +1415,6 @@ const WORLD_DEFS = [
   { id:'auto',       name:'AUTO',        emoji:'✨',  desc:"Follows the active ship's own world", accent:'#aaaaaa', bgA:'#060612', bgB:'#0a0d22' },
   { id:'prehistoric',name:'PREHISTORIC', emoji:'🦕',  desc:'Dark jungle · Lava particles · Tribal drums', accent:'#ff6600', bgA:'#071409', bgB:'#0e2210' },
   { id:'thegrid',    name:'THE GRID',    emoji:'💻',  desc:'Matrix code rain · Glitch barriers · Electronic', accent:'#00ff41', bgA:'#000000', bgB:'#000800' },
-  { id:'pandora',    name:'PANDORA',     emoji:'🌿',  desc:'Bioluminescent · Floating spores · Ethereal', accent:'#00cfff', bgA:'#000812', bgB:'#001020' },
   { id:'machinewar', name:'MACHINE WAR', emoji:'🤖',  desc:'Dark metal · Fire sparks · Industrial metal', accent:'#cc2200', bgA:'#0c0000', bgB:'#140000' },
   { id:'nitro',      name:'NITRO',       emoji:'🏎️', desc:'Speed streaks · Tire smoke · Trap beat', accent:'#ff7700', bgA:'#0d0500', bgB:'#1a0a00' },
 ];
@@ -2599,27 +2577,6 @@ const AudioEngine = (() => {
     if(bar===3) for(let i=0;i<8;i++) gGlitch(st+GCb*3+i*GCs*0.5);
   }
 
-  // ── PANDORA: 90 BPM ethereal ambient ───────────────────────────────────────
-  const ACb=60/90,ACe=ACb/2,ACBAR=ACb*4;
-  const ACHORDS=[[147,220,294,370],[175,262,349,440],[220,330,440,523],[196,294,392,494]];
-  const ABELLS=[587,659,784,880,784,659,523,659];
-  function schedulePandora(st){
-    const bar=wmBarCount%4;
-    function aPad(f,t,dur){
-      if(!ctx||muted||!wmGain) return;
-      const osc=ctx.createOscillator(),g=ctx.createGain();
-      osc.type='sawtooth'; osc.frequency.value=f;
-      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.042,t+ACb*0.9);
-      g.gain.exponentialRampToValueAtTime(0.001,t+dur);
-      osc.connect(g); g.connect(wmGain); osc.start(t); osc.stop(t+dur+0.05);
-    }
-    ACHORDS[bar].forEach(f=>{ aPad(f,st,ACBAR*0.92); aPad(f*2,st+ACb*0.15,ACBAR*0.78); });
-    wmT(ACHORDS[bar][0]*0.5,st,ACb*3.6,'sine',0.24);
-    ABELLS.forEach((f,i)=>{ wmT(f,st+i*ACe,ACb*1.3,'sine',0.075); wmT(f*2,st+i*ACe+0.06,ACb*0.7,'sine',0.028); });
-    [0,2].forEach(b=>wmN(st+b*ACb,0.18,0.07,'bandpass',550));
-    for(let i=0;i<4;i++) wmT(ACHORDS[bar][i%4]*4,st+i*ACb+ACe*0.4,ACe*0.9,'sine',0.018);
-  }
-
   // ── MACHINE WAR: 160 BPM industrial metal ──────────────────────────────────
   const WCb=60/160,WCe=WCb/2,WCBAR=WCb*4;
   function scheduleMachineWar(st){
@@ -2715,7 +2672,6 @@ const AudioEngine = (() => {
   const WM_SCHED={
     prehistoric:{fn:schedulePrehistoric,bar:PCBAR},
     thegrid:    {fn:scheduleGrid,       bar:GCBAR},
-    pandora:    {fn:schedulePandora,    bar:ACBAR},
     machinewar: {fn:scheduleMachineWar, bar:WCBAR},
     nitro:      {fn:scheduleNitro,      bar:NCBAR},
     // Luxury worlds
@@ -2864,10 +2820,6 @@ function spawnWorldAmbient() {
   if(wid==='thegrid' && frame%6===0) {
     // Glitch data sparks at random points
     particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*1.5, vy:(Math.random()-0.5)*1.5, life:0.8, decay:0.06+Math.random()*0.04, r:1.5+Math.random()*2, color:'#00ff41', glow:true});
-  }
-  if(wid==='pandora' && frame%5===0) {
-    // Bioluminescent spores floating slowly upward
-    particles.push({x:Math.random()*canvas.width, y:canvas.height*(0.2+Math.random()*0.8), vx:(Math.random()-0.5)*0.7, vy:-(Math.random()*0.9+0.2), life:1, decay:0.007+Math.random()*0.007, r:Math.random()*4.5+1.5, color:Math.random()<0.5?'#00ffaa':'#00cfff', glow:true});
   }
   if(wid==='machinewar' && frame%2===0) {
     // Fire sparks shooting upward
@@ -3505,15 +3457,6 @@ function drawWorldPreview(c, wd, selected) {
   if(wd.id==='thegrid') {
     gfx.font='8px monospace'; gfx.fillStyle='rgba(0,255,65,0.45)';
     for(let cx=0;cx<W;cx+=11) for(let ry=8;ry<H;ry+=11) gfx.fillText((cx+ry)%22<11?'1':'0',cx,ry);
-  }
-  if(wd.id==='pandora') {
-    [[W*0.28,H*0.58,16,172],[W*0.72,H*0.35,12,155]].forEach(([nx,ny,nr,nh])=>{
-      const ng2=gfx.createRadialGradient(nx,ny,0,nx,ny,nr);
-      ng2.addColorStop(0,`hsla(${nh},100%,60%,0.38)`); ng2.addColorStop(1,'transparent');
-      gfx.fillStyle=ng2; gfx.beginPath(); gfx.arc(nx,ny,nr,0,Math.PI*2); gfx.fill();
-    });
-    const pg=gfx.createLinearGradient(0,H*0.75,0,H); pg.addColorStop(0,'transparent'); pg.addColorStop(1,'rgba(0,210,140,0.28)');
-    gfx.fillStyle=pg; gfx.fillRect(0,H*0.75,W,H*0.25);
   }
   if(wd.id==='machinewar') {
     gfx.fillStyle='rgba(0,0,0,0.18)'; for(let y=0;y<H;y+=4) gfx.fillRect(0,y,W,2);
@@ -4216,19 +4159,6 @@ function drawBackground() {
     // Horizontal scan flash every ~90 frames
     const scanY=(frame*1.8)%canvas.height;
     ctx.fillStyle='rgba(0,255,65,0.04)'; ctx.fillRect(0,scanY-1,canvas.width,3);
-  }
-
-  // ── PANDORA: bioluminescent ground glow + pulsing bloom pools ────────────
-  if(wid==='pandora') {
-    [{x:0.15,y:0.62,r:90,h:172},{x:0.62,y:0.80,r:65,h:155},{x:0.84,y:0.42,r:75,h:192},{x:0.35,y:0.70,r:55,h:145}].forEach((sp,i)=>{
-      const pulse=0.5+0.5*Math.sin(frame*0.022+i*1.6);
-      const bg2=ctx.createRadialGradient(canvas.width*sp.x,canvas.height*sp.y,0,canvas.width*sp.x,canvas.height*sp.y,sp.r*(1+pulse*0.28));
-      bg2.addColorStop(0,`hsla(${sp.h},100%,58%,${pulse*0.18})`); bg2.addColorStop(1,'transparent');
-      ctx.fillStyle=bg2; ctx.beginPath(); ctx.arc(canvas.width*sp.x,canvas.height*sp.y,sp.r*1.3,0,Math.PI*2); ctx.fill();
-    });
-    const pandG=ctx.createLinearGradient(0,canvas.height*0.76,0,canvas.height);
-    pandG.addColorStop(0,'transparent'); pandG.addColorStop(1,'rgba(0,210,140,0.20)');
-    ctx.fillStyle=pandG; ctx.fillRect(0,canvas.height*0.76,canvas.width,canvas.height*0.24);
   }
 
   // ── MACHINE WAR: scanlines + fire glow + circuit grid ────────────────────
