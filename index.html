@@ -768,7 +768,7 @@ const LUXURY_SHIPS = [
     wingColor:'rgba(150,150,150,0.75)', glowColor:'#cccccc', emoji:'⚫',
     description:'Sleek · Silent · Invincible',
     luxury:true,
-    worldTheme:{ bgTop:'#040404', bgBot:'#0c0c0c', nebulaHue:0, nebulaSpread:5, starRgb:'200,200,200', barrierHue:0, barrierSpread:5, grid:'rgba(160,160,160,0.018)', worldId:'obsidian', barrierStyle:'chrome', ambientColor:'#aaaaaa' }
+    worldTheme:{ bgTop:'#040404', bgBot:'#0c0c0c', nebulaHue:220, nebulaSpread:15, starRgb:'200,200,200', barrierHue:220, barrierSpread:12, grid:'rgba(160,160,160,0.018)', worldId:'obsidian', barrierStyle:'chrome', ambientColor:'#aaaaaa' }
   },
   {
     id:'scuderia', name:'SCUDERIA', premiumPrice:4.99,
@@ -2731,6 +2731,7 @@ function renderWorldShop() {
 
     card.addEventListener('click', () => {
       save.selectedWorld = wd.id;
+      if (wd.id !== 'auto') save.selected = wd.id;
       writeSave(save);
       renderWorldShop();
     });
