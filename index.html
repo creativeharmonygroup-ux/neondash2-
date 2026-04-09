@@ -2654,7 +2654,9 @@ function updateStartShipEmoji() {
 }
 
 // ── UNIVERSE WORLD SHOP ──────────────────────────────────────────────────────
+let _worldScrollLastIdx = -1;
 function openWorldShop() {
+  _worldScrollLastIdx = -1;
   AudioEngine.init(); AudioEngine.resume();
   AudioEngine.playHangarOpen();
   AudioEngine.startHangarMusic();
@@ -2663,6 +2665,23 @@ function openWorldShop() {
   renderWorldShop();
   document.getElementById('worldScreen').classList.remove('hidden');
 }
+document.getElementById('worldGrid').addEventListener('scroll', () => {
+  const grid = document.getElementById('worldGrid');
+  const cards = grid.querySelectorAll('.world-card');
+  if (!cards.length) return;
+  const gridMid = grid.getBoundingClientRect().top + grid.getBoundingClientRect().height / 2;
+  let closestIdx = 0, closestDist = Infinity;
+  cards.forEach((card, i) => {
+    const r = card.getBoundingClientRect();
+    const dist = Math.abs((r.top + r.height / 2) - gridMid);
+    if (dist < closestDist) { closestDist = dist; closestIdx = i; }
+  });
+  if (closestIdx !== _worldScrollLastIdx) {
+    _worldScrollLastIdx = closestIdx;
+    AudioEngine.init(); AudioEngine.resume();
+    AudioEngine.playScore();
+  }
+}, { passive: true });
 function closeWorldShop() {
   AudioEngine.stopHangarMusic();
   document.getElementById('worldScreen').classList.add('hidden');
