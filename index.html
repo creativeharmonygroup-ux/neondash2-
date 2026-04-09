@@ -3419,6 +3419,7 @@ function openShop() {
   document.getElementById('shopScreen').classList.remove('hidden');
 }
 function closeShop() {
+  _stopHangarPreviews();
   AudioEngine.stopHangarMusic();
   document.getElementById('shopScreen').classList.add('hidden');
   updateStartShipEmoji();
@@ -3439,6 +3440,7 @@ function openWorldShop() {
   document.getElementById('worldScreen').classList.remove('hidden');
 }
 function closeWorldShop() {
+  _stopHangarPreviews();
   AudioEngine.stopHangarMusic();
   document.getElementById('worldScreen').classList.add('hidden');
 }
@@ -3455,6 +3457,7 @@ function openLuxuryShop() {
   document.getElementById('luxuryScreen').classList.remove('hidden');
 }
 function closeLuxuryShop() {
+  _stopHangarPreviews();
   AudioEngine.stopHangarMusic();
   document.getElementById('luxuryScreen').classList.add('hidden');
   document.getElementById('luxuryPurchaseModal').classList.add('hidden');
@@ -3524,61 +3527,13 @@ function renderLuxuryShop() {
       }
     });
     grid.appendChild(card);
-    animateLuxuryShipPreview(mc, ship, selected);
+    animateLuxuryShipPreview(mc, ship);
   });
 }
 
-function animateLuxuryShipPreview(c, ship, selected) {
-  const h2r = h => { if(!h||!h.startsWith('#')) return '212,175,55'; return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(','); };
-  c._luxGen = (c._luxGen || 0) + 1;
-  const myGen = c._luxGen;
-  let flicker = 0;
-  function frame() {
-    if (!c.isConnected || c._luxGen !== myGen) return;
-    flicker += 0.15;
-    const g = c.getContext('2d');
-    const W = c.width, H = c.height;
-    const wt = ship.worldTheme;
-    g.clearRect(0,0,W,H);
-
-    const bg = g.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0, wt.bgTop||'#040404'); bg.addColorStop(1, wt.bgBot||'#0c0c0c');
-    g.fillStyle=bg; g.fillRect(0,0,W,H);
-
-    const rgb = h2r(ship.color);
-    const ng = g.createRadialGradient(W/2,H/2,0,W/2,H/2,30);
-    ng.addColorStop(0,`rgba(${rgb},0.22)`); ng.addColorStop(1,'transparent');
-    g.fillStyle=ng; g.beginPath(); g.arc(W/2,H/2,30,0,Math.PI*2); g.fill();
-
-    for(let i=0;i<14;i++){
-      const sx=(i*41+7)%W, sy=(i*23+11)%H;
-      g.fillStyle=`rgba(${h2r(wt.ambientColor||'#ffffff')},${0.2+i%3*0.16})`;
-      g.beginPath(); g.arc(sx,sy,0.65+i%2*0.5,0,Math.PI*2); g.fill();
-    }
-
-    const fs = 7 + Math.sin(flicker) * 3;
-    g.shadowColor=ship.glowColor; g.shadowBlur=15;
-    g.save(); g.translate(W/2, H/2);
-    g.fillStyle=ship.color;
-    g.beginPath(); g.moveTo(18,0); g.lineTo(-11,-9); g.lineTo(-7,0); g.lineTo(-11,9); g.closePath(); g.fill();
-    g.fillStyle=ship.wingColor||ship.color;
-    g.beginPath(); g.moveTo(-4,-6); g.lineTo(-13,-15); g.lineTo(-17,-2); g.lineTo(-9,0); g.closePath(); g.fill();
-    g.beginPath(); g.moveTo(-4,6); g.lineTo(-13,15); g.lineTo(-17,2); g.lineTo(-9,0); g.closePath(); g.fill();
-    const fg = g.createRadialGradient(-11,0,0,-11,0,fs*1.8);
-    fg.addColorStop(0, ship.flameColors[0]||'#ffffff');
-    fg.addColorStop(0.35, ship.flameColors[1]||'#ffffff');
-    fg.addColorStop(0.75, ship.flameColors[2]||ship.color);
-    fg.addColorStop(1,'transparent');
-    g.shadowBlur=12; g.fillStyle=fg;
-    g.beginPath(); g.ellipse(-11-fs*0.4, 0, fs, fs*0.38, 0, 0, Math.PI*2); g.fill();
-    g.restore(); g.shadowBlur=0;
-
-    const isSel = save.selected === ship.id;
-    if(isSel) { g.strokeStyle='rgba(212,175,55,0.8)'; g.lineWidth=2; g.strokeRect(1,1,W-2,H-2); }
-
-    requestAnimationFrame(frame);
-  }
-  frame();
+function animateLuxuryShipPreview(c, ship) {
+  _previewList.push({canvas: c, ship, type: 'luxury'});
+  _startHangarPreviews();
 }
 
 function showLuxuryPurchaseModal(ship) {
@@ -3586,7 +3541,7 @@ function showLuxuryPurchaseModal(ship) {
   document.getElementById('lpmShipName').textContent = ship.emoji + ' ' + ship.name;
   document.getElementById('lpmShipDesc').textContent = ship.description;
   const mc = document.getElementById('lpmShipCanvas');
-  animateLuxuryShipPreview(mc, ship, false);
+  animateLuxuryShipPreview(mc, ship);
   document.getElementById('luxuryPurchaseModal').classList.remove('hidden');
 }
 
@@ -3896,50 +3851,103 @@ function drawShipPreview(c, ship, selected) {
   }
 }
 
-const previewAnimations = new Map();
-function animateShipPreview(c, ship) {
-  let flicker = 0;
-  function frame() {
-    if (!c.isConnected) return;
-    flicker += 0.15;
-    const gfx = c.getContext('2d');
-    const W=100, H=100, cx=50, cy=44, size=16;
-    gfx.clearRect(0,0,W,H);
-    const selected = save.selected === ship.id;
-    if (selected) {
-      const bg=gfx.createRadialGradient(cx,cy,0,cx,cy,34);
-      bg.addColorStop(0,`${ship.color}22`); bg.addColorStop(1,'transparent');
-      gfx.fillStyle=bg; gfx.fillRect(0,0,W,H);
+// ── Shared hangar preview loop ────────────────────────────────────────────────
+// Single rAF tick drives ALL preview canvases so they stay in sync and don't
+// compete for frame budget (N individual loops → slow-motion effect).
+let _hangarRaf = null;
+let _hangarFlicker = 0;
+const _previewList = []; // {canvas, ship, type:'regular'|'luxury'}
+
+function _startHangarPreviews() {
+  if (_hangarRaf) return;
+  function tick() {
+    _hangarFlicker += 0.15;
+    for (const {canvas, ship, type} of _previewList) {
+      if (!canvas.isConnected) continue;
+      if (type === 'luxury') _drawLuxuryPreviewFrame(canvas, ship);
+      else _drawRegularPreviewFrame(canvas, ship);
     }
-    gfx.shadowColor=ship.glowColor; gfx.shadowBlur=15;
-    gfx.save(); gfx.translate(cx,cy);
-
-    const bodyColor = ship.rainbow ? getRainbow(Date.now()*0.002) : ship.color;
-
-    gfx.fillStyle=bodyColor; gfx.beginPath(); gfx.ellipse(0,0,size*0.5,size,0,0,Math.PI*2); gfx.fill();
-    gfx.fillStyle='#ffffff'; gfx.beginPath(); gfx.moveTo(0,-size); gfx.lineTo(-size*0.4,-size*0.3); gfx.lineTo(size*0.4,-size*0.3); gfx.closePath(); gfx.fill();
-    gfx.fillStyle=ship.wingColor;
-    gfx.beginPath(); gfx.moveTo(-size*0.4,size*0.3); gfx.lineTo(-size*1.1,size*0.9); gfx.lineTo(-size*0.4,size*0.7); gfx.closePath(); gfx.fill();
-    gfx.beginPath(); gfx.moveTo(size*0.4,size*0.3); gfx.lineTo(size*1.1,size*0.9); gfx.lineTo(size*0.4,size*0.7); gfx.closePath(); gfx.fill();
-    const fs=8+Math.sin(flicker)*3;
-    const fg=gfx.createRadialGradient(0,size+fs*0.4,0,0,size,fs*1.5);
-    fg.addColorStop(0,ship.flameColors[0]); fg.addColorStop(0.3,ship.flameColors[1]); fg.addColorStop(0.7,ship.flameColors[2]); fg.addColorStop(1,'transparent');
-    gfx.fillStyle=fg; gfx.beginPath(); gfx.ellipse(0,size+fs*0.4,size*0.25,fs,0,0,Math.PI*2); gfx.fill();
-
-    if (!save.owned.includes(ship.id)) {
-      gfx.restore();
-      gfx.fillStyle='rgba(6,6,18,0.65)'; gfx.fillRect(0,0,W,H);
-      gfx.textAlign='center'; gfx.textBaseline='middle';
-      gfx.font='bold 26px serif'; gfx.fillText('\ud83d\udd12',cx,38);
-      gfx.font='bold 13px Orbitron,monospace'; gfx.fillStyle='#ffee00';
-      gfx.shadowColor='rgba(255,238,0,0.8)'; gfx.shadowBlur=8;
-      gfx.fillText('\ud83e\ude99 '+ship.price,cx,68);
-      gfx.shadowBlur=0;
-    } else { gfx.restore(); }
-
-    requestAnimationFrame(frame);
+    _hangarRaf = requestAnimationFrame(tick);
   }
-  frame();
+  _hangarRaf = requestAnimationFrame(tick);
+}
+
+function _stopHangarPreviews() {
+  if (_hangarRaf) { cancelAnimationFrame(_hangarRaf); _hangarRaf = null; }
+  _previewList.length = 0;
+}
+
+function _drawRegularPreviewFrame(c, ship) {
+  const gfx = c.getContext('2d');
+  const W=100, H=100, cx=50, cy=44, size=16;
+  gfx.clearRect(0,0,W,H);
+  const selected = save.selected === ship.id;
+  if (selected) {
+    const bg=gfx.createRadialGradient(cx,cy,0,cx,cy,34);
+    bg.addColorStop(0,`${ship.color}22`); bg.addColorStop(1,'transparent');
+    gfx.fillStyle=bg; gfx.fillRect(0,0,W,H);
+  }
+  gfx.shadowColor=ship.glowColor; gfx.shadowBlur=15;
+  gfx.save(); gfx.translate(cx,cy);
+  const bodyColor = ship.rainbow ? getRainbow(Date.now()*0.002) : ship.color;
+  gfx.fillStyle=bodyColor; gfx.beginPath(); gfx.ellipse(0,0,size*0.5,size,0,0,Math.PI*2); gfx.fill();
+  gfx.fillStyle='#ffffff'; gfx.beginPath(); gfx.moveTo(0,-size); gfx.lineTo(-size*0.4,-size*0.3); gfx.lineTo(size*0.4,-size*0.3); gfx.closePath(); gfx.fill();
+  gfx.fillStyle=ship.wingColor;
+  gfx.beginPath(); gfx.moveTo(-size*0.4,size*0.3); gfx.lineTo(-size*1.1,size*0.9); gfx.lineTo(-size*0.4,size*0.7); gfx.closePath(); gfx.fill();
+  gfx.beginPath(); gfx.moveTo(size*0.4,size*0.3); gfx.lineTo(size*1.1,size*0.9); gfx.lineTo(size*0.4,size*0.7); gfx.closePath(); gfx.fill();
+  const fs=8+Math.sin(_hangarFlicker)*3;
+  const fg=gfx.createRadialGradient(0,size+fs*0.4,0,0,size,fs*1.5);
+  fg.addColorStop(0,ship.flameColors[0]); fg.addColorStop(0.3,ship.flameColors[1]); fg.addColorStop(0.7,ship.flameColors[2]); fg.addColorStop(1,'transparent');
+  gfx.fillStyle=fg; gfx.beginPath(); gfx.ellipse(0,size+fs*0.4,size*0.25,fs,0,0,Math.PI*2); gfx.fill();
+  if (!save.owned.includes(ship.id)) {
+    gfx.restore();
+    gfx.fillStyle='rgba(6,6,18,0.65)'; gfx.fillRect(0,0,W,H);
+    gfx.textAlign='center'; gfx.textBaseline='middle';
+    gfx.font='bold 26px serif'; gfx.fillText('\ud83d\udd12',cx,38);
+    gfx.font='bold 13px Orbitron,monospace'; gfx.fillStyle='#ffee00';
+    gfx.shadowColor='rgba(255,238,0,0.8)'; gfx.shadowBlur=8;
+    gfx.fillText('\ud83e\ude99 '+ship.price,cx,68);
+    gfx.shadowBlur=0;
+  } else { gfx.restore(); }
+}
+
+function _drawLuxuryPreviewFrame(c, ship) {
+  const h2r = h => { if(!h||!h.startsWith('#')) return '212,175,55'; return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(','); };
+  const g = c.getContext('2d');
+  const W=c.width, H=c.height, wt=ship.worldTheme;
+  g.clearRect(0,0,W,H);
+  const bg=g.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,wt.bgTop||'#040404'); bg.addColorStop(1,wt.bgBot||'#0c0c0c');
+  g.fillStyle=bg; g.fillRect(0,0,W,H);
+  const rgb=h2r(ship.color);
+  const ng=g.createRadialGradient(W/2,H/2,0,W/2,H/2,30);
+  ng.addColorStop(0,`rgba(${rgb},0.22)`); ng.addColorStop(1,'transparent');
+  g.fillStyle=ng; g.beginPath(); g.arc(W/2,H/2,30,0,Math.PI*2); g.fill();
+  for(let i=0;i<14;i++){
+    const sx=(i*41+7)%W, sy=(i*23+11)%H;
+    g.fillStyle=`rgba(${h2r(wt.ambientColor||'#ffffff')},${0.2+i%3*0.16})`;
+    g.beginPath(); g.arc(sx,sy,0.65+i%2*0.5,0,Math.PI*2); g.fill();
+  }
+  const fs=7+Math.sin(_hangarFlicker)*3;
+  g.shadowColor=ship.glowColor; g.shadowBlur=15;
+  g.save(); g.translate(W/2,H/2);
+  g.fillStyle=ship.color;
+  g.beginPath(); g.moveTo(18,0); g.lineTo(-11,-9); g.lineTo(-7,0); g.lineTo(-11,9); g.closePath(); g.fill();
+  g.fillStyle=ship.wingColor||ship.color;
+  g.beginPath(); g.moveTo(-4,-6); g.lineTo(-13,-15); g.lineTo(-17,-2); g.lineTo(-9,0); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(-4,6); g.lineTo(-13,15); g.lineTo(-17,2); g.lineTo(-9,0); g.closePath(); g.fill();
+  const fg=g.createRadialGradient(-11,0,0,-11,0,fs*1.8);
+  fg.addColorStop(0,ship.flameColors[0]||'#ffffff'); fg.addColorStop(0.35,ship.flameColors[1]||'#ffffff');
+  fg.addColorStop(0.75,ship.flameColors[2]||ship.color); fg.addColorStop(1,'transparent');
+  g.shadowBlur=12; g.fillStyle=fg;
+  g.beginPath(); g.ellipse(-11-fs*0.4,0,fs,fs*0.38,0,0,Math.PI*2); g.fill();
+  g.restore(); g.shadowBlur=0;
+  if(save.selected===ship.id){ g.strokeStyle='rgba(212,175,55,0.8)'; g.lineWidth=2; g.strokeRect(1,1,W-2,H-2); }
+}
+
+function animateShipPreview(c, ship) {
+  _previewList.push({canvas: c, ship, type: 'regular'});
+  _startHangarPreviews();
 }
 
 // ── Purchase Modal State ─────────────────────────────────────────────────────
