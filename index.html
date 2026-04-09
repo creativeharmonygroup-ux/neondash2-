@@ -2752,6 +2752,8 @@ function renderWorldShop() {
       save.selectedWorld = wd.id;
       if (wd.id !== 'auto') save.selected = wd.id;
       writeSave(save);
+      AudioEngine.init(); AudioEngine.resume();
+      AudioEngine.playScore();
       renderWorldShop();
     });
     grid.appendChild(card);
@@ -2815,6 +2817,8 @@ function renderWorldShop() {
       save.selected = ship.id;
       save.selectedWorld = wt.worldId;
       writeSave(save);
+      AudioEngine.init(); AudioEngine.resume();
+      AudioEngine.playScore();
       renderWorldShop();
     });
     grid.appendChild(card);
