@@ -574,6 +574,7 @@
     <div class="ship-preview" id="startShipEmoji">\ud83d\ude80</div>
     <div class="tap-hint">TAP TO START</div>
     <div class="instructions">TAP / CLICK TO BOOST<br>DODGE THE BARRIERS<br>COLLECT COINS</div>
+    <button id="startWorldBtn" style="animation: btnFloat 2.5s ease-in-out infinite; background: linear-gradient(135deg, #ff006e, #bf00ff); color: white; box-shadow: 0 0 20px #ff006e, 0 0 40px #bf00ff; border: none; font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; letter-spacing: 3px; padding: 12px 32px; border-radius: 50px; cursor: pointer; pointer-events: all; margin-top: 18px;">🌌 DIMENSIONS</button>
   </div>
 
   <!-- GAME OVER -->
@@ -2579,6 +2580,8 @@ soundBtn.addEventListener('click', e => {
 
 document.getElementById('worldBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playShopOpen(); openWorldShop(); });
 document.getElementById('worldBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openWorldShop(); }, { passive: false });
+document.getElementById('startWorldBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playShopOpen(); openWorldShop(); });
+document.getElementById('startWorldBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openWorldShop(); }, { passive: false });
 document.getElementById('worldCloseBtn').addEventListener('click', e => { e.stopPropagation(); const nm=!AudioEngine.isMuted(); AudioEngine.setMuted(nm); applySoundIcon(nm); document.getElementById('worldCloseBtn').textContent = nm ? '🔇' : '🔊'; });
 document.getElementById('worldLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeWorldShop(); });
 document.getElementById('worldLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeWorldShop(); });
