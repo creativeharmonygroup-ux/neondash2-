@@ -2012,22 +2012,53 @@ const AudioEngine = (() => {
     if(bar===3){ for(let i=0;i<8;i++){ if(i%2===0) pFloor(st+i*PCe); else pMid(st+i*PCe); } pSnare(st+PCb*3.5); }
   }
 
-  // ── THE GRID: 140 BPM electronic glitch ────────────────────────────────────
-  const GCb=60/140,GCe=GCb/2,GCs=GCb/4,GCBAR=GCb*4;
+  // ── THE GRID: 150 BPM chiptune — exact original game music (cabf66f) ─────────
+  const GCb=60/150,GCe=GCb/2,GCs=GCb/4,GCBAR=GCb*4;
+  const GC_MELO=[
+    [659,659,880,784,659,587,659,523],
+    [440,523,587,659,698,659,587,523],
+    [587,659,698,659,587,523,494,440],
+    [659,587,523,494,440,392,440,330],
+  ];
+  const GC_BASS=[
+    [110,0,110,0,165,0,131,0],
+    [87,0,87,110,98,0,98,123],
+    [98,0,98,123,147,0,110,0],
+    [110,0,131,0,165,110,98,82],
+  ];
+  const GC_ARPS=[
+    [220,330,440,550,440,330,220,330,220,330,440,550,660,550,440,330],
+    [175,262,349,523,349,262,175,262,196,294,392,523,392,294,196,262],
+    [196,294,392,523,392,294,196,294,220,330,440,523,440,330,220,330],
+    [220,330,440,660,440,330,220,330,165,247,330,440,330,247,165,220],
+  ];
   function scheduleGrid(st){
     const bar=wmBarCount%4;
-    function gKick(t){ wmT(58,t,0.065,'sine',0.75); wmN(t,0.008,0.5,'lowpass',180); }
-    function gSnare(t){ wmN(t,0.055,0.45,'bandpass',2800); wmN(t,0.032,0.28,'highpass',6000); wmT(1100,t,0.014,'sine',0.28); }
-    function gHat(t,v){ wmN(t,0.011,v,'highpass',15000); }
-    function gGlitch(t){ wmT(300+Math.floor(t*1000)%1800,t,0.016,'square',0.16); }
-    wmT(45,st,GCb*0.42,'sine',0.38); // sub pulse beat 1
-    const kPat=[[0,1,2,3],[0,0.5,1,2,2.5,3],[0,1,1.5,2,3,3.5],[0,0.25,1,1.5,2,2.5,3,3.75]];
-    kPat[bar].forEach(b=>gKick(st+b*GCb));
-    gSnare(st+GCb); gSnare(st+GCb*3);
-    for(let i=0;i<16;i++) gHat(st+i*GCs, i%4===0?0.16:i%2===0?0.09:0.042);
-    gGlitch(st+GCb*1.5);
-    if(bar%2===1){ gGlitch(st+GCb*0.75); gGlitch(st+GCb*2.25); }
-    if(bar===3) for(let i=0;i<8;i++) gGlitch(st+GCb*3+i*GCs*0.5);
+    // Kick: beats 1+3 — two sine tones (82 Hz + 96 Hz) + lowpass noise thud
+    const kBeats=bar===3?[0,2,2.75]:[0,2];
+    kBeats.forEach(i=>{
+      wmT(82,st+i*GCb,0.25,'sine',0.42);
+      wmT(96,st+i*GCb,0.12,'sine',0.22);
+      wmN(st+i*GCb,0.05,0.20,'lowpass',260);
+    });
+    // Snare: beats 2+4
+    [1,3].forEach(i=>{ wmN(st+i*GCb,0.13,0.24,'bandpass',1350); wmT(185,st+i*GCb,0.07,'triangle',0.13); });
+    // Hi-hats: every 8th; 16th layer on bars 1 & 3
+    for(let i=0;i<8;i++) wmN(st+i*GCe,0.03,i%2===0?0.09:0.045,'highpass',11000);
+    if(bar===1||bar===3) for(let i=0;i<16;i++){ if(i%2!==0) wmN(st+i*GCs,0.018,0.022,'highpass',13500); }
+    // Sub-bass pulse on beat 1
+    wmT(55,st,GCb*0.45,'sine',0.14);
+    // Sawtooth bass line
+    GC_BASS[bar].forEach((f,i)=>{ if(f) wmT(f,st+i*GCe,GCe*0.65,'sawtooth',0.20); });
+    // Square wave lead melody
+    GC_MELO[bar].forEach((f,i)=>wmT(f,st+i*GCe,GCe*0.42,'square',0.06));
+    // Triangle arpeggio sparkle
+    GC_ARPS[bar].forEach((f,i)=>wmT(f,st+i*GCs,GCs*0.50,'triangle',0.03));
+    // Chord pad stab on beat 1 (bars 0 & 2)
+    if(bar===0||bar===2){
+      const ch=bar===0?[220,330,440]:[196,294,392];
+      ch.forEach(f=>wmT(f,st,GCb*1.8,'triangle',0.022));
+    }
   }
 
   // ── MACHINE WAR: 160 BPM industrial metal ──────────────────────────────────
@@ -2149,7 +2180,23 @@ const AudioEngine = (() => {
     const comp=ctx.createDynamicsCompressor();
     comp.threshold.value=-14; comp.knee.value=6; comp.ratio.value=4;
     comp.attack.value=0.003; comp.release.value=0.15;
-    wmGain.connect(comp); comp.connect(masterGain);
+    if(worldId==='thegrid'){
+      // Restored from cabf66f: LPF 800Hz Q=0.8, delay 0.3s, feedback 0.4, wet 0.28
+      const lpf=ctx.createBiquadFilter();
+      lpf.type='lowpass'; lpf.frequency.value=800; lpf.Q.value=0.8;
+      const dly=ctx.createDelay(1.0);
+      dly.delayTime.value=0.3;
+      const fbk=ctx.createGain(); fbk.gain.value=0.4;
+      const wet=ctx.createGain(); wet.gain.value=0.28;
+      wmGain.connect(lpf);
+      lpf.connect(comp);                       // dry path
+      lpf.connect(dly);                        // delay input
+      dly.connect(fbk); fbk.connect(dly);      // feedback loop
+      dly.connect(wet); wet.connect(comp);     // wet out
+    } else {
+      wmGain.connect(comp);
+    }
+    comp.connect(masterGain);
     wmGain.gain.linearRampToValueAtTime(0.75,ctx.currentTime+0.5);
     wmId=worldId; wmBarCount=0; wmPlaying=true; wmNextBar=ctx.currentTime+0.05;
     wmLoop();
