@@ -571,7 +571,7 @@
   <div class="screen" id="startScreen">
     <div class="game-title">NEON DASH</div>
     <div class="game-subtitle">Hypercasual · Infinite</div>
-    <div class="ship-preview" id="startShipEmoji">\ud83d\ude80</div>
+    <div class="ship-preview" id="startShipEmoji">🚀</div>
     <div class="tap-hint">TAP TO START</div>
     <div class="instructions">TAP / CLICK TO BOOST<br>DODGE THE BARRIERS<br>COLLECT COINS</div>
     <button id="startWorldBtn" style="animation: btnFloat 2.5s ease-in-out infinite; background: linear-gradient(135deg, #ff006e, #bf00ff); color: white; box-shadow: 0 0 20px #ff006e, 0 0 40px #bf00ff; border: none; font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; letter-spacing: 3px; padding: 12px 32px; border-radius: 50px; cursor: pointer; pointer-events: all; margin-top: 18px;">🌌 DIMENSIONS</button>
@@ -829,11 +829,11 @@ function loadSave() {
       coins: s.coins || 0,
       best: s.best || 0,
       owned: s.owned || ['classic'],
-      selected: s.selected || 'classic',
-      selectedWorld: s.selectedWorld || 'auto',
+      selected: s.selected || 'thegrid',
+      selectedWorld: s.selectedWorld || 'thegrid',
       luxuryOwned: s.luxuryOwned || []
     };
-  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'classic', selectedWorld: 'auto', luxuryOwned: [] }; }
+  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'thegrid', selectedWorld: 'thegrid', luxuryOwned: [] }; }
 }
 function writeSave(s) {
   localStorage.setItem('neonDashSave', JSON.stringify(s));
@@ -885,7 +885,6 @@ function writeCloudSave(s) {
         if (d.selectedWorld) save.selectedWorld = d.selectedWorld;
         localStorage.setItem('neonDashSave', JSON.stringify(save));
         updateCoinHud();
-        updateStartShipEmoji();
         document.getElementById('bestDisplay').textContent = 'BEST: ' + save.best;
       })
       .catch(e => console.warn('[Firebase]', e));
@@ -2641,7 +2640,6 @@ function startGame() {
   Replay.reset();
   spawnBarrier();
   (function(){ var _w=currentWorldTheme().worldId; if(_w) AudioEngine.startWorldMusic(_w); else AudioEngine.startMusic(); })();
-  updateStartShipEmoji();
   Replay.start(canvas);
 }
 
@@ -2706,9 +2704,6 @@ function gameOver() {
 // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 //  SHIP SHOP
 // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-function updateStartShipEmoji() {
-  document.getElementById('startShipEmoji').textContent = currentShip().emoji;
-}
 
 // ── UNIVERSE WORLD SHOP ──────────────────────────────────────────────────────
 let _worldScrollLastIdx = -1;
@@ -2742,7 +2737,6 @@ document.getElementById('worldGrid').addEventListener('scroll', () => {
 function closeWorldShop() {
   AudioEngine.stopHangarMusic();
   document.getElementById('worldScreen').classList.add('hidden');
-  updateStartShipEmoji();
 }
 
 function renderWorldShop() {
@@ -4077,7 +4071,6 @@ function loop() {
 
 // Init
 updateUI();
-updateStartShipEmoji();
 loop();
 
 // ═══════════════════════════════════════════════
