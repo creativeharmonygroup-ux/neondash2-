@@ -129,29 +129,18 @@
   }
   #shopBtn:hover { border-color: var(--neon-cyan); box-shadow: 0 0 14px rgba(0,255,240,0.4); }
 
-  /* Luxury Hangar button */
-  #luxuryBtn {
-    position: absolute; bottom: 124px; right: 16px;
-    width: 44px; height: 44px; background: transparent;
-    border: 1.5px solid rgba(212,175,55,0.55); border-radius: 10px;
-    cursor: pointer; pointer-events: all;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; transition: all 0.2s; z-index: 10;
+  /* Section divider between regular and premium ships */
+  .universe-divider {
+    width: 100%; padding: 8px 0 4px; display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
   }
-  #luxuryBtn:hover { border-color: #d4af37; box-shadow: 0 0 16px rgba(212,175,55,0.5); }
-
-  /* ── LUXURY HANGAR SCREEN ────────────────────────────────────────── */
-  #luxuryScreen {
-    position: absolute; inset: 0; z-index: 50;
-    display: flex; flex-direction: column; align-items: stretch;
-    background: radial-gradient(ellipse at 50% -10%, rgba(60,42,0,0.75) 0%, #040302 50%);
-    overflow: hidden; pointer-events: all;
+  .universe-divider::before, .universe-divider::after {
+    content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.35), transparent);
   }
-  #luxuryScreen::before {
-    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
-    background: repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(212,175,55,0.012) 3px, rgba(212,175,55,0.012) 4px);
+  .universe-divider span {
+    font-family: 'Orbitron', monospace; font-size: 8px; letter-spacing: 4px;
+    color: rgba(212,175,55,0.65); white-space: nowrap;
   }
-  #luxuryScreen.hidden { display: none; }
 
   .luxury-header {
     position: relative; z-index: 1;
@@ -1069,9 +1058,8 @@
     <div id="comboDisplay">x2 COMBO!</div>
     <div id="coinHud"><span id="coinCount">0</span></div>
     <button id="soundToggle" title="Toggle Sound">🔊</button>
-    <button id="shopBtn" title="Ship Shop">🛸</button>
-    <button id="worldBtn" title="Universe">🌌</button>
-    <button id="luxuryBtn" title="Luxury Hangar">💎</button>
+    <button id="shopBtn" title="The Universe">🛸</button>
+    <button id="worldBtn" title="Dimensions">🌌</button>
   </div>
 
   <div id="flashOverlay"></div>
@@ -1108,7 +1096,7 @@
     <button class="replay-btn" id="replayBtn">▶ REPLAY</button>
     <button class="restart-btn" id="restartBtn">PLAY AGAIN</button>
     <button class="share3pct-btn hidden" id="share3pctBtn">🎬 WOW TIKTOK MOMENT</button>
-    <button class="shop-btn-over" id="shopBtnOver">SHIP SHOP</button>
+    <button class="shop-btn-over" id="shopBtnOver">THE UNIVERSE</button>
   </div>
 
   <!-- REPLAY OVERLAY -->
@@ -1123,54 +1111,10 @@
     <button class="rv-play-again" id="rvPlayAgainBtn">↺ PLAY AGAIN</button>
   </div>
 
-  <!-- LUXURY HANGAR -->
-  <div id="luxuryScreen" class="hidden">
-    <div class="luxury-header">
-      <div class="luxury-title-col">
-        <div class="luxury-eyebrow">💎 EXCLUSIVE COLLECTION</div>
-        <div class="luxury-title">LUXURY HANGAR</div>
-      </div>
-      <button class="luxury-close-btn" id="luxuryCloseBtn">🔊</button>
-    </div>
-    <div class="luxury-pack-banner" id="luxuryPackBanner">
-      <div class="lpb-crown">👑</div>
-      <div class="lpb-text">
-        <div class="lpb-label">FULL COLLECTION · 7 SHIPS</div>
-        <div class="lpb-main">ALL ACCESS PASS</div>
-        <div class="lpb-desc">Every luxury ship · Exclusive worlds · Special effects</div>
-      </div>
-      <button class="lpb-buy-btn" id="luxuryPackBtn">$19.99</button>
-    </div>
-    <div class="luxury-grid" id="luxuryGrid"></div>
-    <button class="luxury-launch-btn" id="luxuryLaunchBtn">▶ LAUNCH</button>
-    <!-- Purchase Modal -->
-    <div id="luxuryPurchaseModal" class="hidden">
-      <div class="lpm-inner">
-        <div class="lpm-crown">👑</div>
-        <canvas id="lpmShipCanvas" width="100" height="100"></canvas>
-        <div class="lpm-ship-name" id="lpmShipName">—</div>
-        <div class="lpm-desc" id="lpmShipDesc">—</div>
-        <div class="lpm-price">$4.99</div>
-        <div class="lpm-per">PER SHIP</div>
-        <div class="lpm-btn-row">
-          <button class="lpm-buy-btn" id="lpmBuyBtn">PURCHASE</button>
-          <button class="lpm-cancel-btn" id="lpmCancelBtn">CANCEL</button>
-        </div>
-        <div class="lpm-bundle-row">
-          <div>
-            <div class="lpm-bundle-label">FULL COLLECTION</div>
-            <div class="lpm-bundle-price">$19.99</div>
-          </div>
-          <button class="lpm-bundle-btn" id="lpmBundleBtn">GET ALL 7</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- UNIVERSE WORLD SELECTOR -->
+  <!-- DIMENSIONS WORLD SELECTOR -->
   <div id="worldScreen" class="hidden">
     <div class="world-header">
-      <div class="world-title">THE UNIVERSE</div>
+      <div class="world-title">DIMENSIONS</div>
       <div class="shop-coins"><span id="worldCoinCount">0</span></div>
       <button class="world-close-btn" id="worldCloseBtn">🔊</button>
     </div>
@@ -1179,10 +1123,10 @@
     <button class="world-launch-btn" id="worldLaunchBtn">▶ LAUNCH</button>
   </div>
 
-  <!-- SHOP -->
+  <!-- THE UNIVERSE — unified ship hangar -->
   <div id="shopScreen" class="hidden">
     <div class="shop-header">
-      <div class="shop-title">HANGAR</div>
+      <div class="shop-title">THE UNIVERSE</div>
       <div class="shop-coins"><span id="shopCoinCount">0</span></div>
       <button class="shop-close" id="shopClose">🔊</button>
     </div>
@@ -1245,6 +1189,28 @@
           <button class="pm-btn pm-btn-acquire" id="pmConfirm">✓ ACQUIRE</button>
         </div>
 
+      </div>
+    </div>
+    <!-- Premium purchase modal -->
+    <div id="luxuryPurchaseModal" class="hidden">
+      <div class="lpm-inner">
+        <div class="lpm-crown">👑</div>
+        <canvas id="lpmShipCanvas" width="100" height="100"></canvas>
+        <div class="lpm-ship-name" id="lpmShipName">—</div>
+        <div class="lpm-desc" id="lpmShipDesc">—</div>
+        <div class="lpm-price">$4.99</div>
+        <div class="lpm-per">PER SHIP</div>
+        <div class="lpm-btn-row">
+          <button class="lpm-buy-btn" id="lpmBuyBtn">PURCHASE</button>
+          <button class="lpm-cancel-btn" id="lpmCancelBtn">CANCEL</button>
+        </div>
+        <div class="lpm-bundle-row">
+          <div>
+            <div class="lpm-bundle-label">FULL COLLECTION</div>
+            <div class="lpm-bundle-price">$19.99</div>
+          </div>
+          <button class="lpm-bundle-btn" id="lpmBundleBtn">GET ALL 5</button>
+        </div>
       </div>
     </div>
   </div>
@@ -3247,15 +3213,6 @@ wrapper.addEventListener('click', doJump);
 wrapper.addEventListener('touchstart', e => { e.preventDefault(); doJump(); }, {passive:false});
 // Absorb all touch events inside the shop so they never reach the wrapper touchstart
 document.getElementById('shopScreen').addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
-document.getElementById('luxuryScreen').addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
-
-// ── Luxury hangar events ──────────────────────────────────────────────────────
-document.getElementById('luxuryBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playShopOpen(); openLuxuryShop(); });
-document.getElementById('luxuryBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openLuxuryShop(); }, { passive: false });
-document.getElementById('luxuryCloseBtn').addEventListener('click', e => { e.stopPropagation(); const nm=!AudioEngine.isMuted(); AudioEngine.setMuted(nm); applySoundIcon(nm); document.getElementById('luxuryCloseBtn').textContent = nm ? '🔇' : '🔊'; });
-document.getElementById('luxuryLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeLuxuryShop(); updateStartShipEmoji(); });
-document.getElementById('luxuryLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeLuxuryShop(); updateStartShipEmoji(); });
-document.getElementById('luxuryPackBtn').addEventListener('click', e => { e.stopPropagation(); handleLuxuryBundlePurchase(); });
 document.getElementById('lpmBuyBtn').addEventListener('click', e => { e.stopPropagation(); if(_luxuryPendingShip) handleLuxuryPurchase(_luxuryPendingShip.id); });
 document.getElementById('lpmCancelBtn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('luxuryPurchaseModal').classList.add('hidden'); _luxuryPendingShip=null; });
 document.getElementById('lpmBundleBtn').addEventListener('click', e => { e.stopPropagation(); handleLuxuryBundlePurchase(); });
@@ -3373,6 +3330,8 @@ function closeShop() {
   _stopHangarPreviews();
   AudioEngine.stopHangarMusic();
   document.getElementById('shopScreen').classList.add('hidden');
+  document.getElementById('luxuryPurchaseModal').classList.add('hidden');
+  _luxuryPendingShip = null;
   updateStartShipEmoji();
 }
 
@@ -3396,91 +3355,8 @@ function closeWorldShop() {
   document.getElementById('worldScreen').classList.add('hidden');
 }
 
-// ── LUXURY HANGAR ─────────────────────────────────────────────────────────────
+// ── Premium ship helpers ───────────────────────────────────────────────────────
 let _luxuryPendingShip = null;
-
-function openLuxuryShop() {
-  AudioEngine.init(); AudioEngine.resume();
-  AudioEngine.playHangarOpen();
-  AudioEngine.startHangarMusic();
-  document.getElementById('luxuryCloseBtn').textContent = AudioEngine.isMuted() ? '🔇' : '🔊';
-  renderLuxuryShop();
-  document.getElementById('luxuryScreen').classList.remove('hidden');
-}
-function closeLuxuryShop() {
-  _stopHangarPreviews();
-  AudioEngine.stopHangarMusic();
-  document.getElementById('luxuryScreen').classList.add('hidden');
-  document.getElementById('luxuryPurchaseModal').classList.add('hidden');
-  _luxuryPendingShip = null;
-}
-
-function renderLuxuryShop() {
-  const grid = document.getElementById('luxuryGrid');
-  grid.innerHTML = '';
-  const allOwned = LUXURY_SHIPS.every(s => save.luxuryOwned.includes(s.id));
-  document.getElementById('luxuryPackBanner').style.display = allOwned ? 'none' : 'flex';
-
-  LUXURY_SHIPS.forEach(ship => {
-    const owned = save.luxuryOwned.includes(ship.id);
-    const selected = save.selected === ship.id;
-
-    const card = document.createElement('div');
-    card.className = 'luxury-card';
-    card.style.borderColor = selected ? 'rgba(212,175,55,0.55)' : (owned ? 'rgba(212,175,55,0.22)' : 'rgba(212,175,55,0.10)');
-    if(selected) card.style.boxShadow = '0 0 22px rgba(212,175,55,0.32), 0 0 48px rgba(212,175,55,0.10)';
-
-    const previewDiv = document.createElement('div');
-    previewDiv.className = 'luxury-card-preview';
-    const mc = document.createElement('canvas');
-    mc.className = 'luxury-card-canvas';
-    mc.width = 90; mc.height = 90;
-    previewDiv.appendChild(mc);
-    card.appendChild(previewDiv);
-
-    const info = document.createElement('div');
-    info.className = 'luxury-card-info';
-
-    const nm = document.createElement('div');
-    nm.className = 'luxury-card-name';
-    nm.textContent = ship.emoji + ' ' + ship.name;
-    if(selected) nm.style.color = '#d4af37';
-    info.appendChild(nm);
-
-    const desc = document.createElement('div');
-    desc.className = 'luxury-card-desc';
-    desc.textContent = ship.description;
-    info.appendChild(desc);
-
-    const badge = document.createElement('div');
-    badge.className = 'luxury-card-badge';
-    if(owned && selected) {
-      badge.textContent = '✓ ACTIVE';
-      badge.style.cssText = 'background:linear-gradient(90deg,#d4af37,#c9a227);color:#040302;box-shadow:0 0 12px rgba(212,175,55,0.55);';
-    } else if(owned) {
-      badge.textContent = 'SELECT';
-      badge.style.cssText = 'background:transparent;border:1px solid rgba(212,175,55,0.35);color:rgba(212,175,55,0.85);';
-    } else {
-      badge.textContent = '$4.99';
-      badge.style.cssText = 'background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.32);color:#d4af37;';
-    }
-    info.appendChild(badge);
-    card.appendChild(info);
-
-    card.addEventListener('click', () => {
-      if(owned) {
-        save.selected = ship.id;
-        save.selectedWorld = 'auto';
-        writeSave(save);
-        renderLuxuryShop();
-      } else {
-        showLuxuryPurchaseModal(ship);
-      }
-    });
-    grid.appendChild(card);
-    animateLuxuryShipPreview(mc, ship);
-  });
-}
 
 function animateLuxuryShipPreview(c, ship) {
   _previewList.push({canvas: c, ship, type: 'luxury'});
@@ -3491,8 +3367,7 @@ function showLuxuryPurchaseModal(ship) {
   _luxuryPendingShip = ship;
   document.getElementById('lpmShipName').textContent = ship.emoji + ' ' + ship.name;
   document.getElementById('lpmShipDesc').textContent = ship.description;
-  const mc = document.getElementById('lpmShipCanvas');
-  animateLuxuryShipPreview(mc, ship);
+  animateLuxuryShipPreview(document.getElementById('lpmShipCanvas'), ship);
   document.getElementById('luxuryPurchaseModal').classList.remove('hidden');
 }
 
@@ -3504,7 +3379,7 @@ function handleLuxuryPurchase(shipId) {
   writeSave(save);
   document.getElementById('luxuryPurchaseModal').classList.add('hidden');
   _luxuryPendingShip = null;
-  renderLuxuryShop();
+  renderShop();
 }
 
 function handleLuxuryBundlePurchase() {
@@ -3513,7 +3388,7 @@ function handleLuxuryBundlePurchase() {
   writeSave(save);
   document.getElementById('luxuryPurchaseModal').classList.add('hidden');
   _luxuryPendingShip = null;
-  renderLuxuryShop();
+  renderShop();
 }
 
 function renderWorldShop() {
@@ -3745,6 +3620,82 @@ function renderShop() {
     card.addEventListener('click', () => onShipCardClick(ship, card));
     grid.appendChild(card);
     animateShipPreview(miniCanvas, ship);
+  });
+
+  // ── Premium section ───────────────────────────────────────────────────────
+  const divider = document.createElement('div');
+  divider.className = 'universe-divider';
+  divider.innerHTML = '<span>💎 PREMIUM COLLECTION</span>';
+  grid.appendChild(divider);
+
+  const allLuxOwned = LUXURY_SHIPS.every(s => save.luxuryOwned.includes(s.id));
+  if (!allLuxOwned) {
+    const packBanner = document.createElement('div');
+    packBanner.className = 'luxury-pack-banner';
+    packBanner.style.margin = '0 0 4px';
+    packBanner.innerHTML = `<div class="lpb-crown">👑</div><div class="lpb-text"><div class="lpb-label">FULL COLLECTION · 5 SHIPS</div><div class="lpb-main">ALL ACCESS PASS</div><div class="lpb-desc">Every premium ship · Exclusive worlds · Special effects</div></div><button class="lpb-buy-btn">$19.99</button>`;
+    packBanner.querySelector('.lpb-buy-btn').addEventListener('click', e => { e.stopPropagation(); handleLuxuryBundlePurchase(); });
+    grid.appendChild(packBanner);
+  }
+
+  LUXURY_SHIPS.forEach(ship => {
+    const owned = save.luxuryOwned.includes(ship.id);
+    const selected = save.selected === ship.id;
+
+    const card = document.createElement('div');
+    card.className = 'luxury-card';
+    card.style.borderColor = selected ? 'rgba(212,175,55,0.55)' : (owned ? 'rgba(212,175,55,0.22)' : 'rgba(212,175,55,0.10)');
+    if (selected) card.style.boxShadow = '0 0 22px rgba(212,175,55,0.32), 0 0 48px rgba(212,175,55,0.10)';
+
+    const previewDiv = document.createElement('div');
+    previewDiv.className = 'luxury-card-preview';
+    const mc = document.createElement('canvas');
+    mc.className = 'luxury-card-canvas';
+    mc.width = 90; mc.height = 90;
+    previewDiv.appendChild(mc);
+    card.appendChild(previewDiv);
+
+    const info = document.createElement('div');
+    info.className = 'luxury-card-info';
+
+    const nm = document.createElement('div');
+    nm.className = 'luxury-card-name';
+    nm.textContent = ship.emoji + ' ' + ship.name;
+    if (selected) nm.style.color = '#d4af37';
+    info.appendChild(nm);
+
+    const desc = document.createElement('div');
+    desc.className = 'luxury-card-desc';
+    desc.textContent = ship.description;
+    info.appendChild(desc);
+
+    const badge = document.createElement('div');
+    badge.className = 'luxury-card-badge';
+    if (owned && selected) {
+      badge.textContent = '✓ ACTIVE';
+      badge.style.cssText = 'background:linear-gradient(90deg,#d4af37,#c9a227);color:#040302;box-shadow:0 0 12px rgba(212,175,55,0.55);';
+    } else if (owned) {
+      badge.textContent = 'SELECT';
+      badge.style.cssText = 'background:transparent;border:1px solid rgba(212,175,55,0.35);color:rgba(212,175,55,0.85);';
+    } else {
+      badge.textContent = '$4.99';
+      badge.style.cssText = 'background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.32);color:#d4af37;';
+    }
+    info.appendChild(badge);
+    card.appendChild(info);
+
+    card.addEventListener('click', () => {
+      if (owned) {
+        save.selected = ship.id;
+        save.selectedWorld = 'auto';
+        writeSave(save);
+        renderShop();
+      } else {
+        showLuxuryPurchaseModal(ship);
+      }
+    });
+    grid.appendChild(card);
+    animateLuxuryShipPreview(mc, ship);
   });
 }
 
