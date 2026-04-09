@@ -1455,24 +1455,6 @@ const LUXURY_SHIPS = [
     worldTheme:{ bgTop:'#010108', bgBot:'#020214', nebulaHue:228, nebulaSpread:10, starRgb:'70,110,255', barrierHue:228, barrierSpread:12, grid:'rgba(0,55,200,0.028)', worldId:'veyron', barrierStyle:'chrome', ambientColor:'#0044ff' }
   },
   {
-    id:'stuttgart', name:'STUTTGART', premiumPrice:4.99,
-    color:'#c85800', trailColor:'#ff8800',
-    flameColors:['#ffffff','#ffee44','#ff7700','#771400'],
-    wingColor:'rgba(200,88,0,0.9)', glowColor:'#ff8800', emoji:'🟠',
-    description:'Flat-six symphony · Racing heritage',
-    luxury:true,
-    worldTheme:{ bgTop:'#060300', bgBot:'#0e0500', nebulaHue:28, nebulaSpread:15, starRgb:'255,155,55', barrierHue:26, barrierSpread:12, grid:'rgba(200,96,0,0.028)', worldId:'stuttgart', barrierStyle:'racing', ambientColor:'#ff8800' }
-  },
-  {
-    id:'stingray', name:'STINGRAY', premiumPrice:4.99,
-    color:'#006600', trailColor:'#44ff00',
-    flameColors:['#ffffff','#aaff88','#00cc00','#003300'],
-    wingColor:'rgba(0,96,0,0.9)', glowColor:'#44ff00', emoji:'🐍',
-    description:'Venom · Power · American muscle',
-    luxury:true,
-    worldTheme:{ bgTop:'#010801', bgBot:'#020e02', nebulaHue:118, nebulaSpread:14, starRgb:'70,255,50', barrierHue:118, barrierSpread:12, grid:'rgba(0,180,0,0.022)', worldId:'stingray', barrierStyle:'racing', ambientColor:'#44ff00' }
-  },
-  {
     id:'ragingbull', name:'RAGING BULL', premiumPrice:4.99,
     color:'#9fff00', trailColor:'#ccff00',
     flameColors:['#ffffff','#eeff88','#ccff00','#446600'],
@@ -2792,8 +2774,6 @@ const AudioEngine = (() => {
     tridente:   {fn:scheduleLuxuryAmbient,bar:LABAR},
     veyron:     {fn:scheduleLuxuryAmbient,bar:LABAR},
     scuderia:   {fn:scheduleRacetrack,    bar:RTBAR},
-    stuttgart:  {fn:scheduleRacetrack,    bar:RTBAR},
-    stingray:   {fn:scheduleRacetrack,    bar:RTBAR},
     ragingbull: {fn:scheduleRacetrack,    bar:RTBAR},
   };
   function wmLoop(){
@@ -2968,14 +2948,6 @@ function spawnWorldAmbient() {
   if(wid==='veyron' && frame%4===0) {
     // Electric blue sparks
     particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*2.0, vy:-(Math.random()*2.5+0.5), life:0.7+Math.random()*0.4, decay:0.022+Math.random()*0.018, r:Math.random()*2.5+0.6, color:Math.random()<0.5?'#0055ff':'#88aaff', glow:true});
-  }
-  if(wid==='stuttgart' && frame%3===0) {
-    // Porsche orange racing sparks
-    particles.push({x:Math.random()*canvas.width, y:canvas.height*(0.3+Math.random()*0.7), vx:(Math.random()-0.5)*3.0, vy:-(Math.random()*3.2+1.0), life:0.9, decay:0.028+Math.random()*0.02, r:Math.random()*2.5+0.7, color:Math.random()<0.5?'#ff8800':'#ffee44', glow:true});
-  }
-  if(wid==='stingray' && frame%4===0) {
-    // Toxic venom green drops
-    particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height*0.8, vx:(Math.random()-0.5)*0.7, vy:Math.random()*1.5+0.4, life:0.85+Math.random()*0.3, decay:0.011+Math.random()*0.012, r:Math.random()*3.5+0.8, color:Math.random()<0.5?'#44ff00':'#00cc00', glow:true});
   }
   if(wid==='ragingbull' && frame%3===0) {
     // Lamborghini electric lime bursts
@@ -3858,12 +3830,17 @@ let _hangarRaf = null;
 let _hangarFlicker = 0;
 const _previewList = []; // {canvas, ship, type:'regular'|'luxury'}
 
+function _isCanvasVisible(c) {
+  const r = c.getBoundingClientRect();
+  return r.width > 0 && r.bottom > 0 && r.top < window.innerHeight;
+}
+
 function _startHangarPreviews() {
   if (_hangarRaf) return;
   function tick() {
     _hangarFlicker += 0.15;
     for (const {canvas, ship, type} of _previewList) {
-      if (!canvas.isConnected) continue;
+      if (!canvas.isConnected || !_isCanvasVisible(canvas)) continue;
       if (type === 'luxury') _drawLuxuryPreviewFrame(canvas, ship);
       else _drawRegularPreviewFrame(canvas, ship);
     }
