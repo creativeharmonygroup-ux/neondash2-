@@ -3481,7 +3481,7 @@ function renderLuxuryShop() {
     const mc = document.createElement('canvas');
     mc.className = 'luxury-card-canvas';
     mc.width = 90; mc.height = 90;
-    drawLuxuryShipPreview(mc, ship, selected);
+    animateLuxuryShipPreview(mc, ship, selected);
     previewDiv.appendChild(mc);
     card.appendChild(previewDiv);
 
@@ -3528,39 +3528,55 @@ function renderLuxuryShop() {
   });
 }
 
-function drawLuxuryShipPreview(c, ship, selected) {
-  const g = c.getContext('2d');
-  const W = c.width, H = c.height;
-  const wt = ship.worldTheme;
+function animateLuxuryShipPreview(c, ship, selected) {
   const h2r = h => { if(!h||!h.startsWith('#')) return '212,175,55'; return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(','); };
+  let flicker = 0;
+  function frame() {
+    if (!c.isConnected) return;
+    flicker += 0.15;
+    const g = c.getContext('2d');
+    const W = c.width, H = c.height;
+    const wt = ship.worldTheme;
+    g.clearRect(0,0,W,H);
 
-  const bg = g.createLinearGradient(0,0,0,H);
-  bg.addColorStop(0, wt.bgTop||'#040404'); bg.addColorStop(1, wt.bgBot||'#0c0c0c');
-  g.fillStyle=bg; g.fillRect(0,0,W,H);
+    const bg = g.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0, wt.bgTop||'#040404'); bg.addColorStop(1, wt.bgBot||'#0c0c0c');
+    g.fillStyle=bg; g.fillRect(0,0,W,H);
 
-  const rgb = h2r(ship.color);
-  const ng = g.createRadialGradient(W/2,H/2,0,W/2,H/2,30);
-  ng.addColorStop(0,`rgba(${rgb},0.22)`); ng.addColorStop(1,'transparent');
-  g.fillStyle=ng; g.beginPath(); g.arc(W/2,H/2,30,0,Math.PI*2); g.fill();
+    const rgb = h2r(ship.color);
+    const ng = g.createRadialGradient(W/2,H/2,0,W/2,H/2,30);
+    ng.addColorStop(0,`rgba(${rgb},0.22)`); ng.addColorStop(1,'transparent');
+    g.fillStyle=ng; g.beginPath(); g.arc(W/2,H/2,30,0,Math.PI*2); g.fill();
 
-  for(let i=0;i<14;i++){
-    const sx=(i*41+7)%W, sy=(i*23+11)%H;
-    g.fillStyle=`rgba(${h2r(wt.ambientColor||'#ffffff')},${0.2+i%3*0.16})`;
-    g.beginPath(); g.arc(sx,sy,0.65+i%2*0.5,0,Math.PI*2); g.fill();
+    for(let i=0;i<14;i++){
+      const sx=(i*41+7)%W, sy=(i*23+11)%H;
+      g.fillStyle=`rgba(${h2r(wt.ambientColor||'#ffffff')},${0.2+i%3*0.16})`;
+      g.beginPath(); g.arc(sx,sy,0.65+i%2*0.5,0,Math.PI*2); g.fill();
+    }
+
+    const fs = 7 + Math.sin(flicker) * 3;
+    g.shadowColor=ship.glowColor; g.shadowBlur=15;
+    g.save(); g.translate(W/2, H/2);
+    g.fillStyle=ship.color;
+    g.beginPath(); g.moveTo(18,0); g.lineTo(-11,-9); g.lineTo(-7,0); g.lineTo(-11,9); g.closePath(); g.fill();
+    g.fillStyle=ship.wingColor||ship.color;
+    g.beginPath(); g.moveTo(-4,-6); g.lineTo(-13,-15); g.lineTo(-17,-2); g.lineTo(-9,0); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(-4,6); g.lineTo(-13,15); g.lineTo(-17,2); g.lineTo(-9,0); g.closePath(); g.fill();
+    const fg = g.createRadialGradient(-11,0,0,-11,0,fs*1.8);
+    fg.addColorStop(0, ship.flameColors[0]||'#ffffff');
+    fg.addColorStop(0.35, ship.flameColors[1]||'#ffffff');
+    fg.addColorStop(0.75, ship.flameColors[2]||ship.color);
+    fg.addColorStop(1,'transparent');
+    g.shadowBlur=12; g.fillStyle=fg;
+    g.beginPath(); g.ellipse(-11-fs*0.4, 0, fs, fs*0.38, 0, 0, Math.PI*2); g.fill();
+    g.restore(); g.shadowBlur=0;
+
+    const isSel = save.selected === ship.id;
+    if(isSel) { g.strokeStyle='rgba(212,175,55,0.8)'; g.lineWidth=2; g.strokeRect(1,1,W-2,H-2); }
+
+    requestAnimationFrame(frame);
   }
-
-  g.shadowColor=ship.glowColor; g.shadowBlur=14;
-  g.save(); g.translate(W/2, H/2);
-  g.fillStyle=ship.color;
-  g.beginPath(); g.moveTo(18,0); g.lineTo(-11,-9); g.lineTo(-7,0); g.lineTo(-11,9); g.closePath(); g.fill();
-  g.fillStyle=ship.wingColor||ship.color;
-  g.beginPath(); g.moveTo(-4,-6); g.lineTo(-13,-15); g.lineTo(-17,-2); g.lineTo(-9,0); g.closePath(); g.fill();
-  g.beginPath(); g.moveTo(-4,6); g.lineTo(-13,15); g.lineTo(-17,2); g.lineTo(-9,0); g.closePath(); g.fill();
-  g.shadowBlur=10; g.fillStyle=ship.flameColors[0]||'#ffffff';
-  g.beginPath(); g.moveTo(-11,0); g.lineTo(-20,-4); g.lineTo(-15,0); g.lineTo(-20,4); g.closePath(); g.fill();
-  g.restore(); g.shadowBlur=0;
-
-  if(selected) { g.strokeStyle='rgba(212,175,55,0.8)'; g.lineWidth=2; g.strokeRect(1,1,W-2,H-2); }
+  frame();
 }
 
 function showLuxuryPurchaseModal(ship) {
@@ -3568,7 +3584,7 @@ function showLuxuryPurchaseModal(ship) {
   document.getElementById('lpmShipName').textContent = ship.emoji + ' ' + ship.name;
   document.getElementById('lpmShipDesc').textContent = ship.description;
   const mc = document.getElementById('lpmShipCanvas');
-  drawLuxuryShipPreview(mc, ship, false);
+  animateLuxuryShipPreview(mc, ship, false);
   document.getElementById('luxuryPurchaseModal').classList.remove('hidden');
 }
 
