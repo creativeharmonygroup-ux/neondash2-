@@ -1058,6 +1058,7 @@
     <div id="comboDisplay">x2 COMBO!</div>
     <div id="coinHud"><span id="coinCount">0</span></div>
     <button id="soundToggle" title="Toggle Sound">🔊</button>
+    <button id="shopBtn" title="The Universe">🛸</button>
     <button id="worldBtn" title="Dimensions">🌌</button>
   </div>
 
@@ -1110,16 +1111,27 @@
     <button class="rv-play-again" id="rvPlayAgainBtn">↺ PLAY AGAIN</button>
   </div>
 
-  <!-- DIMENSIONS — unified ship hangar -->
+  <!-- DIMENSIONS WORLD SELECTOR -->
   <div id="worldScreen" class="hidden">
     <div class="world-header">
       <div class="world-title">DIMENSIONS</div>
       <div class="shop-coins"><span id="worldCoinCount">0</span></div>
       <button class="world-close-btn" id="worldCloseBtn">🔊</button>
     </div>
-    <div class="world-subtitle">SELECT YOUR SHIP</div>
+    <div class="world-subtitle">SELECT YOUR DIMENSION</div>
     <div class="world-grid" id="worldGrid"></div>
     <button class="world-launch-btn" id="worldLaunchBtn">▶ LAUNCH</button>
+  </div>
+
+  <!-- THE UNIVERSE — unified ship hangar -->
+  <div id="shopScreen" class="hidden">
+    <div class="shop-header">
+      <div class="shop-title">THE UNIVERSE</div>
+      <div class="shop-coins"><span id="shopCoinCount">0</span></div>
+      <button class="shop-close" id="shopClose">🔊</button>
+    </div>
+    <div class="shop-grid" id="shopGrid"></div>
+    <button class="hangar-launch-btn" id="hangarLaunchBtn">▶ LAUNCH</button>
 
     <!-- Purchase confirmation — military tactical overlay -->
     <div id="purchaseModal" class="hidden">
@@ -3095,18 +3107,18 @@ function triggerYupilandia() {
 
 function updateCoinHud() {
   document.getElementById('coinCount').textContent = save.coins;
-  document.getElementById('worldCoinCount').textContent = save.coins;
+  document.getElementById('shopCoinCount').textContent = save.coins;
 }
 
 // \u2500\u2500 Controls \u2500\u2500
 const soundBtn = document.getElementById('soundToggle');
+const shopSoundBtn = document.getElementById('shopClose');
 
 function applySoundIcon(muted) {
   const icon = muted ? '🔇' : '🔊';
   soundBtn.textContent = icon;
   soundBtn.classList.toggle('muted', muted);
-  const wcb = document.getElementById('worldCloseBtn');
-  if (wcb) wcb.textContent = icon;
+  shopSoundBtn.textContent = icon;
 }
 
 soundBtn.addEventListener('click', e => {
@@ -3116,17 +3128,29 @@ soundBtn.addEventListener('click', e => {
   applySoundIcon(nowMuted);
 });
 
+shopSoundBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const nowMuted = !AudioEngine.isMuted();
+  AudioEngine.setMuted(nowMuted);
+  applySoundIcon(nowMuted);
+});
+
+document.getElementById('shopBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openShop(); }, { passive: false });
+document.getElementById('shopBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playShopOpen(); openShop(); });
+document.getElementById('shopBtnOver').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openShop(); }, { passive: false });
+document.getElementById('shopBtnOver').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); openShop(); });
+document.getElementById('hangarLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeShop(); });
+document.getElementById('hangarLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeShop(); });
+
 document.getElementById('worldBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playShopOpen(); openWorldShop(); });
 document.getElementById('worldBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openWorldShop(); }, { passive: false });
-document.getElementById('shopBtnOver').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openWorldShop(); }, { passive: false });
-document.getElementById('shopBtnOver').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); openWorldShop(); });
-document.getElementById('worldCloseBtn').addEventListener('click', e => { e.stopPropagation(); const nm=!AudioEngine.isMuted(); AudioEngine.setMuted(nm); applySoundIcon(nm); });
+document.getElementById('worldCloseBtn').addEventListener('click', e => { e.stopPropagation(); const nm=!AudioEngine.isMuted(); AudioEngine.setMuted(nm); applySoundIcon(nm); document.getElementById('worldCloseBtn').textContent = nm ? '🔇' : '🔊'; });
 document.getElementById('worldLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeWorldShop(); });
 document.getElementById('worldLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeWorldShop(); });
 
 function doJump() {
   // Never fire while the hangar is open
-  if (!document.getElementById('worldScreen').classList.contains('hidden')) return;
+  if (!document.getElementById('shopScreen').classList.contains('hidden')) return;
   AudioEngine.init(); AudioEngine.resume();
   if (state === 'start') { startGame(); return; }
   if (state === 'playing' && !player.dead && !yupilandiaFrozen) {
@@ -3140,7 +3164,7 @@ document.addEventListener('keydown', e => { if(e.code==='Space') doJump(); });
 wrapper.addEventListener('click', doJump);
 wrapper.addEventListener('touchstart', e => { e.preventDefault(); doJump(); }, {passive:false});
 // Absorb all touch events inside the shop so they never reach the wrapper touchstart
-document.getElementById('worldScreen').addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
+document.getElementById('shopScreen').addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: true });
 document.getElementById('lpmBuyBtn').addEventListener('click', e => { e.stopPropagation(); if(_luxuryPendingShip) handleLuxuryPurchase(_luxuryPendingShip.id); });
 document.getElementById('lpmCancelBtn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('luxuryPurchaseModal').classList.add('hidden'); _luxuryPendingShip=null; });
 document.getElementById('lpmBundleBtn').addEventListener('click', e => { e.stopPropagation(); handleLuxuryBundlePurchase(); });
@@ -3174,7 +3198,7 @@ function startGame() {
   resetPlayer(); updateUI();
   document.getElementById('startScreen').classList.add('hidden');
   document.getElementById('gameOverScreen').classList.add('hidden');
-  document.getElementById('worldScreen').classList.add('hidden');
+  document.getElementById('shopScreen').classList.add('hidden');
   const rv = document.getElementById('replayVideo');
   rv.pause(); rv.src = '';
   document.getElementById('replayOverlay').classList.add('hidden');
@@ -3243,17 +3267,37 @@ function gameOver() {
   }, 700);
 }
 
+// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+//  SHIP SHOP
+// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+function openShop() {
+  AudioEngine.init(); AudioEngine.resume();
+  AudioEngine.playHangarOpen();
+  AudioEngine.startHangarMusic();
+  shopSoundBtn.textContent = AudioEngine.isMuted() ? '🔇' : '🔊';
+  renderShop();
+  document.getElementById('shopScreen').classList.remove('hidden');
+}
+function closeShop() {
+  _stopHangarPreviews();
+  AudioEngine.stopHangarMusic();
+  document.getElementById('shopScreen').classList.add('hidden');
+  document.getElementById('luxuryPurchaseModal').classList.add('hidden');
+  _luxuryPendingShip = null;
+  updateStartShipEmoji();
+}
+
 function updateStartShipEmoji() {
   document.getElementById('startShipEmoji').textContent = currentShip().emoji;
 }
 
-// ── DIMENSIONS HANGAR ────────────────────────────────────────────
+// ── UNIVERSE WORLD SHOP ──────────────────────────────────────────────────────
 function openWorldShop() {
   AudioEngine.init(); AudioEngine.resume();
   AudioEngine.playHangarOpen();
   AudioEngine.startHangarMusic();
-  const wcb = document.getElementById('worldCloseBtn');
-  if(wcb) wcb.textContent = AudioEngine.isMuted() ? '🔇' : '🔊';
+  const worldSoundBtn = document.getElementById('worldCloseBtn');
+  if(worldSoundBtn) worldSoundBtn.textContent = AudioEngine.isMuted() ? '🔇' : '🔊';
   renderWorldShop();
   document.getElementById('worldScreen').classList.remove('hidden');
 }
@@ -3261,9 +3305,6 @@ function closeWorldShop() {
   _stopHangarPreviews();
   AudioEngine.stopHangarMusic();
   document.getElementById('worldScreen').classList.add('hidden');
-  document.getElementById('luxuryPurchaseModal').classList.add('hidden');
-  _luxuryPendingShip = null;
-  updateStartShipEmoji();
 }
 
 // ── Premium ship helpers ───────────────────────────────────────────────────────
@@ -3290,7 +3331,7 @@ function handleLuxuryPurchase(shipId) {
   writeSave(save);
   document.getElementById('luxuryPurchaseModal').classList.add('hidden');
   _luxuryPendingShip = null;
-  renderWorldShop();
+  renderShop();
 }
 
 function handleLuxuryBundlePurchase() {
@@ -3299,12 +3340,144 @@ function handleLuxuryBundlePurchase() {
   writeSave(save);
   document.getElementById('luxuryPurchaseModal').classList.add('hidden');
   _luxuryPendingShip = null;
-  renderWorldShop();
+  renderShop();
 }
 
 function renderWorldShop() {
-  updateCoinHud();
+  const coinEl = document.getElementById('worldCoinCount');
+  if(coinEl) coinEl.textContent = save.coins;
   const grid = document.getElementById('worldGrid');
+  grid.innerHTML = '';
+  const h2r = h => { if(!h||!h.startsWith('#')) return '170,170,170'; return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(','); };
+
+  WORLD_DEFS.forEach(wd => {
+    const sel = (save.selectedWorld || 'auto') === wd.id;
+    const rgb = h2r(wd.accent);
+
+    const card = document.createElement('div');
+    card.className = 'world-card' + (sel ? ' world-selected' : '');
+    card.style.borderColor = sel ? `rgba(${rgb},0.55)` : `rgba(${rgb},0.18)`;
+    card.style.boxShadow = sel
+      ? `inset 4px 0 0 ${wd.accent}, 0 0 22px rgba(${rgb},0.40), 0 0 48px rgba(${rgb},0.10)`
+      : `inset 3px 0 0 rgba(${rgb},0.45), 0 0 8px rgba(${rgb},0.10)`;
+    if(sel) card.style.background = `linear-gradient(120deg, rgba(${rgb},0.13) 0%, rgba(5,2,14,0.99) 55%)`;
+
+    // Left: world preview canvas
+    const previewPanel = document.createElement('div');
+    previewPanel.className = 'world-card-preview';
+    const miniCanvas = document.createElement('canvas');
+    miniCanvas.width = 110; miniCanvas.height = 82;
+    miniCanvas.className = 'world-card-canvas';
+    drawWorldPreview(miniCanvas, wd, sel);
+    previewPanel.appendChild(miniCanvas);
+    card.appendChild(previewPanel);
+
+    // Right: info
+    const info = document.createElement('div');
+    info.className = 'world-card-info';
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'world-card-name';
+    nameEl.textContent = wd.emoji + ' ' + wd.name;
+    nameEl.style.color = sel ? wd.accent : '#ffffff';
+    if(sel) nameEl.style.textShadow = `0 0 14px rgba(${rgb},0.75)`;
+    info.appendChild(nameEl);
+
+    const descEl = document.createElement('div');
+    descEl.className = 'world-card-desc';
+    descEl.textContent = wd.desc;
+    info.appendChild(descEl);
+
+    const badge = document.createElement('div');
+    badge.className = 'world-card-badge';
+    if(sel) {
+      badge.textContent = '✓ ACTIVE';
+      badge.style.background = wd.accent;
+      badge.style.boxShadow = `0 0 12px rgba(${rgb},0.6)`;
+      badge.style.color = '#060612';
+    } else {
+      badge.textContent = 'SELECT';
+      badge.classList.add('badge-owned');
+      badge.style.borderColor = `rgba(${rgb},0.40)`;
+      badge.style.color = `rgba(${rgb},0.85)`;
+    }
+    info.appendChild(badge);
+    card.appendChild(info);
+
+    card.addEventListener('click', () => {
+      save.selectedWorld = wd.id;
+      writeSave(save);
+      renderWorldShop();
+    });
+    grid.appendChild(card);
+  });
+}
+
+function drawWorldPreview(c, wd, selected) {
+  const gfx = c.getContext('2d');
+  const W = 110, H = 82;
+  const h2r = h => { if(!h||!h.startsWith('#')) return '170,170,170'; return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(','); };
+  const rgb = h2r(wd.accent);
+
+  // Background gradient
+  const bg = gfx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0, wd.bgA || '#060612');
+  bg.addColorStop(1, wd.bgB || '#0a0d22');
+  gfx.fillStyle=bg; gfx.fillRect(0,0,W,H);
+
+  // Nebula blobs
+  [[W*0.18,H*0.38,22],[W*0.55,H*0.60,16],[W*0.82,H*0.28,18]].forEach(([nx,ny,nr],i)=>{
+    const ng=gfx.createRadialGradient(nx,ny,0,nx,ny,nr);
+    ng.addColorStop(0,`rgba(${rgb},${0.18+i*0.04})`); ng.addColorStop(1,'transparent');
+    gfx.fillStyle=ng; gfx.beginPath(); gfx.arc(nx,ny,nr,0,Math.PI*2); gfx.fill();
+  });
+
+  // Stars
+  for(let i=0;i<20;i++){
+    const sx=(i*41+7)%W, sy=(i*23+5)%H;
+    gfx.fillStyle=`rgba(${rgb},${0.35+i%3*0.22})`;
+    gfx.beginPath(); gfx.arc(sx,sy,0.7+i%2*0.5,0,Math.PI*2); gfx.fill();
+  }
+
+  // World-specific overlays
+  if(wd.id==='auto') {
+    const ship=currentShip(); const sr=h2r(ship.color);
+    const ag=gfx.createRadialGradient(W/2,H/2,0,W/2,H/2,32);
+    ag.addColorStop(0,`rgba(${sr},0.30)`); ag.addColorStop(1,'transparent');
+    gfx.fillStyle=ag; gfx.beginPath(); gfx.arc(W/2,H/2,32,0,Math.PI*2); gfx.fill();
+    gfx.font='bold 10px Orbitron,monospace'; gfx.fillStyle=`rgba(${sr},0.65)`;
+    gfx.textAlign='center'; gfx.textBaseline='middle'; gfx.fillText('AUTO',W/2,H/2); gfx.textAlign='left'; gfx.textBaseline='alphabetic';
+  }
+  if(wd.id==='prehistoric') {
+    gfx.fillStyle='rgba(0,20,2,0.55)';
+    for(let x=0;x<W+10;x+=13){ const h2=9+Math.sin(x*0.22)*5; gfx.beginPath(); gfx.moveTo(x,0); gfx.lineTo(x+6,h2); gfx.lineTo(x+13,0); gfx.closePath(); gfx.fill(); }
+    const lg=gfx.createLinearGradient(0,H*0.7,0,H); lg.addColorStop(0,'transparent'); lg.addColorStop(1,'rgba(255,50,0,0.42)');
+    gfx.fillStyle=lg; gfx.fillRect(0,H*0.7,W,H*0.3);
+  }
+  if(wd.id==='thegrid') {
+    gfx.font='8px monospace'; gfx.fillStyle='rgba(0,255,65,0.45)';
+    for(let cx=0;cx<W;cx+=11) for(let ry=8;ry<H;ry+=11) gfx.fillText((cx+ry)%22<11?'1':'0',cx,ry);
+  }
+  if(wd.id==='machinewar') {
+    gfx.fillStyle='rgba(0,0,0,0.18)'; for(let y=0;y<H;y+=4) gfx.fillRect(0,y,W,2);
+    const fg=gfx.createLinearGradient(0,H*0.6,0,H); fg.addColorStop(0,'transparent'); fg.addColorStop(1,'rgba(200,15,0,0.48)');
+    gfx.fillStyle=fg; gfx.fillRect(0,H*0.6,W,H*0.4);
+  }
+  if(wd.id==='nitro') {
+    gfx.strokeStyle='rgba(255,130,0,0.28)'; gfx.lineWidth=1.2;
+    for(let y=6;y<H;y+=9){ gfx.beginPath(); gfx.moveTo(W*0.45,y); gfx.lineTo(W,y); gfx.stroke(); }
+  }
+
+  // Selected glow border
+  if(selected) {
+    gfx.strokeStyle=`rgba(${rgb},0.7)`; gfx.lineWidth=2;
+    gfx.strokeRect(1,1,W-2,H-2);
+  }
+}
+
+function renderShop() {
+  updateCoinHud();
+  const grid = document.getElementById('shopGrid');
   grid.innerHTML = '';
 
   const h2r = h => [1,3,5].map(i => parseInt(h.slice(i,i+2),16)).join(',');
@@ -3315,10 +3488,12 @@ function renderWorldShop() {
     const affordable = save.coins >= ship.price;
     const rgb = h2r(ship.color);
 
+    // ── Card shell ──
     const card = document.createElement('div');
     card.className = `ship-card ${owned ? 'owned' : 'locked'} ${selected ? 'selected' : ''}`;
     card.dataset.id = ship.id;
 
+    // Left accent stripe + outer glow via box-shadow
     if (selected) {
       card.style.boxShadow  = `inset 4px 0 0 ${ship.color}, 0 0 24px rgba(${rgb},0.45), 0 0 50px rgba(${rgb},0.12)`;
       card.style.borderColor = `rgba(${rgb},0.50)`;
@@ -3328,6 +3503,7 @@ function renderWorldShop() {
       card.style.borderColor = `rgba(${rgb},0.22)`;
     }
 
+    // ── Left panel: ship preview ──
     const previewPanel = document.createElement('div');
     previewPanel.className = 'ship-card-preview';
     previewPanel.style.background = `radial-gradient(ellipse at center, rgba(${rgb},${selected ? '0.20' : '0.10'}) 0%, transparent 72%)`;
@@ -3339,9 +3515,11 @@ function renderWorldShop() {
     previewPanel.appendChild(miniCanvas);
     card.appendChild(previewPanel);
 
+    // ── Right panel: ship info ──
     const info = document.createElement('div');
     info.className = 'ship-card-info';
 
+    // Name
     const nameEl = document.createElement('div');
     nameEl.className = 'ship-card-name';
     nameEl.textContent = ship.name;
@@ -3349,6 +3527,7 @@ function renderWorldShop() {
     if (selected) nameEl.style.textShadow = `0 0 14px rgba(${rgb},0.80)`;
     info.appendChild(nameEl);
 
+    // Price line (all non-free ships)
     if (ship.price > 0) {
       const costEl = document.createElement('div');
       costEl.className = 'ship-card-cost';
@@ -3356,6 +3535,7 @@ function renderWorldShop() {
       info.appendChild(costEl);
     }
 
+    // Status badge
     const badge = document.createElement('div');
     badge.className = 'ship-card-badge';
     if (selected) {
@@ -3368,7 +3548,7 @@ function renderWorldShop() {
       badge.classList.add('badge-owned');
       badge.textContent = 'SELECT';
       badge.style.borderColor = `rgba(${rgb},0.40)`;
-      badge.style.color       = `rgba(${rgb},0.85)`;
+      badge.style.color       = `rgba(${rgb},0.85)` ;
     } else if (ship.price === 0) {
       badge.classList.add('badge-owned');
       badge.textContent = 'FREE';
@@ -3388,7 +3568,7 @@ function renderWorldShop() {
   // ── Premium section ───────────────────────────────────────────────────────
   const divider = document.createElement('div');
   divider.className = 'universe-divider';
-  divider.innerHTML = '<span>\ud83d\udc8e PREMIUM COLLECTION</span>';
+  divider.innerHTML = '<span>💎 PREMIUM COLLECTION</span>';
   grid.appendChild(divider);
 
   const allLuxOwned = LUXURY_SHIPS.every(s => save.luxuryOwned.includes(s.id));
@@ -3396,7 +3576,7 @@ function renderWorldShop() {
     const packBanner = document.createElement('div');
     packBanner.className = 'luxury-pack-banner';
     packBanner.style.margin = '0 0 4px';
-    packBanner.innerHTML = `<div class="lpb-crown">\ud83d\udc51</div><div class="lpb-text"><div class="lpb-label">FULL COLLECTION \u00b7 5 SHIPS</div><div class="lpb-main">ALL ACCESS PASS</div><div class="lpb-desc">Every premium ship \u00b7 Exclusive worlds \u00b7 Special effects</div></div><button class="lpb-buy-btn">$19.99</button>`;
+    packBanner.innerHTML = `<div class="lpb-crown">👑</div><div class="lpb-text"><div class="lpb-label">FULL COLLECTION · 5 SHIPS</div><div class="lpb-main">ALL ACCESS PASS</div><div class="lpb-desc">Every premium ship · Exclusive worlds · Special effects</div></div><button class="lpb-buy-btn">$19.99</button>`;
     packBanner.querySelector('.lpb-buy-btn').addEventListener('click', e => { e.stopPropagation(); handleLuxuryBundlePurchase(); });
     grid.appendChild(packBanner);
   }
@@ -3421,11 +3601,11 @@ function renderWorldShop() {
     const info = document.createElement('div');
     info.className = 'luxury-card-info';
 
-    const nameEl = document.createElement('div');
-    nameEl.className = 'luxury-card-name';
-    nameEl.textContent = ship.emoji + ' ' + ship.name;
-    if (selected) nameEl.style.cssText = 'color:#d4af37;text-shadow:0 0 12px rgba(212,175,55,0.7);';
-    info.appendChild(nameEl);
+    const nm = document.createElement('div');
+    nm.className = 'luxury-card-name';
+    nm.textContent = ship.emoji + ' ' + ship.name;
+    if (selected) nm.style.color = '#d4af37';
+    info.appendChild(nm);
 
     const desc = document.createElement('div');
     desc.className = 'luxury-card-desc';
@@ -3435,7 +3615,7 @@ function renderWorldShop() {
     const badge = document.createElement('div');
     badge.className = 'luxury-card-badge';
     if (owned && selected) {
-      badge.textContent = '\u2713 ACTIVE';
+      badge.textContent = '✓ ACTIVE';
       badge.style.cssText = 'background:linear-gradient(90deg,#d4af37,#c9a227);color:#040302;box-shadow:0 0 12px rgba(212,175,55,0.55);';
     } else if (owned) {
       badge.textContent = 'SELECT';
@@ -3452,7 +3632,7 @@ function renderWorldShop() {
         save.selected = ship.id;
         save.selectedWorld = 'auto';
         writeSave(save);
-        renderWorldShop();
+        renderShop();
       } else {
         showLuxuryPurchaseModal(ship);
       }
@@ -3811,7 +3991,7 @@ pmAcquireBtn.addEventListener('click', () => {
     AudioEngine.playUnlock();
     card.classList.add('unlocking');
     flashScreen(ship.color, 0.35);
-    setTimeout(() => renderWorldShop(), 200);
+    setTimeout(() => renderShop(), 200);
   }, 650);
 });
 
@@ -3837,7 +4017,7 @@ function onShipCardClick(ship, card) {
     writeSave(save);
     AudioEngine.init(); AudioEngine.resume();
     AudioEngine.playScore();
-    renderWorldShop();
+    renderShop();
   } else if (save.coins >= ship.price) {
     // Show confirmation modal
     AudioEngine.init(); AudioEngine.resume();
