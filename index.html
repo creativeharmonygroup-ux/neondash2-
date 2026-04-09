@@ -885,6 +885,7 @@ function writeCloudSave(s) {
         if (d.selectedWorld) save.selectedWorld = d.selectedWorld;
         localStorage.setItem('neonDashSave', JSON.stringify(save));
         updateCoinHud();
+        updateStartShipEmoji();
         document.getElementById('bestDisplay').textContent = 'BEST: ' + save.best;
       })
       .catch(e => console.warn('[Firebase]', e));
@@ -2741,6 +2742,7 @@ document.getElementById('worldGrid').addEventListener('scroll', () => {
 function closeWorldShop() {
   AudioEngine.stopHangarMusic();
   document.getElementById('worldScreen').classList.add('hidden');
+  updateStartShipEmoji();
 }
 
 function renderWorldShop() {
