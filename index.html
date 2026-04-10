@@ -2823,6 +2823,21 @@ function closeWorldShop() {
   document.getElementById('worldScreen').classList.add('hidden');
 }
 
+function resetWorldState() {
+  // Stop all music immediately
+  AudioEngine.stopWorldMusic();
+  AudioEngine.stopMusic();
+  // Clear all in-flight visual state
+  barriers = [];
+  particles = [];
+  coinPickups = [];
+  screenShake.x = 0; screenShake.y = 0; screenShake.power = 0;
+  // Reinitialize stars and nebula for the new world
+  initStars();
+  // Reset canvas shadow so no previous world's glow bleeds in
+  ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+}
+
 function renderWorldShop() {
   const coinEl = document.getElementById('worldCoinCount');
   if(coinEl) coinEl.textContent = save.coins;
@@ -2888,7 +2903,7 @@ function renderWorldShop() {
       save.selectedWorld = wd.id;
       if (wd.id !== 'auto') save.selected = wd.id;
       writeSave(save);
-      particles = []; initStars();
+      resetWorldState();
       AudioEngine.init(); AudioEngine.resume();
       AudioEngine.playScore();
       renderWorldShop();
@@ -2954,7 +2969,7 @@ function renderWorldShop() {
       save.selected = ship.id;
       save.selectedWorld = wt.worldId;
       writeSave(save);
-      particles = []; initStars();
+      resetWorldState();
       AudioEngine.init(); AudioEngine.resume();
       AudioEngine.playScore();
       renderWorldShop();
