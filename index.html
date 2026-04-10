@@ -815,7 +815,7 @@ const LUXURY_SHIPS = [
 
 // World definitions for UNIVERSE hangar
 const WORLD_DEFS = [
-  { id:'auto',       name:'AUTO',        emoji:'✨',  desc:"Follows the active ship's own world", accent:'#aaaaaa', bgA:'#060612', bgB:'#0a0d22' },
+  { id:'auto',       name:'TURBO',       emoji:'✨',  desc:"Follows the active ship's own world", accent:'#aaaaaa', bgA:'#060612', bgB:'#0a0d22' },
   { id:'prehistoric',name:'PREHISTORIC', emoji:'🦕',  desc:'Dark jungle · Lava particles · Tribal drums', accent:'#ff6600', bgA:'#071409', bgB:'#0e2210' },
   { id:'thegrid',    name:'THE GRID',    emoji:'💻',  desc:'Matrix code rain · Glitch barriers · Electronic', accent:'#00ff41', bgA:'#000000', bgB:'#000800' },
   { id:'machinewar', name:'MACHINE WAR', emoji:'🤖',  desc:'Dark metal · Fire sparks · Industrial metal', accent:'#cc2200', bgA:'#0c0000', bgB:'#140000' },
@@ -2957,7 +2957,7 @@ function drawWorldPreview(c, wd, selected) {
     ag.addColorStop(0,`rgba(${sr},0.30)`); ag.addColorStop(1,'transparent');
     gfx.fillStyle=ag; gfx.beginPath(); gfx.arc(W/2,H/2,32,0,Math.PI*2); gfx.fill();
     gfx.font='bold 10px Orbitron,monospace'; gfx.fillStyle=`rgba(${sr},0.65)`;
-    gfx.textAlign='center'; gfx.textBaseline='middle'; gfx.fillText('AUTO',W/2,H/2); gfx.textAlign='left'; gfx.textBaseline='alphabetic';
+    gfx.textAlign='center'; gfx.textBaseline='middle'; gfx.fillText('TURBO',W/2,H/2); gfx.textAlign='left'; gfx.textBaseline='alphabetic';
   }
   if(wd.id==='prehistoric') {
     gfx.fillStyle='rgba(0,20,2,0.55)';
