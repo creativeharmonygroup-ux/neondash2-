@@ -823,7 +823,7 @@ const TURBO_WORLD_THEME = {
 
 // World definitions for UNIVERSE hangar
 const WORLD_DEFS = [
-  { id:'auto',       name:'TURBO',       emoji:'✨',  desc:"Follows the active ship's own world", accent:'#aaaaaa', bgA:'#060612', bgB:'#0a0d22' },
+  { id:'auto',       name:'TURBO',       emoji:'✨',  desc:"Black speed track · NOS barriers · Trap beat", accent:'#ff4400', bgA:'#000000', bgB:'#030005' },
   { id:'prehistoric',name:'PREHISTORIC', emoji:'🦕',  desc:'Dark jungle · Lava particles · Tribal drums', accent:'#ff6600', bgA:'#071409', bgB:'#0e2210' },
   { id:'thegrid',    name:'THE GRID',    emoji:'💻',  desc:'Matrix code rain · Glitch barriers · Electronic', accent:'#00ff41', bgA:'#000000', bgB:'#000800' },
   { id:'machinewar', name:'MACHINE WAR', emoji:'🤖',  desc:'Dark metal · Fire sparks · Industrial metal', accent:'#cc2200', bgA:'#0c0000', bgB:'#140000' },
@@ -2692,6 +2692,7 @@ document.getElementById('restartBtn').addEventListener('touchend', e => { e.stop
 // \u2500\u2500 Game lifecycle \u2500\u2500
 function startGame() {
   state='playing'; score=0; frame=0; speed=5.45; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0; nearMissCooldown=0;
+  initStars();
   treasureChest=null; chestSpawned=false;
   legendaryChest=null; nextGoldenChestScore=4;
   nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
@@ -2887,6 +2888,7 @@ function renderWorldShop() {
       save.selectedWorld = wd.id;
       if (wd.id !== 'auto') save.selected = wd.id;
       writeSave(save);
+      particles = []; initStars();
       AudioEngine.init(); AudioEngine.resume();
       AudioEngine.playScore();
       renderWorldShop();
@@ -2952,6 +2954,7 @@ function renderWorldShop() {
       save.selected = ship.id;
       save.selectedWorld = wt.worldId;
       writeSave(save);
+      particles = []; initStars();
       AudioEngine.init(); AudioEngine.resume();
       AudioEngine.playScore();
       renderWorldShop();
@@ -3032,6 +3035,7 @@ function getRainbow(t) {
 //  DRAW FUNCTIONS
 // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function drawBackground() {
+  ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
   if (yupilandiaActive) {
     // Electric disco strobe: hot pink / electric purple / bright cyan cycling fast
     yupilandiaRainbowT += 0.055; // fast cycle
