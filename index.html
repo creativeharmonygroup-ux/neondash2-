@@ -835,9 +835,7 @@ function loadSave() {
     };
   } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'thegrid', selectedWorld: 'thegrid', luxuryOwned: [] }; }
 }
-let _userMadeSelection = false;
 function writeSave(s) {
-  _userMadeSelection = true;
   localStorage.setItem('neonDashSave', JSON.stringify(s));
   writeCloudSave(s);
 }
@@ -883,8 +881,8 @@ function writeCloudSave(s) {
         save.best         = Math.max(save.best,  d.best  || 0);
         if ((d.owned       || []).length > save.owned.length)       save.owned       = d.owned;
         if ((d.luxuryOwned || []).length > save.luxuryOwned.length) save.luxuryOwned = d.luxuryOwned;
-        if (!_userMadeSelection && d.selected)      save.selected      = d.selected;
-        if (!_userMadeSelection && d.selectedWorld) save.selectedWorld = d.selectedWorld;
+        if (d.selected)     save.selected     = d.selected;
+        if (d.selectedWorld) save.selectedWorld = d.selectedWorld;
         localStorage.setItem('neonDashSave', JSON.stringify(save));
         updateCoinHud();
         document.getElementById('bestDisplay').textContent = 'BEST: ' + save.best;
@@ -896,16 +894,9 @@ function writeCloudSave(s) {
 
 function getShip(id) { return SHIPS.find(s => s.id === id) || LUXURY_SHIPS.find(s => s.id === id) || SHIPS[0]; }
 function currentShip() { return getShip(save.selected); }
-const TURBO_WORLD_THEME = {
-  bgTop:'#000000', bgBot:'#030005', nebulaHue:195, nebulaSpread:0,
-  starRgb:'255,100,0', barrierHue:205, barrierSpread:6,
-  grid:'rgba(0,0,0,0)', worldId:'turbo', ambientColor:'#ff4400',
-  barrierStyle:'nos'
-};
 function currentWorldTheme() {
   const wid = save.selectedWorld;
-  if(wid === 'auto') return TURBO_WORLD_THEME;
-  if(wid) {
+  if(wid && wid !== 'auto') {
     const ws = SHIPS.find(s => s.worldTheme && s.worldTheme.worldId === wid)
              || LUXURY_SHIPS.find(s => s.worldTheme && s.worldTheme.worldId === wid);
     if(ws) return ws.worldTheme;
@@ -2115,57 +2106,6 @@ const AudioEngine = (() => {
     if(bar===3) for(let i=0;i<16;i++) nHat(st+NCb*2+i*(NCb/4),0.05+i*0.008);
   }
 
-  // ── TURBO: 140 BPM aggressive trap / heavy bass ──────────────────────────────
-  const TBb=60/140,TBe=TBb/2,TBs=TBb/4,TBBAR=TBb*4;
-  function scheduleTurbo(st){
-    const bar=wmBarCount%8;
-    // Heavy 808 with long sub tail
-    function t808(t,vel){
-      wmKick(t,118,30,0.50,vel||0.95);
-      if(!ctx||muted||!wmGain) return;
-      const sub=ctx.createOscillator(),sg=ctx.createGain();
-      sub.type='sine'; sub.frequency.setValueAtTime(46,t);
-      sg.gain.setValueAtTime(0,t); sg.gain.linearRampToValueAtTime(0.65*(vel||0.95),t+0.005);
-      sg.gain.exponentialRampToValueAtTime(0.001,t+0.54);
-      sub.connect(sg); sg.connect(wmGain); sub.start(t); sub.stop(t+0.56);
-    }
-    // Trap clap
-    function tClap(t){ wmN(t,0.10,0.44,'bandpass',1800); wmN(t,0.06,0.26,'highpass',6000); }
-    // Trap hi-hat
-    function tHat(t,v){ wmN(t,0.008,v,'highpass',15000); }
-    function tOHat(t){ wmN(t,0.055,0.11,'highpass',10000); }
-    // 808 patterns (8-bar cycle)
-    const kPats=[[0,2,3],[0,1.5,2,3.5],[0,2,2.5,3],[0,0.5,2,3],[0,1,2,3],[0,2,3,3.5],[0,1.5,2.5,3],[0,2,2.75,3.5]];
-    kPats[bar].forEach(b=>t808(st+b*TBb));
-    // Clap on 2 & 4
-    tClap(st+TBb); tClap(st+TBb*3);
-    if(bar%2===1) tClap(st+TBb*3.5);
-    // 16th hi-hat grid
-    for(let i=0;i<16;i++) tHat(st+i*TBs, i%8===0?0.13:i%4===0?0.07:i%2===0?0.035:0.015);
-    // 32nd trap roll on odd bars beat 3
-    if(bar%2===1) for(let i=0;i<8;i++) tHat(st+TBb*3+i*(TBs/2), 0.012+i*0.005);
-    // Open hats off-beat
-    [0.5,1.5,2.5].forEach(b=>tOHat(st+b*TBb));
-    // Constant sub drone
-    wmT(41,st,TBBAR*0.97,'sine',0.22);
-    // Bass stab sequence (sawtooth, aggressive)
-    const bSeq=[[55,0.5],[0,0.5],[73,0.25],[0,0.25],[65,0.5],[0,0.25],[55,0.25]];
-    let pos=0;
-    bSeq.forEach(([f,len])=>{
-      if(f && !muted && wmGain){
-        const osc=ctx.createOscillator(),g=ctx.createGain(),t2=st+pos*TBb;
-        osc.type='sawtooth'; osc.frequency.value=f;
-        g.gain.setValueAtTime(0,t2); g.gain.linearRampToValueAtTime(0.30,t2+0.007);
-        g.gain.exponentialRampToValueAtTime(0.001,t2+len*TBb*0.82);
-        osc.connect(g); g.connect(wmGain); osc.start(t2); osc.stop(t2+len*TBb);
-      }
-      pos+=len;
-    });
-    // Dark synth stab on select bars
-    if(bar===0||bar===4) wmT(110,st+TBb*0.5,TBb*0.22,'square',0.11);
-    if(bar===2||bar===6){ wmT(82,st+TBb*2,TBb*0.16,'square',0.13); wmT(110,st+TBb*2.5,TBb*0.14,'square',0.10); }
-  }
-
   // ── LUXURY AMBIENT: 62 BPM cinematic dark ──────────────────────────────────
   const LAb=60/62,LAe=LAb/2,LABAR=LAb*4;
   function scheduleLuxuryAmbient(st){
@@ -2214,7 +2154,6 @@ const AudioEngine = (() => {
   }
 
   const WM_SCHED={
-    turbo:      {fn:scheduleTurbo,      bar:TBBAR},
     prehistoric:{fn:schedulePrehistoric,bar:PCBAR},
     thegrid:    {fn:scheduleGrid,       bar:GCBAR},
     machinewar: {fn:scheduleMachineWar, bar:WCBAR},
@@ -2374,12 +2313,6 @@ function spawnWorldAmbient() {
   const wt = currentWorldTheme();
   const wid = wt.worldId;
   if(!wid) return;
-  if(wid==='turbo' && frame%2===0) {
-    // Orange flames on left edge
-    particles.push({x:Math.random()*28, y:canvas.height*0.5+Math.random()*canvas.height*0.5, vx:Math.random()*2.2+0.5, vy:-(Math.random()*4.5+1.0), life:0.85+Math.random()*0.3, decay:0.022+Math.random()*0.018, r:Math.random()*4.5+1.5, color:Math.random()<0.55?'#ff4400':Math.random()<0.5?'#ff8800':'#ffaa00', glow:true});
-    // Blue flames on right edge
-    particles.push({x:canvas.width-Math.random()*28, y:canvas.height*0.5+Math.random()*canvas.height*0.5, vx:-(Math.random()*2.2+0.5), vy:-(Math.random()*4.5+1.0), life:0.85+Math.random()*0.3, decay:0.022+Math.random()*0.018, r:Math.random()*4.5+1.5, color:Math.random()<0.55?'#0088ff':Math.random()<0.5?'#00ccff':'#0044ff', glow:true});
-  }
   if(wid==='prehistoric' && frame%3===0) {
     // Lava sparks rising from bottom
     particles.push({x:Math.random()*canvas.width, y:canvas.height, vx:(Math.random()-0.5)*2.2, vy:-(Math.random()*3.5+1.2), life:1, decay:0.022+Math.random()*0.022, r:Math.random()*3+1, color:Math.random()<0.5?'#ff4400':'#ff8c00', glow:true});
@@ -3196,18 +3129,6 @@ function drawBackground() {
     for(let y=60;y<canvas.height;y+=80){ ctx.strokeStyle=`rgba(160,0,0,${0.08+0.04*Math.sin(y*0.05+frame*0.01)})`; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
   }
 
-  // ── TURBO: black void + speed lines ─────────────────────────────────────────
-  if(wid==='turbo') {
-    for(let i=0;i<44;i++){
-      const y=(i/44)*canvas.height;
-      const lineLen=22+(i%9)*16, lspd=4.0+(i%6)*1.1;
-      const xOff=(frame*lspd+i*(canvas.width/44)*2.3)%(canvas.width+lineLen);
-      const alpha=0.05+(i%4)*0.03;
-      ctx.fillStyle=i%3===0?`rgba(255,55,0,${alpha})`:i%3===1?`rgba(255,110,10,${alpha})`:`rgba(210,10,0,${alpha})`;
-      ctx.fillRect(canvas.width-xOff,y,lineLen,i%5===0?2.2:1.1);
-    }
-  }
-
   // ── NITRO: speed blur streaks + chrome ground ─────────────────────────────
   if(wid==='nitro') {
     for(let i=0;i<20;i++){
@@ -3222,8 +3143,8 @@ function drawBackground() {
     ctx.fillStyle=chromeG; ctx.fillRect(0,canvas.height*0.82,canvas.width,canvas.height*0.18);
   }
 
-  // Nebula (skip for pure-black worlds)
-  if(wid!=='thegrid' && wid!=='turbo') {
+  // Nebula (skip for pure-black grid world)
+  if(wid!=='thegrid') {
     nebula.forEach((n,i)=>{
       const nh=wt.nebulaHue+(i-3)*(wt.nebulaSpread/3);
       const ng=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
@@ -3231,29 +3152,14 @@ function drawBackground() {
       ctx.fillStyle=ng; ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,Math.PI*2); ctx.fill();
     });
   }
-  if(wid!=='turbo'){
-    ctx.strokeStyle=wt.grid; ctx.lineWidth=1;
-    for(let x=0;x<canvas.width;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
-    for(let y=0;y<canvas.height;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
-  }
-  if(wid==='turbo'){
-    // Speed sparks — bright flecks rushing left instead of stars
-    ctx.save(); ctx.lineWidth=1.2;
-    stars.forEach(s=>{
-      const len=3+s.speed*9;
-      const alpha=s.opacity*(0.5+0.5*Math.sin(s.twinkle+frame*0.12));
-      ctx.strokeStyle=Math.floor(s.twinkle*10)%3===0?`rgba(0,180,255,${alpha})`:Math.floor(s.twinkle*10)%3===1?`rgba(255,120,0,${alpha})`:`rgba(255,60,0,${alpha})`;
-      ctx.lineWidth=s.r*0.7;
-      ctx.beginPath(); ctx.moveTo(s.x,s.y); ctx.lineTo(s.x+len,s.y); ctx.stroke();
-    });
-    ctx.restore();
-  } else {
-    stars.forEach(s=>{
-      const tw=0.5+0.5*Math.sin(s.twinkle+frame*0.03);
-      ctx.beginPath();ctx.arc(s.x,s.y,s.r*(0.8+0.2*tw),0,Math.PI*2);
-      ctx.fillStyle=`rgba(${wt.starRgb},${s.opacity*tw})`;ctx.fill();
-    });
-  }
+  ctx.strokeStyle=wt.grid; ctx.lineWidth=1;
+  for(let x=0;x<canvas.width;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
+  for(let y=0;y<canvas.height;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+  stars.forEach(s=>{
+    const tw=0.5+0.5*Math.sin(s.twinkle+frame*0.03);
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r*(0.8+0.2*tw),0,Math.PI*2);
+    ctx.fillStyle=`rgba(${wt.starRgb},${s.opacity*tw})`;ctx.fill();
+  });
 }
 
 function drawCoinPickups() {
@@ -3920,38 +3826,6 @@ function drawBarrier(b) {
     ctx.strokeRect(b.x,0,BAR_W,b.topH); ctx.strokeRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
     ctx.shadowBlur=35; ctx.fillStyle=`hsl(${b.hue},100%,72%)`;
     ctx.fillRect(b.x-4,b.topH-10,BAR_W+8,10); ctx.fillRect(b.x-4,b.bottomY,BAR_W+8,10);
-
-  } else if(bStyle==='nos') {
-    // NOS nitro tank — cylindrical with sheen, rings, elliptical cap, valve nozzle
-    ctx.shadowColor='#00aaff'; ctx.shadowBlur=28;
-    // Cylinder body: left-to-right gradient simulating curved surface
-    const nosG=ctx.createLinearGradient(b.x,0,b.x+BAR_W,0);
-    nosG.addColorStop(0,'rgba(0,8,35,0.98)');
-    nosG.addColorStop(0.16,'rgba(0,45,120,0.92)');
-    nosG.addColorStop(0.42,'rgba(0,150,255,0.82)');
-    nosG.addColorStop(0.68,'rgba(0,55,150,0.90)');
-    nosG.addColorStop(1,'rgba(0,8,35,0.98)');
-    ctx.fillStyle=nosG;
-    ctx.fillRect(b.x,0,BAR_W,b.topH); ctx.fillRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
-    // Specular highlight stripe
-    ctx.fillStyle='rgba(160,220,255,0.13)';
-    ctx.fillRect(b.x+BAR_W*0.36,0,BAR_W*0.13,b.topH);
-    ctx.fillRect(b.x+BAR_W*0.36,b.bottomY,BAR_W*0.13,canvas.height-b.bottomY);
-    // Horizontal pressure rings
-    ctx.shadowBlur=5; ctx.fillStyle='rgba(0,200,255,0.26)';
-    for(let y=10;y<b.topH-5;y+=13) ctx.fillRect(b.x-1,y,BAR_W+2,2);
-    for(let y=b.bottomY+10;y<canvas.height-5;y+=13) ctx.fillRect(b.x-1,y,BAR_W+2,2);
-    // Outer edge neon glow
-    ctx.shadowBlur=38; ctx.strokeStyle='#00bbff'; ctx.lineWidth=2;
-    ctx.strokeRect(b.x,0,BAR_W,b.topH); ctx.strokeRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
-    // Elliptical dome cap at facing ends
-    ctx.shadowBlur=48; ctx.fillStyle='#00ddff';
-    ctx.beginPath(); ctx.ellipse(b.x+BAR_W/2,b.topH,BAR_W/2+3,8,0,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(b.x+BAR_W/2,b.bottomY,BAR_W/2+3,8,0,0,Math.PI*2); ctx.fill();
-    // Valve nozzle at cap centre
-    ctx.shadowBlur=20; ctx.fillStyle='#aaeeff';
-    ctx.fillRect(b.x+BAR_W*0.36,b.topH-2,BAR_W*0.28,9);
-    ctx.fillRect(b.x+BAR_W*0.36,b.bottomY-7,BAR_W*0.28,9);
 
   } else {
     // Default neon barrier
