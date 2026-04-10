@@ -910,6 +910,7 @@ function currentWorldTheme() {
              || LUXURY_SHIPS.find(s => s.worldTheme && s.worldTheme.worldId === wid);
     if(ws) return ws.worldTheme;
   }
+  if(save.selected === 'nitro') return TURBO_WORLD_THEME;
   return currentShip().worldTheme;
 }
 
@@ -2901,7 +2902,8 @@ function renderWorldShop() {
 
     card.addEventListener('click', () => {
       save.selectedWorld = wd.id;
-      if (wd.id !== 'auto') save.selected = wd.id;
+      if (wd.id === 'auto') save.selected = 'nitro';
+      else save.selected = wd.id;
       writeSave(save);
       resetWorldState();
       AudioEngine.init(); AudioEngine.resume();
