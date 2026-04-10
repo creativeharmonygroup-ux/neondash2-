@@ -3966,7 +3966,7 @@ function loop() {
           setTimeout(() => triggerYupilandia(), 1200);
         }
       } else if(phase === 2){
-        if(!yupilandiaActive) targetSpeedMult = 0.75;
+        if(!yupilandiaActive) targetSpeedMult = 0.40;
         if(!yupilandiaActive){ fluctNotif.textContent = 'SLOW DOWN...'; fluctNotif.style.cssText = 'color:#00ccff;font-size:22px;text-shadow:0 0 18px #00ccff,0 0 40px #0099ff;'; fluctNotif.classList.add('show'); setTimeout(()=>fluctNotif.classList.remove('show'), 1500); flashScreen('#00ccff', 0.2); }
       } else {
         if(!yupilandiaActive) targetSpeedMult = 1.0;
