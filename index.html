@@ -813,6 +813,14 @@ const LUXURY_SHIPS = [
   },
 ];
 
+// TURBO world theme (used when selectedWorld === 'auto')
+const TURBO_WORLD_THEME = {
+  bgTop:'#000000', bgBot:'#030005', nebulaHue:195, nebulaSpread:0,
+  starRgb:'255,100,0', barrierHue:25, barrierSpread:6,
+  grid:'rgba(0,0,0,0)', worldId:'turbo', ambientColor:'#ff4400',
+  barrierStyle:'nos'
+};
+
 // World definitions for UNIVERSE hangar
 const WORLD_DEFS = [
   { id:'auto',       name:'TURBO',       emoji:'✨',  desc:"Follows the active ship's own world", accent:'#aaaaaa', bgA:'#060612', bgB:'#0a0d22' },
@@ -896,7 +904,8 @@ function getShip(id) { return SHIPS.find(s => s.id === id) || LUXURY_SHIPS.find(
 function currentShip() { return getShip(save.selected); }
 function currentWorldTheme() {
   const wid = save.selectedWorld;
-  if(wid && wid !== 'auto') {
+  if(wid === 'auto') return TURBO_WORLD_THEME;
+  if(wid) {
     const ws = SHIPS.find(s => s.worldTheme && s.worldTheme.worldId === wid)
              || LUXURY_SHIPS.find(s => s.worldTheme && s.worldTheme.worldId === wid);
     if(ws) return ws.worldTheme;
@@ -2153,7 +2162,34 @@ const AudioEngine = (() => {
     if(bar===3) for(let i=0;i<8;i++) rtSnare(st+RTb*3+i*RTs*0.5);
   }
 
+  // ── TURBO: 140 BPM aggressive trap ──────────────────────────────────────────
+  const TRb=60/140,TRe=TRb/2,TRs=TRb/4,TRBAR=TRb*4;
+  function scheduleTurbo(st){
+    const bar=wmBarCount%4;
+    function trKick(t,v=1){ wmKick(t,55,40,0.25*v,0.55); wmT(60,t,0.04,'sine',0.35*v); }
+    function trSnare(t){ wmN(t,0.085,0.22,'bandpass',2200); wmT(220,t,0.025,'square',0.12); }
+    function trHat(t,v){ wmN(t,0.008,v,'highpass',11000); }
+    // 808 kick pattern: beat 1, beat 3, and syncopated hits
+    trKick(st); trKick(st+TRb*2);
+    if(bar%2===0){ trKick(st+TRb*1.5,0.6); trKick(st+TRb*3.5,0.5); }
+    else { trKick(st+TRb*0.75,0.55); trKick(st+TRb*2.75,0.65); }
+    // Snare on 2 & 4
+    trSnare(st+TRb); trSnare(st+TRb*3);
+    // Rolling hi-hats 32nds on bar 4
+    for(let i=0;i<16;i++) trHat(st+i*TRs, i%4===0?0.12:i%2===0?0.06:0.025);
+    if(bar===3) for(let i=0;i<32;i++) trHat(st+TRb*2+i*(TRs/2),0.018);
+    // Deep 808 bass stabs
+    const bassFreqs=[[55,73,55,82],[55,65,49,73],[61,73,55,65],[49,61,55,73]];
+    bassFreqs[bar].forEach((f,i)=>{
+      wmT(f,st+i*TRb,TRb*0.92,'sine',0.32);
+      wmT(f*2,st+i*TRb,TRb*0.18,'sawtooth',0.04);
+    });
+    // Aggressive synth stab on 1 & 3
+    wmT(220,st,0.06,'sawtooth',0.06); wmT(220,st+TRb*2,0.06,'sawtooth',0.06);
+  }
+
   const WM_SCHED={
+    turbo:      {fn:scheduleTurbo,     bar:TRBAR},
     prehistoric:{fn:schedulePrehistoric,bar:PCBAR},
     thegrid:    {fn:scheduleGrid,       bar:GCBAR},
     machinewar: {fn:scheduleMachineWar, bar:WCBAR},
@@ -3074,6 +3110,18 @@ function drawBackground() {
 
   const wid = wt.worldId;
 
+  // ── TURBO: black + orange/red speed lines ────────────────────────────────
+  if(wid==='turbo') {
+    for(let i=0;i<44;i++){
+      const y=(i/44)*canvas.height;
+      const lineLen=22+(i%9)*16, lspd=4.0+(i%6)*1.1;
+      const xOff=(frame*lspd+i*(canvas.width/44)*2.3)%(canvas.width+lineLen);
+      const alpha=0.05+(i%4)*0.03;
+      ctx.fillStyle=i%3===0?`rgba(255,55,0,${alpha})`:i%3===1?`rgba(255,110,10,${alpha})`:`rgba(210,10,0,${alpha})`;
+      ctx.fillRect(canvas.width-xOff,y,lineLen,i%5===0?2.2:1.1);
+    }
+  }
+
   // ── PREHISTORIC: jungle canopy + lava glow ──────────────────────────────
   if(wid==='prehistoric') {
     const lavaG=ctx.createLinearGradient(0,canvas.height*0.72,0,canvas.height);
@@ -3143,8 +3191,8 @@ function drawBackground() {
     ctx.fillStyle=chromeG; ctx.fillRect(0,canvas.height*0.82,canvas.width,canvas.height*0.18);
   }
 
-  // Nebula (skip for pure-black grid world)
-  if(wid!=='thegrid') {
+  // Nebula (skip for pure-black worlds)
+  if(wid!=='thegrid' && wid!=='turbo') {
     nebula.forEach((n,i)=>{
       const nh=wt.nebulaHue+(i-3)*(wt.nebulaSpread/3);
       const ng=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
@@ -3826,6 +3874,34 @@ function drawBarrier(b) {
     ctx.strokeRect(b.x,0,BAR_W,b.topH); ctx.strokeRect(b.x,b.bottomY,BAR_W,canvas.height-b.bottomY);
     ctx.shadowBlur=35; ctx.fillStyle=`hsl(${b.hue},100%,72%)`;
     ctx.fillRect(b.x-4,b.topH-10,BAR_W+8,10); ctx.fillRect(b.x-4,b.bottomY,BAR_W+8,10);
+
+  } else if(bStyle==='nos') {
+    // NOS tank: cylindrical blue with neon glow
+    function drawNosTank(bx,y0,h){
+      if(h<=0) return;
+      const g=ctx.createLinearGradient(bx,0,bx+BAR_W,0);
+      g.addColorStop(0,'rgba(0,10,40,0.95)'); g.addColorStop(0.18,'rgba(0,80,200,0.90)');
+      g.addColorStop(0.5,'rgba(0,180,255,0.95)'); g.addColorStop(0.82,'rgba(0,80,200,0.90)');
+      g.addColorStop(1,'rgba(0,10,40,0.95)');
+      ctx.fillStyle=g; ctx.fillRect(bx,y0,BAR_W,h);
+      ctx.shadowBlur=38; ctx.strokeStyle='rgba(0,220,255,0.9)'; ctx.lineWidth=2;
+      ctx.strokeRect(bx,y0,BAR_W,h);
+      // Pressure rings
+      ctx.shadowBlur=8; ctx.strokeStyle='rgba(0,200,255,0.30)'; ctx.lineWidth=1.5;
+      for(let ry=y0+14;ry<y0+h-8;ry+=22){ ctx.beginPath(); ctx.moveTo(bx+2,ry); ctx.lineTo(bx+BAR_W-2,ry); ctx.stroke(); }
+      // Specular highlight
+      ctx.fillStyle='rgba(255,255,255,0.12)';
+      ctx.fillRect(bx+Math.floor(BAR_W*0.22),y0,Math.floor(BAR_W*0.18),h);
+    }
+    ctx.shadowBlur=22;
+    drawNosTank(b.x,0,b.topH); drawNosTank(b.x,b.bottomY,canvas.height-b.bottomY);
+    // Elliptical end caps
+    ctx.shadowBlur=30; ctx.fillStyle='rgba(0,200,255,0.85)';
+    ctx.beginPath(); ctx.ellipse(b.x+BAR_W/2,b.topH,BAR_W/2+4,7,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(b.x+BAR_W/2,b.bottomY,BAR_W/2+4,7,0,0,Math.PI*2); ctx.fill();
+    // Valve nozzle
+    ctx.shadowBlur=20; ctx.fillStyle='rgba(0,160,255,0.8)';
+    ctx.fillRect(b.x+BAR_W/2-4,b.topH-3,8,6); ctx.fillRect(b.x+BAR_W/2-4,b.bottomY-3,8,6);
 
   } else {
     // Default neon barrier
