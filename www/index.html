@@ -4595,6 +4595,7 @@ function loop() {
       checkCursedChestCollision();
       checkSurpriseCollision();
       if(!yupilandiaActive && !yupilandiaFrozen && checkCollision()){combo=0;gameOver();}
+      if(yupilandiaActive && (player.y - player.size < 0 || player.y + player.size > canvas.height)){combo=0;gameOver();}
     }
   }
 
