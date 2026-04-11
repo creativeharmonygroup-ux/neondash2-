@@ -106,6 +106,20 @@
     60%  { opacity: 1; transform: translateY(-30px) scale(1.05); }
     100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
   }
+  .coinFloat.cursedPenalty {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    animation: floatUpCursed 1.4s ease-out forwards;
+  }
+  @keyframes floatUpCursed {
+    0%   { opacity: 0; transform: translateY(0) scale(2.0) rotate(-4deg); }
+    10%  { opacity: 1; transform: translateY(-6px) scale(1.4) rotate(3deg); }
+    35%  { opacity: 1; transform: translateY(-20px) scale(1.1) rotate(-2deg); }
+    70%  { opacity: 1; transform: translateY(-46px) scale(1.0) rotate(1deg); }
+    100% { opacity: 0; transform: translateY(-80px) scale(0.75) rotate(0deg); }
+  }
 
   #soundToggle {
     position: absolute; top: 16px; right: 16px;
@@ -813,9 +827,17 @@ const LUXURY_SHIPS = [
   },
 ];
 
+// TURBO world theme (used when selectedWorld === 'auto')
+const TURBO_WORLD_THEME = {
+  bgTop:'#000000', bgBot:'#030005', nebulaHue:195, nebulaSpread:0,
+  starRgb:'255,100,0', barrierHue:25, barrierSpread:6,
+  grid:'rgba(0,0,0,0)', worldId:'turbo', ambientColor:'#ff4400',
+  barrierStyle:'nos'
+};
+
 // World definitions for UNIVERSE hangar
 const WORLD_DEFS = [
-  { id:'auto',       name:'TURBO',       emoji:'✨',  desc:"Follows the active ship's own world", accent:'#aaaaaa', bgA:'#060612', bgB:'#0a0d22' },
+  { id:'auto',       name:'TURBO',       emoji:'✨',  desc:"Black speed track · NOS barriers · Trap beat", accent:'#ff4400', bgA:'#000000', bgB:'#030005' },
   { id:'prehistoric',name:'PREHISTORIC', emoji:'🦕',  desc:'Dark jungle · Lava particles · Tribal drums', accent:'#ff6600', bgA:'#071409', bgB:'#0e2210' },
   { id:'thegrid',    name:'THE GRID',    emoji:'💻',  desc:'Matrix code rain · Glitch barriers · Electronic', accent:'#00ff41', bgA:'#000000', bgB:'#000800' },
   { id:'machinewar', name:'MACHINE WAR', emoji:'🤖',  desc:'Dark metal · Fire sparks · Industrial metal', accent:'#cc2200', bgA:'#0c0000', bgB:'#140000' },
@@ -896,11 +918,13 @@ function getShip(id) { return SHIPS.find(s => s.id === id) || LUXURY_SHIPS.find(
 function currentShip() { return getShip(save.selected); }
 function currentWorldTheme() {
   const wid = save.selectedWorld;
-  if(wid && wid !== 'auto') {
+  if(wid === 'auto') return TURBO_WORLD_THEME;
+  if(wid) {
     const ws = SHIPS.find(s => s.worldTheme && s.worldTheme.worldId === wid)
              || LUXURY_SHIPS.find(s => s.worldTheme && s.worldTheme.worldId === wid);
     if(ws) return ws.worldTheme;
   }
+  if(save.selected === 'nitro') return TURBO_WORLD_THEME;
   return currentShip().worldTheme;
 }
 
@@ -1614,6 +1638,98 @@ const AudioEngine = (() => {
     });
   }
 
+  function playCursedChest() {
+    // Horror sting: instant impact cluster + shrieking downward stab
+    init(); resume();
+    const t = ctx.currentTime;
+
+    // Noise impact — white noise slam on hit
+    playNoise(t, 0.08, 0.55);
+
+    // Cluster of dissonant high tones crashing in simultaneously (horror string hit)
+    [[880, 831], [1109, 1047], [1397, 1319]].forEach(([f1, f2], i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(f1, t);
+      o.frequency.linearRampToValueAtTime(f2, t + 0.18);
+      g.gain.setValueAtTime(0.22 - i * 0.04, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      o.connect(g); g.connect(masterGain); o.start(t); o.stop(t + 0.25);
+    });
+
+    // Sharp descending shriek — single sawtooth drops fast like a horror violin stab
+    const shriek = ctx.createOscillator(), shriekG = ctx.createGain();
+    shriek.type = 'sawtooth';
+    shriek.frequency.setValueAtTime(1600, t + 0.01);
+    shriek.frequency.exponentialRampToValueAtTime(120, t + 0.35);
+    shriekG.gain.setValueAtTime(0, t);
+    shriekG.gain.linearRampToValueAtTime(0.38, t + 0.015);
+    shriekG.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+    shriek.connect(shriekG); shriekG.connect(masterGain);
+    shriek.start(t + 0.01); shriek.stop(t + 0.40);
+
+    // Sub thud underneath — dark weight
+    const thud = ctx.createOscillator(), thudG = ctx.createGain();
+    thud.type = 'sine';
+    thud.frequency.setValueAtTime(120, t);
+    thud.frequency.exponentialRampToValueAtTime(35, t + 0.20);
+    thudG.gain.setValueAtTime(0.5, t);
+    thudG.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    thud.connect(thudG); thudG.connect(masterGain); thud.start(t); thud.stop(t + 0.25);
+  }
+
+  function playDevilChest() {
+    // Deeper, more terrifying version: demonic growl + brutal descending crash
+    init(); resume();
+    const t = ctx.currentTime;
+
+    // Monstrous sub-bass crash — two overlapping subs
+    [55, 40].forEach((freq, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(freq * 2.5, t + i * 0.03);
+      o.frequency.exponentialRampToValueAtTime(freq * 0.6, t + 0.8 + i * 0.05);
+      g.gain.setValueAtTime(0.6 - i * 0.1, t + i * 0.03);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.85 + i * 0.05);
+      o.connect(g); g.connect(masterGain); o.start(t + i * 0.03); o.stop(t + 0.9 + i * 0.05);
+    });
+
+    // Demonic descending wail — longer, lower, more distorted
+    const wail = ctx.createOscillator(), wailG = ctx.createGain();
+    const dist = ctx.createWaveShaper();
+    const dc = new Float32Array(512);
+    for (let i = 0; i < 512; i++) { const x = (i * 2) / 512 - 1; dc[i] = (Math.PI + 300) * x / (Math.PI + 300 * Math.abs(x)); }
+    dist.curve = dc;
+    wail.type = 'sawtooth';
+    wail.frequency.setValueAtTime(440, t + 0.01);
+    wail.frequency.exponentialRampToValueAtTime(22, t + 1.4);
+    wailG.gain.setValueAtTime(0, t);
+    wailG.gain.linearRampToValueAtTime(0.38, t + 0.05);
+    wailG.gain.setValueAtTime(0.38, t + 0.5);
+    wailG.gain.exponentialRampToValueAtTime(0.001, t + 1.45);
+    wail.connect(dist); dist.connect(wailG); wailG.connect(masterGain);
+    wail.start(t + 0.01); wail.stop(t + 1.5);
+
+    // Evil laugh — five descending growl barks (deeper and slower than cursed)
+    [0.04, 0.20, 0.36, 0.50, 0.63].forEach((dt, i) => {
+      const bark = ctx.createOscillator(), bG = ctx.createGain();
+      bark.type = 'square';
+      bark.frequency.setValueAtTime(95 - i * 12, t + dt);
+      bark.frequency.exponentialRampToValueAtTime(42 - i * 4, t + dt + 0.13);
+      bG.gain.setValueAtTime(0.28 - i * 0.02, t + dt);
+      bG.gain.exponentialRampToValueAtTime(0.001, t + dt + 0.15);
+      bark.connect(bG); bG.connect(masterGain); bark.start(t + dt); bark.stop(t + dt + 0.17);
+    });
+
+    // Diabolus in musica — augmented 4th tritone chord, long sustain
+    [98, 139, 196].forEach((freq, i) => {
+      playTone({ type: 'triangle', freq, duration: 1.2, gainPeak: 0.16, startTime: t + 0.55 + i * 0.02 });
+    });
+
+    // Noise crashes — three layered hits
+    [0, 0.06, 0.14].forEach(dt => playNoise(t + dt, 0.18, 0.30 - dt));
+  }
+
   function setMusicPhase(p) {} // no-op — single energetic track
 
   // ── YUPILANDIA: 180 BPM BERLIN TECHNO — four-on-the-floor, claps, fast hats ──
@@ -2153,7 +2269,34 @@ const AudioEngine = (() => {
     if(bar===3) for(let i=0;i<8;i++) rtSnare(st+RTb*3+i*RTs*0.5);
   }
 
+  // ── TURBO: 140 BPM aggressive trap ──────────────────────────────────────────
+  const TRb=60/140,TRe=TRb/2,TRs=TRb/4,TRBAR=TRb*4;
+  function scheduleTurbo(st){
+    const bar=wmBarCount%4;
+    function trKick(t,v=1){ wmKick(t,55,40,0.25*v,0.55); wmT(60,t,0.04,'sine',0.35*v); }
+    function trSnare(t){ wmN(t,0.085,0.22,'bandpass',2200); wmT(220,t,0.025,'square',0.12); }
+    function trHat(t,v){ wmN(t,0.008,v,'highpass',11000); }
+    // 808 kick pattern: beat 1, beat 3, and syncopated hits
+    trKick(st); trKick(st+TRb*2);
+    if(bar%2===0){ trKick(st+TRb*1.5,0.6); trKick(st+TRb*3.5,0.5); }
+    else { trKick(st+TRb*0.75,0.55); trKick(st+TRb*2.75,0.65); }
+    // Snare on 2 & 4
+    trSnare(st+TRb); trSnare(st+TRb*3);
+    // Rolling hi-hats 32nds on bar 4
+    for(let i=0;i<16;i++) trHat(st+i*TRs, i%4===0?0.12:i%2===0?0.06:0.025);
+    if(bar===3) for(let i=0;i<32;i++) trHat(st+TRb*2+i*(TRs/2),0.018);
+    // Deep 808 bass stabs
+    const bassFreqs=[[55,73,55,82],[55,65,49,73],[61,73,55,65],[49,61,55,73]];
+    bassFreqs[bar].forEach((f,i)=>{
+      wmT(f,st+i*TRb,TRb*0.92,'sine',0.32);
+      wmT(f*2,st+i*TRb,TRb*0.18,'sawtooth',0.04);
+    });
+    // Aggressive synth stab on 1 & 3
+    wmT(220,st,0.06,'sawtooth',0.06); wmT(220,st+TRb*2,0.06,'sawtooth',0.06);
+  }
+
   const WM_SCHED={
+    turbo:      {fn:scheduleTurbo,     bar:TRBAR},
     prehistoric:{fn:schedulePrehistoric,bar:PCBAR},
     thegrid:    {fn:scheduleGrid,       bar:GCBAR},
     machinewar: {fn:scheduleMachineWar, bar:WCBAR},
@@ -2212,7 +2355,7 @@ const AudioEngine = (() => {
     wmGain=null; wmId=null;
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic };
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic };
 })();
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -2256,6 +2399,7 @@ let nextGoldenChestScore = 4;
 // Legendary chest triggers at 100 total coins, then every 50 after (150, 200, 250...)
 // Legendary chest spawns at every 100-coin multiple (100, 200, 300...)
 let nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
+let cursedChests = [];
 
 // ── Surprise obstacles ──
 let surpriseObstacle = null;
@@ -2656,8 +2800,10 @@ document.getElementById('restartBtn').addEventListener('touchend', e => { e.stop
 // \u2500\u2500 Game lifecycle \u2500\u2500
 function startGame() {
   state='playing'; score=0; frame=0; speed=5.45; barriers=[]; particles=[]; coinPickups=[]; combo=0; coinsThisRun=0; nearMissCooldown=0;
+  initStars();
   treasureChest=null; chestSpawned=false;
   legendaryChest=null; nextGoldenChestScore=4;
+  cursedChests=[];
   nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
   surpriseObstacle=null; nextSurpriseScore=10+Math.floor(Math.random()*6);
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
@@ -2786,6 +2932,21 @@ function closeWorldShop() {
   document.getElementById('worldScreen').classList.add('hidden');
 }
 
+function resetWorldState() {
+  // Stop all music immediately
+  AudioEngine.stopWorldMusic();
+  AudioEngine.stopMusic();
+  // Clear all in-flight visual state
+  barriers = [];
+  particles = [];
+  coinPickups = [];
+  screenShake.x = 0; screenShake.y = 0; screenShake.power = 0;
+  // Reinitialize stars and nebula for the new world
+  initStars();
+  // Reset canvas shadow so no previous world's glow bleeds in
+  ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+}
+
 function renderWorldShop() {
   const coinEl = document.getElementById('worldCoinCount');
   if(coinEl) coinEl.textContent = save.coins;
@@ -2849,8 +3010,10 @@ function renderWorldShop() {
 
     card.addEventListener('click', () => {
       save.selectedWorld = wd.id;
-      if (wd.id !== 'auto') save.selected = wd.id;
+      if (wd.id === 'auto') save.selected = 'nitro';
+      else save.selected = wd.id;
       writeSave(save);
+      resetWorldState();
       AudioEngine.init(); AudioEngine.resume();
       AudioEngine.playScore();
       renderWorldShop();
@@ -2916,6 +3079,7 @@ function renderWorldShop() {
       save.selected = ship.id;
       save.selectedWorld = wt.worldId;
       writeSave(save);
+      resetWorldState();
       AudioEngine.init(); AudioEngine.resume();
       AudioEngine.playScore();
       renderWorldShop();
@@ -2996,6 +3160,7 @@ function getRainbow(t) {
 //  DRAW FUNCTIONS
 // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 function drawBackground() {
+  ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
   if (yupilandiaActive) {
     // Electric disco strobe: hot pink / electric purple / bright cyan cycling fast
     yupilandiaRainbowT += 0.055; // fast cycle
@@ -3074,6 +3239,18 @@ function drawBackground() {
 
   const wid = wt.worldId;
 
+  // ── TURBO: black + orange/red speed lines ────────────────────────────────
+  if(wid==='turbo') {
+    for(let i=0;i<44;i++){
+      const y=(i/44)*canvas.height;
+      const lineLen=22+(i%9)*16, lspd=4.0+(i%6)*1.1;
+      const xOff=(frame*lspd+i*(canvas.width/44)*2.3)%(canvas.width+lineLen);
+      const alpha=0.05+(i%4)*0.03;
+      ctx.fillStyle=i%3===0?`rgba(255,55,0,${alpha})`:i%3===1?`rgba(255,110,10,${alpha})`:`rgba(210,10,0,${alpha})`;
+      ctx.fillRect(canvas.width-xOff,y,lineLen,i%5===0?2.2:1.1);
+    }
+  }
+
   // ── PREHISTORIC: jungle canopy + lava glow ──────────────────────────────
   if(wid==='prehistoric') {
     const lavaG=ctx.createLinearGradient(0,canvas.height*0.72,0,canvas.height);
@@ -3143,8 +3320,8 @@ function drawBackground() {
     ctx.fillStyle=chromeG; ctx.fillRect(0,canvas.height*0.82,canvas.width,canvas.height*0.18);
   }
 
-  // Nebula (skip for pure-black grid world)
-  if(wid!=='thegrid') {
+  // Nebula (skip for pure-black worlds)
+  if(wid!=='thegrid' && wid!=='turbo') {
     nebula.forEach((n,i)=>{
       const nh=wt.nebulaHue+(i-3)*(wt.nebulaSpread/3);
       const ng=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
@@ -3462,6 +3639,287 @@ function checkLegendaryChestCollection() {
     awardCoins(30, ch.x, ch.y);
     showLegendaryFloat();
   }
+}
+
+// ═══════════════════════════════════════════
+//  CURSED CHESTS
+// ═══════════════════════════════════════════
+function drawCursedChest(ch) {
+  if (ch.collected) return;
+  ch.t += 0.065;
+  const isDevil = ch.kind === 'devil';
+  const pulse = 1 + Math.sin(ch.t * 3.2) * 0.12;
+  const W = ch.w * pulse, H = ch.h * pulse;
+  const lh = H * 0.42;
+
+  ctx.save();
+  ctx.translate(ch.x, ch.y);
+
+  if (isDevil) {
+    // ── DEVIL CHEST: pure black body, vivid purple accents, bold horns ──
+
+    // Outer purple aura (very intense)
+    ctx.shadowColor = '#cc00ff';
+    ctx.shadowBlur = 55 + Math.sin(ch.t * 2.8) * 25;
+
+    // Body — pure black
+    const bodyG = ctx.createLinearGradient(0, -H/2+lh, 0, H/2);
+    bodyG.addColorStop(0, '#111111');
+    bodyG.addColorStop(0.5, '#060606');
+    bodyG.addColorStop(1, '#000000');
+    ctx.fillStyle = bodyG;
+    rrect(ctx, -W/2, -H/2+lh, W, H*(1-0.42), 4); ctx.fill();
+
+    // Purple trim stripe on body edges
+    ctx.shadowColor = '#cc00ff'; ctx.shadowBlur = 12;
+    ctx.strokeStyle = '#aa00ff'; ctx.lineWidth = 2.5;
+    rrect(ctx, -W/2, -H/2+lh, W, H*(1-0.42), 4); ctx.stroke();
+
+    // Lid — black with vivid purple top edge
+    ctx.shadowBlur = 14;
+    const lidG = ctx.createLinearGradient(0, -H/2, 0, -H/2+lh);
+    lidG.addColorStop(0, '#0d0d0d');
+    lidG.addColorStop(0.6, '#080808');
+    lidG.addColorStop(1, '#000000');
+    ctx.fillStyle = lidG;
+    rrect(ctx, -W/2, -H/2, W, lh+4, 5); ctx.fill();
+
+    // Purple lid border stroke
+    ctx.shadowColor = '#ee00ff'; ctx.shadowBlur = 18;
+    ctx.strokeStyle = '#cc00ff'; ctx.lineWidth = 2;
+    rrect(ctx, -W/2, -H/2, W, lh+4, 5); ctx.stroke();
+
+    // Lock band — glowing purple
+    ctx.fillStyle = '#6600bb'; ctx.shadowColor='#cc00ff'; ctx.shadowBlur=16;
+    ctx.fillRect(-W/2, -H/2+lh-3, W, 7);
+
+    // Lock disc — bright purple orb
+    ctx.shadowColor='#ff00ff'; ctx.shadowBlur=30;
+    ctx.fillStyle='#cc00ff';
+    ctx.beginPath(); ctx.arc(0, -H/2+lh, 9, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#000000';
+    ctx.beginPath(); ctx.arc(0, -H/2+lh-1, 4, 0, Math.PI*2); ctx.fill();
+    // Purple dot center glow
+    ctx.fillStyle='#ee00ff'; ctx.shadowBlur=10;
+    ctx.beginPath(); ctx.arc(0, -H/2+lh-1, 1.5, 0, Math.PI*2); ctx.fill();
+
+    // Bold horns poking up from lid top
+    ctx.shadowColor='#ff00ff'; ctx.shadowBlur=22;
+    // Left horn fill (bright purple)
+    ctx.fillStyle='#9900ee';
+    ctx.beginPath();
+    ctx.moveTo(-W*0.32, -H/2+2);
+    ctx.bezierCurveTo(-W*0.44, -H/2-8, -W*0.30, -H/2-30, -W*0.19, -H/2-26);
+    ctx.bezierCurveTo(-W*0.12, -H/2-22, -W*0.16, -H/2-4, -W*0.20, -H/2+2);
+    ctx.closePath(); ctx.fill();
+    // Right horn fill
+    ctx.beginPath();
+    ctx.moveTo(W*0.32, -H/2+2);
+    ctx.bezierCurveTo(W*0.44, -H/2-8, W*0.30, -H/2-30, W*0.19, -H/2-26);
+    ctx.bezierCurveTo(W*0.12, -H/2-22, W*0.16, -H/2-4, W*0.20, -H/2+2);
+    ctx.closePath(); ctx.fill();
+    // Horn bright highlights
+    ctx.fillStyle='#dd00ff';
+    ctx.beginPath();
+    ctx.moveTo(-W*0.28, -H/2+1);
+    ctx.bezierCurveTo(-W*0.34, -H/2-10, -W*0.26, -H/2-24, -W*0.21, -H/2-22);
+    ctx.bezierCurveTo(-W*0.17, -H/2-20, -W*0.20, -H/2-6, -W*0.22, -H/2+1);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(W*0.28, -H/2+1);
+    ctx.bezierCurveTo(W*0.34, -H/2-10, W*0.26, -H/2-24, W*0.21, -H/2-22);
+    ctx.bezierCurveTo(W*0.17, -H/2-20, W*0.20, -H/2-6, W*0.22, -H/2+1);
+    ctx.closePath(); ctx.fill();
+    // Horn tip glow balls
+    ctx.shadowColor='#ff88ff'; ctx.shadowBlur=20; ctx.fillStyle='#ff44ff';
+    ctx.beginPath(); ctx.arc(-W*0.20, -H/2-25, 3.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(W*0.20, -H/2-25, 3.5, 0, Math.PI*2); ctx.fill();
+
+    // "DEVIL" label — bright magenta so it pops on black
+    ctx.shadowBlur = 14; ctx.shadowColor = '#ff00ff';
+    ctx.fillStyle = '#ff44ff';
+    ctx.font = `bold ${Math.round(W*0.20)}px Orbitron`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('DEVIL', 0, H*0.10);
+
+    // Purple/magenta flame orbiters
+    for (let i = 0; i < 12; i++) {
+      const dir = i % 2 === 0 ? 1 : -1;
+      const ang = (i / 12) * Math.PI * 2 + ch.t * 1.4 * dir;
+      const orbit = 32 + (i % 4) * 12;
+      const fx = Math.cos(ang) * orbit, fy = Math.sin(ang) * orbit;
+      const bright = Math.sin(ch.t * 4 + i * 0.85) * 0.5 + 0.5;
+      ctx.shadowColor = '#ff00ff'; ctx.shadowBlur = 16 * bright;
+      ctx.fillStyle = `hsla(${285+i*6},100%,${55+bright*30}%,${0.5+bright*0.5})`;
+      ctx.save(); ctx.translate(fx, fy); ctx.rotate(ch.t * dir * 1.6 + i);
+      ctx.beginPath();
+      ctx.moveTo(0, -(4+bright*2.5)*pulse);
+      ctx.bezierCurveTo(2.8, -1.5, 3.8, 1.8, 0, (4+bright*2.5)*pulse);
+      ctx.bezierCurveTo(-3.8, 1.8, -2.8, -1.5, 0, -(4+bright*2.5)*pulse);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+  } else {
+    // ── CURSED CHEST: vivid crimson red body, white skull with red glow eyes ──
+
+    // Outer red aura (intense pulsing)
+    ctx.shadowColor = '#ff0000';
+    ctx.shadowBlur = 48 + Math.sin(ch.t * 3.0) * 22;
+
+    // Body — bright crimson red (NOT dark, clearly red)
+    const bodyG = ctx.createLinearGradient(0, -H/2+lh, 0, H/2);
+    bodyG.addColorStop(0, '#cc1100');
+    bodyG.addColorStop(0.45, '#aa0000');
+    bodyG.addColorStop(1, '#660000');
+    ctx.fillStyle = bodyG;
+    rrect(ctx, -W/2, -H/2+lh, W, H*(1-0.42), 4); ctx.fill();
+
+    // Red trim stripe
+    ctx.shadowColor = '#ff4400'; ctx.shadowBlur = 10;
+    ctx.strokeStyle = '#ff2200'; ctx.lineWidth = 2;
+    rrect(ctx, -W/2, -H/2+lh, W, H*(1-0.42), 4); ctx.stroke();
+
+    // Lid — vivid bright red
+    ctx.shadowBlur = 18;
+    const lidG = ctx.createLinearGradient(0, -H/2, 0, -H/2+lh);
+    lidG.addColorStop(0, '#ff2200');
+    lidG.addColorStop(0.45, '#dd0000');
+    lidG.addColorStop(1, '#990000');
+    ctx.fillStyle = lidG;
+    rrect(ctx, -W/2, -H/2, W, lh+4, 5); ctx.fill();
+
+    // Lid highlight
+    ctx.shadowBlur = 0; ctx.globalAlpha = 0.45;
+    ctx.strokeStyle = '#ff8866'; ctx.lineWidth = 1.8;
+    rrect(ctx, -W/2+3, -H/2+3, W-6, lh-3, 3); ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Lock band — dark crimson
+    ctx.fillStyle = '#880000'; ctx.shadowColor='#ff0000'; ctx.shadowBlur=10;
+    ctx.fillRect(-W/2, -H/2+lh-3, W, 7);
+
+    // Skull on lid — large white skull, clearly visible
+    ctx.shadowColor='#ff4444'; ctx.shadowBlur=20;
+    const skullX = 0, skullY = -H/2 + lh * 0.5;
+    const skullR = lh * 0.40;
+    // Skull dome — white
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(skullX, skullY, skullR, Math.PI, 0); ctx.closePath(); ctx.fill();
+    // Jaw — white
+    ctx.fillStyle = '#eeeeee';
+    ctx.fillRect(skullX - skullR*0.72, skullY, skullR*1.44, skullR*0.64);
+    // Eyes — solid black sockets
+    ctx.shadowBlur = 0; ctx.fillStyle = '#000000';
+    ctx.beginPath(); ctx.ellipse(skullX - skullR*0.36, skullY - skullR*0.10, skullR*0.22, skullR*0.24, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(skullX + skullR*0.36, skullY - skullR*0.10, skullR*0.22, skullR*0.24, 0, 0, Math.PI*2); ctx.fill();
+    // Glowing red pupils inside eye sockets
+    ctx.fillStyle = '#ff0000'; ctx.shadowColor='#ff0000'; ctx.shadowBlur=12;
+    ctx.beginPath(); ctx.arc(skullX - skullR*0.36, skullY - skullR*0.10, skullR*0.10, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(skullX + skullR*0.36, skullY - skullR*0.10, skullR*0.10, 0, Math.PI*2); ctx.fill();
+    // Nose cavity
+    ctx.fillStyle = '#000000'; ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.moveTo(skullX - skullR*0.08, skullY + skullR*0.08);
+    ctx.lineTo(skullX + skullR*0.08, skullY + skullR*0.08);
+    ctx.lineTo(skullX, skullY + skullR*0.24);
+    ctx.closePath(); ctx.fill();
+    // Teeth gaps
+    ctx.fillStyle = '#cc0000';
+    for (let tt = -1; tt <= 1; tt++) {
+      ctx.fillRect(skullX + tt*skullR*0.36 - skullR*0.10, skullY + skullR*0.02, skullR*0.20, skullR*0.58);
+    }
+    ctx.fillStyle = '#000000';
+    for (let tt = -1; tt <= 1; tt++) {
+      ctx.fillRect(skullX + tt*skullR*0.36 - skullR*0.06, skullY + skullR*0.04, skullR*0.12, skullR*0.54);
+    }
+
+    // Lock disc — glowing red
+    ctx.shadowColor='#ff4400'; ctx.shadowBlur=22;
+    ctx.fillStyle='#ff1100';
+    ctx.beginPath(); ctx.arc(0, -H/2+lh, 9, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#330000';
+    ctx.beginPath(); ctx.arc(0, -H/2+lh-1, 4, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#ff5533'; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.arc(0, -H/2+lh-1, 1.5, 0, Math.PI*2); ctx.fill();
+
+    // "CURSED" label on body — bright orange-red so it reads clearly
+    ctx.shadowBlur = 10; ctx.shadowColor = '#ff4400';
+    ctx.fillStyle = '#ff6633';
+    ctx.font = `bold ${Math.round(W*0.17)}px Orbitron`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('CURSED', 0, H*0.11);
+
+    // Red/orange flame orbiters
+    for (let i = 0; i < 10; i++) {
+      const dir = i % 2 === 0 ? 1 : -1;
+      const ang = (i / 10) * Math.PI * 2 + ch.t * 1.15 * dir;
+      const orbit = 28 + (i % 3) * 10;
+      const fx = Math.cos(ang) * orbit, fy = Math.sin(ang) * orbit;
+      const bright = Math.sin(ch.t * 3.5 + i * 1.2) * 0.5 + 0.5;
+      const r = Math.round(220 + bright * 35);
+      const g = Math.round(bright * 80);
+      ctx.shadowColor = '#ff3300'; ctx.shadowBlur = 13 * bright;
+      ctx.fillStyle = `rgba(${r},${g},0,${0.5+bright*0.5})`;
+      ctx.save(); ctx.translate(fx, fy); ctx.rotate(ch.t * dir * 1.4 + i);
+      ctx.beginPath();
+      ctx.moveTo(0, -(3.5+bright*2.5)*pulse);
+      ctx.bezierCurveTo(2.5, -1.5, 3.5, 1.5, 0, (3.5+bright*2.5)*pulse);
+      ctx.bezierCurveTo(-3.5, 1.5, -2.5, -1.5, 0, -(3.5+bright*2.5)*pulse);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  ctx.restore();
+}
+
+function showCursedFloat(x, y, kind) {
+  const el = document.createElement('div');
+  el.className = 'coinFloat cursedPenalty';
+  el.textContent = kind === 'devil' ? '-300 COINS!' : '-100 COINS!';
+  el.style.left = (x - 60) + 'px';
+  el.style.top  = (y - 44) + 'px';
+  if (kind === 'devil') {
+    el.style.color = '#ee00ff';
+    el.style.textShadow = '0 0 10px #9400ff, 0 0 22px #dd00ff, 0 0 50px #9400ff';
+  } else {
+    el.style.color = '#ff3333';
+    el.style.textShadow = '0 0 10px #ff0000, 0 0 22px #ff4444, 0 0 50px #ff0000';
+  }
+  wrapper.appendChild(el);
+  setTimeout(() => el.remove(), 1400);
+}
+
+function checkCursedChestCollision() {
+  if (player.dead) return;
+  cursedChests.forEach(ch => {
+    if (ch.collected) return;
+    const dx = player.x - ch.x, dy = player.y - ch.y;
+    if (Math.sqrt(dx*dx+dy*dy) < player.size + Math.max(ch.w, ch.h) * 0.52) {
+      ch.collected = true;
+      if (ch.kind === 'devil') AudioEngine.playDevilChest();
+      else AudioEngine.playCursedChest();
+      const penalty = ch.kind === 'devil' ? 300 : 100;
+      const glowColor = ch.kind === 'devil' ? '#9400ff' : '#ff0000';
+      save.coins = Math.max(0, save.coins - penalty);
+      coinsThisRun = Math.max(-99999, coinsThisRun - penalty);
+      writeSave(save);
+      updateCoinHud();
+      flashScreen(glowColor, 0.75);
+      triggerShake(ch.kind === 'devil' ? 18 : 12);
+      if (ch.kind === 'devil') {
+        spawnParticles(ch.x, ch.y, '#9400ff', 30, 1.7);
+        spawnParticles(ch.x, ch.y, '#dd00ff', 16, 1.3);
+        spawnParticles(ch.x, ch.y, '#000033', 12, 0.9);
+      } else {
+        spawnParticles(ch.x, ch.y, '#ff0000', 26, 1.5);
+        spawnParticles(ch.x, ch.y, '#ff5555', 14, 1.1);
+        spawnParticles(ch.x, ch.y, '#330000', 8, 0.7);
+      }
+      showCursedFloat(ch.x, ch.y, ch.kind);
+    }
+  });
 }
 
 // ═══════════════════════════════════════════
@@ -3827,6 +4285,34 @@ function drawBarrier(b) {
     ctx.shadowBlur=35; ctx.fillStyle=`hsl(${b.hue},100%,72%)`;
     ctx.fillRect(b.x-4,b.topH-10,BAR_W+8,10); ctx.fillRect(b.x-4,b.bottomY,BAR_W+8,10);
 
+  } else if(bStyle==='nos') {
+    // NOS tank: cylindrical blue with neon glow
+    function drawNosTank(bx,y0,h){
+      if(h<=0) return;
+      const g=ctx.createLinearGradient(bx,0,bx+BAR_W,0);
+      g.addColorStop(0,'rgba(0,10,40,0.95)'); g.addColorStop(0.18,'rgba(0,80,200,0.90)');
+      g.addColorStop(0.5,'rgba(0,180,255,0.95)'); g.addColorStop(0.82,'rgba(0,80,200,0.90)');
+      g.addColorStop(1,'rgba(0,10,40,0.95)');
+      ctx.fillStyle=g; ctx.fillRect(bx,y0,BAR_W,h);
+      ctx.shadowBlur=38; ctx.strokeStyle='rgba(0,220,255,0.9)'; ctx.lineWidth=2;
+      ctx.strokeRect(bx,y0,BAR_W,h);
+      // Pressure rings
+      ctx.shadowBlur=8; ctx.strokeStyle='rgba(0,200,255,0.30)'; ctx.lineWidth=1.5;
+      for(let ry=y0+14;ry<y0+h-8;ry+=22){ ctx.beginPath(); ctx.moveTo(bx+2,ry); ctx.lineTo(bx+BAR_W-2,ry); ctx.stroke(); }
+      // Specular highlight
+      ctx.fillStyle='rgba(255,255,255,0.12)';
+      ctx.fillRect(bx+Math.floor(BAR_W*0.22),y0,Math.floor(BAR_W*0.18),h);
+    }
+    ctx.shadowBlur=22;
+    drawNosTank(b.x,0,b.topH); drawNosTank(b.x,b.bottomY,canvas.height-b.bottomY);
+    // Elliptical end caps
+    ctx.shadowBlur=30; ctx.fillStyle='rgba(0,200,255,0.85)';
+    ctx.beginPath(); ctx.ellipse(b.x+BAR_W/2,b.topH,BAR_W/2+4,7,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(b.x+BAR_W/2,b.bottomY,BAR_W/2+4,7,0,0,Math.PI*2); ctx.fill();
+    // Valve nozzle
+    ctx.shadowBlur=20; ctx.fillStyle='rgba(0,160,255,0.8)';
+    ctx.fillRect(b.x+BAR_W/2-4,b.topH-3,8,6); ctx.fillRect(b.x+BAR_W/2-4,b.bottomY-3,8,6);
+
   } else {
     // Default neon barrier
     ctx.fillStyle=`hsl(${b.hue},60%,10%)`;
@@ -3993,7 +4479,16 @@ function loop() {
     }
 
     // Spawn monedas (cada ~200 frames, posición aleatoria)
-    if(!yupilandiaActive && frame%90===45) { spawnCoinPickup(); spawnCoinPickup(); if(Math.random()<0.4) spawnCoinPickup(); }
+    if(!yupilandiaActive && frame%90===45) {
+      spawnCoinPickup(); spawnCoinPickup(); if(Math.random()<0.4) spawnCoinPickup();
+      // 15% chance to spawn a cursed chest alongside coins (10% CURSED, 5% DEVIL)
+      const cursedRoll = Math.random();
+      if (cursedRoll < 0.05) {
+        cursedChests.push({kind:'devil', x:canvas.width+70, y:90+Math.random()*(canvas.height-180), w:60, h:50, collected:false, t:0});
+      } else if (cursedRoll < 0.15) {
+        cursedChests.push({kind:'cursed', x:canvas.width+70, y:90+Math.random()*(canvas.height-180), w:60, h:50, collected:false, t:0});
+      }
+    }
 
     if(!player.dead){
       player.vy+=player.gravity; player.y+=player.vy;
@@ -4013,6 +4508,10 @@ function loop() {
     if(legendaryChest&&legendaryChest.collected) legendaryChest=null;
     if(legendaryChest&&!legendaryChest.collected){ legendaryChest.x-=spd; }
     if(legendaryChest&&legendaryChest.x<-100) legendaryChest=null;
+
+    // Update cursed chests
+    cursedChests.forEach(c=>{ if(!c.collected) c.x-=spd; });
+    cursedChests=cursedChests.filter(c=>c.x>-90&&!c.collected);
 
     // Legendary chest milestone check — runs every frame, catches any coin source
     if(!legendaryChest && save.coins >= nextLegendaryCoinThreshold) {
@@ -4093,6 +4592,7 @@ function loop() {
       checkCoinCollection();
       checkChestCollection();
       checkLegendaryChestCollection();
+      checkCursedChestCollision();
       checkSurpriseCollision();
       if(!yupilandiaActive && !yupilandiaFrozen && checkCollision()){combo=0;gameOver();}
     }
@@ -4102,6 +4602,7 @@ function loop() {
   drawCoinPickups();
   drawTreasureChest();
   drawLegendaryChest();
+  cursedChests.forEach(c=>{ if(!c.collected) drawCursedChest(c); });
   // Draw all YUPILANDIA extra chests
   if(yupilandiaActive) {
     yupiChests.forEach(c=>{
