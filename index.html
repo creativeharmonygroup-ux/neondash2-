@@ -1638,6 +1638,47 @@ const AudioEngine = (() => {
     });
   }
 
+  function playSupremeChest() {
+    init(); resume();
+    const t = ctx.currentTime;
+    // Crystalline diamond shimmer: sparkling ascending crystal arpeggios
+    [1047, 1319, 1568, 2093, 2637].forEach((freq, i) => {
+      playTone({ type: 'sine',     freq, duration: 0.32, gainPeak: 0.32, startTime: t + i * 0.065 });
+      playTone({ type: 'triangle', freq: freq * 1.5, duration: 0.20, gainPeak: 0.10, startTime: t + i * 0.065 + 0.02 });
+    });
+    // Bright sustained chord — ice shimmer
+    [1568, 2093, 2637, 3136].forEach((freq, i) => {
+      playTone({ type: 'sine', freq, duration: 0.8, gainPeak: 0.14, startTime: t + 0.38 + i * 0.018 });
+    });
+    // Sub punch for weight
+    playTone({ type: 'sine', freq: 130, duration: 0.35, gainPeak: 0.42, startTime: t });
+    // High sparkle ping
+    playTone({ type: 'sine', freq: 4186, duration: 0.4, gainPeak: 0.07, startTime: t + 0.45 });
+  }
+
+  function playEpicChest() {
+    init(); resume();
+    const t = ctx.currentTime;
+    // Thunder crack
+    playNoise(t, 0.12, 0.70);
+    // Sub bass boom
+    playTone({ type: 'sine', freq: 40, duration: 0.65, gainPeak: 0.58, startTime: t });
+    playTone({ type: 'sine', freq: 80, duration: 0.5,  gainPeak: 0.38, startTime: t + 0.04 });
+    // Electric ascending fanfare — fast heroic arpeggio
+    [196, 247, 294, 370, 494, 740, 988, 1480, 1976].forEach((freq, i) => {
+      playTone({ type: 'sine',     freq, duration: 0.25, gainPeak: 0.44, startTime: t + i * 0.055 });
+      playTone({ type: 'square',   freq: freq * 2, duration: 0.12, gainPeak: 0.06, startTime: t + i * 0.055 });
+    });
+    // Grand power chord burst
+    [988, 1245, 1480, 1976, 2489].forEach((freq, i) => {
+      playTone({ type: 'sine', freq, duration: 1.1, gainPeak: 0.26, startTime: t + 0.55 + i * 0.025 });
+    });
+    // Sizzling overtones
+    [3951, 5274].forEach((freq, i) => {
+      playTone({ type: 'sine', freq, duration: 0.55, gainPeak: 0.07, startTime: t + 0.62 + i * 0.04 });
+    });
+  }
+
   function playCursedChest() {
     // Horror sting: instant impact cluster + shrieking downward stab
     init(); resume();
@@ -2355,7 +2396,7 @@ const AudioEngine = (() => {
     wmGain=null; wmId=null;
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic };
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic };
 })();
 
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -2400,6 +2441,7 @@ let nextGoldenChestScore = 4;
 // Legendary chest spawns at every 100-coin multiple (100, 200, 300...)
 let nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
 let cursedChests = [];
+let epicChest = null, supremeChest = null;
 
 // ── Surprise obstacles ──
 let surpriseObstacle = null;
@@ -2803,6 +2845,7 @@ function startGame() {
   treasureChest=null; chestSpawned=false;
   legendaryChest=null; nextGoldenChestScore=4;
   cursedChests=[];
+  epicChest=null; supremeChest=null;
   nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
   surpriseObstacle=null; nextSurpriseScore=10+Math.floor(Math.random()*6);
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
@@ -3637,6 +3680,293 @@ function checkLegendaryChestCollection() {
     spawnParticles(cx, cy, '#ffffff', 12, 1.0);
     awardCoins(30, ch.x, ch.y);
     showLegendaryFloat();
+  }
+}
+
+// ═══════════════════════════════════════════
+//  SUPREME CHEST
+// ═══════════════════════════════════════════
+function drawSupremeChest() {
+  if (!supremeChest || supremeChest.collected) return;
+  const ch = supremeChest;
+  ch.t += 0.06;
+  const pulse = 1 + Math.sin(ch.t * 2.5) * 0.10;
+  const W = ch.w * pulse, H = ch.h * pulse;
+  const lh = H * 0.38;
+
+  ctx.save();
+  ctx.translate(ch.x, ch.y);
+
+  // Ice-blue outer aura
+  ctx.shadowColor = '#aaeeff';
+  ctx.shadowBlur = 42 + Math.sin(ch.t * 2.8) * 18;
+
+  // Body — silver→diamond gradient
+  const bodyG = ctx.createLinearGradient(-W/2, -H/2+lh, W/2, H/2);
+  bodyG.addColorStop(0,   '#e8f8ff');
+  bodyG.addColorStop(0.25,'#b0d8f0');
+  bodyG.addColorStop(0.55,'#7ab8e0');
+  bodyG.addColorStop(0.85,'#4488bb');
+  bodyG.addColorStop(1,   '#1a4a70');
+  ctx.fillStyle = bodyG;
+  rrect(ctx, -W/2, -H/2+lh, W, H*(1-0.38), 5); ctx.fill();
+
+  // Diamond facet highlight on body
+  ctx.globalAlpha = 0.22;
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(-W*0.42, -H/2+lh+4);
+  ctx.lineTo(0, H/2-6);
+  ctx.lineTo(W*0.18, -H/2+lh+4);
+  ctx.closePath(); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Lid — bright silver-white
+  ctx.shadowBlur = 16;
+  const lidG = ctx.createLinearGradient(0, -H/2, 0, -H/2+lh);
+  lidG.addColorStop(0, '#ffffff');
+  lidG.addColorStop(0.4,'#cceeff');
+  lidG.addColorStop(1,  '#88bbdd');
+  ctx.fillStyle = lidG;
+  rrect(ctx, -W/2, -H/2, W, lh+4, 6); ctx.fill();
+
+  // Lid highlight
+  ctx.shadowBlur = 0; ctx.globalAlpha = 0.55;
+  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.8;
+  rrect(ctx, -W/2+3, -H/2+3, W-6, lh-3, 4); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Lock band — dark blue
+  ctx.fillStyle = '#1a3a55'; ctx.shadowColor='#aaeeff'; ctx.shadowBlur=6;
+  ctx.fillRect(-W/2, -H/2+lh-3, W, 6);
+
+  // Lock disc — diamond sparkle
+  ctx.shadowColor='#aaeeff'; ctx.shadowBlur=20;
+  ctx.fillStyle='#cceeff';
+  ctx.beginPath(); ctx.arc(0, -H/2+lh, 8, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#1a3a55';
+  ctx.beginPath(); ctx.arc(0, -H/2+lh-1, 3.5, 0, Math.PI*2); ctx.fill();
+  // Diamond shape on lock
+  ctx.shadowColor='#ffffff'; ctx.shadowBlur=12;
+  ctx.fillStyle='#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(0, -H/2+lh-6); ctx.lineTo(4, -H/2+lh); ctx.lineTo(0, -H/2+lh+5); ctx.lineTo(-4, -H/2+lh);
+  ctx.closePath(); ctx.fill();
+
+  // "SUPREME" label
+  ctx.shadowBlur = 8; ctx.shadowColor = '#aaeeff';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `bold ${Math.round(W*0.155)}px Orbitron`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('SUPREME', 0, H*0.14);
+
+  // Orbiting diamond sparkles (4-point stars, ice blue/white)
+  for (let i = 0; i < 12; i++) {
+    const dir = i % 2 === 0 ? 1 : -1;
+    const ang = (i / 12) * Math.PI * 2 + ch.t * 0.8 * dir;
+    const orbit = 32 + (i % 4) * 10;
+    const sx = Math.cos(ang) * orbit, sy = Math.sin(ang) * orbit;
+    const bright = Math.sin(ch.t * 3.8 + i * 1.3) * 0.5 + 0.5;
+    const sz = (2.2 + bright * 4.2) * pulse;
+    const hue = 190 + i * 8; // ice-blue range
+    ctx.shadowColor = `hsl(${hue},100%,85%)`; ctx.shadowBlur = 12 * bright;
+    ctx.fillStyle = `hsla(${hue},100%,88%,${0.45+bright*0.55})`;
+    ctx.save(); ctx.translate(sx, sy); ctx.rotate(ch.t * dir * 0.9 + i);
+    ctx.beginPath();
+    for (let s = 0; s < 4; s++) {
+      const a1 = (s/4)*Math.PI*2, a2 = ((s+0.5)/4)*Math.PI*2;
+      ctx.lineTo(Math.cos(a1)*sz, Math.sin(a1)*sz);
+      ctx.lineTo(Math.cos(a2)*sz*0.22, Math.sin(a2)*sz*0.22);
+    }
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+function showSupremeFloat(x, y) {
+  const el = document.createElement('div');
+  el.className = 'coinFloat treasure';
+  el.textContent = '+300 COINS!';
+  el.style.left = (wrapper.clientWidth / 2 - 95) + 'px';
+  el.style.top  = (wrapper.clientHeight / 2 - 50) + 'px';
+  el.style.fontSize = '28px';
+  el.style.fontWeight = 'bold';
+  el.style.letterSpacing = '2px';
+  el.style.color = '#cceeff';
+  el.style.textShadow = '0 0 8px #aaeeff, 0 0 22px #55bbff, 0 0 50px #aaeeff';
+  el.style.animation = 'coinFloat 1.8s ease-out forwards';
+  wrapper.appendChild(el);
+  setTimeout(() => el.remove(), 1800);
+}
+
+function checkSupremeChestCollection() {
+  if (!supremeChest || supremeChest.collected || player.dead) return;
+  const ch = supremeChest;
+  const dx = player.x - ch.x, dy = player.y - ch.y;
+  if (Math.sqrt(dx*dx+dy*dy) < player.size + Math.max(ch.w,ch.h)*0.55) {
+    ch.collected = true;
+    AudioEngine.playSupremeChest();
+    flashScreen('#aaeeff', 0.55);
+    triggerShake(12);
+    const cx = canvas.width * 0.5, cy = canvas.height * 0.5;
+    spawnParticles(cx, cy, '#aaeeff', 28, 1.6);
+    spawnParticles(cx, cy, '#ffffff', 18, 1.2);
+    spawnParticles(cx, cy, '#55bbff', 14, 1.0);
+    awardCoins(300, ch.x, ch.y);
+    showSupremeFloat(ch.x, ch.y);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  EPIC CHEST
+// ═══════════════════════════════════════════
+function drawEpicChest() {
+  if (!epicChest || epicChest.collected) return;
+  const ch = epicChest;
+  ch.t += 0.065;
+  ch.spin = (ch.spin || 0) + 0.015;
+  const pulse = 1 + Math.sin(ch.t * 2.2) * 0.13;
+  const W = ch.w * pulse, H = ch.h * pulse;
+  const lh = H * 0.38;
+
+  ctx.save();
+  ctx.translate(ch.x, ch.y);
+
+  // Blazing white+gold outer aura
+  const glowCycle = Math.sin(ch.t * 2.6) * 0.5 + 0.5;
+  ctx.shadowColor = `rgb(255,${Math.round(220+glowCycle*35)},${Math.round(glowCycle*120)})`;
+  ctx.shadowBlur = 65 + glowCycle * 30;
+
+  // Body — deep gold with bright highlights
+  const bodyG = ctx.createLinearGradient(-W/2, -H/2+lh, W/2, H/2);
+  bodyG.addColorStop(0,   '#fffde0');
+  bodyG.addColorStop(0.2, '#ffe040');
+  bodyG.addColorStop(0.55,'#ffaa00');
+  bodyG.addColorStop(0.85,'#c06000');
+  bodyG.addColorStop(1,   '#6b3200');
+  ctx.fillStyle = bodyG;
+  rrect(ctx, -W/2, -H/2+lh, W, H*(1-0.38), 5); ctx.fill();
+
+  // White shine stripe across body
+  ctx.globalAlpha = 0.18 + glowCycle * 0.18;
+  const shineG = ctx.createLinearGradient(-W/2, 0, W/2, 0);
+  shineG.addColorStop(0, 'transparent');
+  shineG.addColorStop(0.35, '#ffffff');
+  shineG.addColorStop(0.65, '#ffffff');
+  shineG.addColorStop(1, 'transparent');
+  ctx.fillStyle = shineG;
+  rrect(ctx, -W/2, -H/2+lh+4, W, H*0.28, 3); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Lid — bright white-gold
+  ctx.shadowBlur = 18;
+  const lidG = ctx.createLinearGradient(0, -H/2, 0, -H/2+lh);
+  lidG.addColorStop(0, '#ffffff');
+  lidG.addColorStop(0.3,'#fff4a0');
+  lidG.addColorStop(1,  '#ffd700');
+  ctx.fillStyle = lidG;
+  rrect(ctx, -W/2, -H/2, W, lh+4, 6); ctx.fill();
+
+  // Lid highlight rim
+  ctx.shadowBlur = 0; ctx.globalAlpha = 0.65;
+  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.2;
+  rrect(ctx, -W/2+3, -H/2+3, W-6, lh-3, 4); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Lock band — dark gold
+  ctx.fillStyle = '#7a4400'; ctx.shadowColor='#ffe040'; ctx.shadowBlur=8;
+  ctx.fillRect(-W/2, -H/2+lh-3, W, 7);
+
+  // Lock disc — electric white
+  ctx.shadowColor='#ffffff'; ctx.shadowBlur=24;
+  ctx.fillStyle='#fffde0';
+  ctx.beginPath(); ctx.arc(0, -H/2+lh, 10, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#7a4400';
+  ctx.beginPath(); ctx.arc(0, -H/2+lh-1, 4.5, 0, Math.PI*2); ctx.fill();
+
+  // "EPIC" label
+  ctx.shadowBlur = 10; ctx.shadowColor = '#ffffff';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = `bold ${Math.round(W*0.20)}px Orbitron`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('EPIC', 0, H*0.14);
+
+  // Electric lightning rays shooting outward
+  const rayCount = 8;
+  for (let i = 0; i < rayCount; i++) {
+    const baseAng = (i / rayCount) * Math.PI * 2 + ch.t * 0.4;
+    const rayLen = 28 + Math.sin(ch.t * 4.5 + i * 1.3) * 14;
+    const flicker = Math.sin(ch.t * 8 + i * 2.1) * 0.5 + 0.5;
+    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 18 * flicker;
+    ctx.strokeStyle = `rgba(255,255,${Math.round(180+flicker*75)},${0.5+flicker*0.5})`;
+    ctx.lineWidth = 1.5 + flicker * 1.5;
+    // Jagged lightning bolt
+    const x0 = Math.cos(baseAng) * (W * 0.52);
+    const y0 = Math.sin(baseAng) * (H * 0.52);
+    const x1 = Math.cos(baseAng + 0.15) * (W * 0.52 + rayLen * 0.5);
+    const y1 = Math.sin(baseAng + 0.15) * (H * 0.52 + rayLen * 0.5);
+    const x2 = Math.cos(baseAng - 0.08) * (W * 0.52 + rayLen);
+    const y2 = Math.sin(baseAng - 0.08) * (H * 0.52 + rayLen);
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  }
+
+  // Orbiting gold sparkle stars — large, intense
+  for (let i = 0; i < 14; i++) {
+    const dir = i % 2 === 0 ? 1 : -1;
+    const ang = (i / 14) * Math.PI * 2 + ch.t * 1.1 * dir;
+    const orbit = 38 + (i % 4) * 12;
+    const sx = Math.cos(ang) * orbit, sy = Math.sin(ang) * orbit;
+    const bright = Math.sin(ch.t * 4.5 + i * 1.2) * 0.5 + 0.5;
+    const sz = (3.5 + bright * 5.5) * pulse;
+    ctx.shadowColor = bright > 0.7 ? '#ffffff' : '#ffe040';
+    ctx.shadowBlur = 18 * bright;
+    ctx.fillStyle = `rgba(255,${Math.round(200+bright*55)},${Math.round(bright*120)},${0.45+bright*0.55})`;
+    ctx.save(); ctx.translate(sx, sy); ctx.rotate(ch.t * dir + i);
+    ctx.beginPath();
+    for (let s = 0; s < 4; s++) {
+      const a1 = (s/4)*Math.PI*2, a2 = ((s+0.5)/4)*Math.PI*2;
+      ctx.lineTo(Math.cos(a1)*sz, Math.sin(a1)*sz);
+      ctx.lineTo(Math.cos(a2)*sz*0.20, Math.sin(a2)*sz*0.20);
+    }
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+function showEpicFloat(x, y) {
+  const el = document.createElement('div');
+  el.className = 'coinFloat treasure';
+  el.textContent = '+500 COINS!';
+  el.style.left = (wrapper.clientWidth / 2 - 100) + 'px';
+  el.style.top  = (wrapper.clientHeight / 2 - 60) + 'px';
+  el.style.fontSize = '36px';
+  el.style.fontWeight = 'bold';
+  el.style.letterSpacing = '3px';
+  el.style.color = '#ffffff';
+  el.style.textShadow = '0 0 10px #ffe040, 0 0 28px #ffaa00, 0 0 60px #ffffff, 0 0 90px #ffcc00';
+  el.style.animation = 'coinFloat 2.2s ease-out forwards';
+  wrapper.appendChild(el);
+  setTimeout(() => el.remove(), 2200);
+}
+
+function checkEpicChestCollection() {
+  if (!epicChest || epicChest.collected || player.dead) return;
+  const ch = epicChest;
+  const dx = player.x - ch.x, dy = player.y - ch.y;
+  if (Math.sqrt(dx*dx+dy*dy) < player.size + Math.max(ch.w,ch.h)*0.55) {
+    ch.collected = true;
+    AudioEngine.playEpicChest();
+    flashScreen('#ffffff', 0.85);
+    triggerShake(20);
+    const cx = canvas.width * 0.5, cy = canvas.height * 0.5;
+    spawnParticles(cx, cy, '#ffffff', 40, 2.2);
+    spawnParticles(cx, cy, '#ffe040', 30, 1.8);
+    spawnParticles(cx, cy, '#ffaa00', 20, 1.4);
+    spawnParticles(cx, cy, '#fff8c0', 15, 1.0);
+    awardCoins(500, ch.x, ch.y);
+    showEpicFloat(ch.x, ch.y);
   }
 }
 
@@ -4480,12 +4810,17 @@ function loop() {
     // Spawn monedas (cada ~200 frames, posición aleatoria)
     if(!yupilandiaActive && frame%90===45) {
       spawnCoinPickup(); spawnCoinPickup(); if(Math.random()<0.4) spawnCoinPickup();
-      // 15% chance to spawn a cursed chest alongside coins (10% CURSED, 5% DEVIL)
-      const cursedRoll = Math.random();
-      if (cursedRoll < 0.05) {
+      // 30% chance to spawn a special chest alongside coins
+      // Negative: 10% CURSED, 5% DEVIL — Positive: 10% SUPREME, 5% EPIC
+      const chestRoll = Math.random();
+      if (chestRoll < 0.05) {
         cursedChests.push({kind:'devil', x:canvas.width+70, y:90+Math.random()*(canvas.height-180), w:60, h:50, collected:false, t:0});
-      } else if (cursedRoll < 0.15) {
+      } else if (chestRoll < 0.15) {
         cursedChests.push({kind:'cursed', x:canvas.width+70, y:90+Math.random()*(canvas.height-180), w:60, h:50, collected:false, t:0});
+      } else if (chestRoll < 0.25 && !supremeChest) {
+        supremeChest = {x:canvas.width+75, y:90+Math.random()*(canvas.height-180), w:65, h:54, collected:false, t:0};
+      } else if (chestRoll < 0.30 && !epicChest) {
+        epicChest = {x:canvas.width+85, y:90+Math.random()*(canvas.height-180), w:70, h:58, collected:false, t:0, spin:0};
       }
     }
 
@@ -4511,6 +4846,12 @@ function loop() {
     // Update cursed chests
     cursedChests.forEach(c=>{ if(!c.collected) c.x-=spd; });
     cursedChests=cursedChests.filter(c=>c.x>-90&&!c.collected);
+
+    // Update supreme/epic chests
+    if(supremeChest&&!supremeChest.collected){ supremeChest.x-=spd; }
+    if(supremeChest&&supremeChest.x<-100) supremeChest=null;
+    if(epicChest&&!epicChest.collected){ epicChest.x-=spd; }
+    if(epicChest&&epicChest.x<-110) epicChest=null;
 
     // Legendary chest milestone check — runs every frame, catches any coin source
     if(!legendaryChest && save.coins >= nextLegendaryCoinThreshold) {
@@ -4591,6 +4932,8 @@ function loop() {
       checkCoinCollection();
       checkChestCollection();
       checkLegendaryChestCollection();
+      checkSupremeChestCollection();
+      checkEpicChestCollection();
       checkCursedChestCollision();
       checkSurpriseCollision();
       if(!yupilandiaActive && !yupilandiaFrozen && checkCollision()){combo=0;gameOver();}
@@ -4602,6 +4945,8 @@ function loop() {
   drawCoinPickups();
   drawTreasureChest();
   drawLegendaryChest();
+  if(supremeChest && !supremeChest.collected) drawSupremeChest();
+  if(epicChest && !epicChest.collected) drawEpicChest();
   cursedChests.forEach(c=>{ if(!c.collected) drawCursedChest(c); });
   // Draw all YUPILANDIA extra chests
   if(yupilandiaActive) {
