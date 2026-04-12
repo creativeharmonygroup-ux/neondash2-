@@ -908,6 +908,16 @@ const PAID_WORLD_IDS = { machinewar:1.99, thegrid:4.99, obsidian:2.99, scuderia:
 const BUNDLE_IDS = ['machinewar','thegrid','obsidian','scuderia','tridente'];
 const BUNDLE_PRICE = 9.99;
 
+// Progressive difficulty per world: affects base speed and barrier spawn rate
+const WORLD_DIFFICULTY = {
+  turbo:1.0, prehistoric:1.05, nitro:1.10, veyron:1.15, ragingbull:1.20,
+  machinewar:1.30, thegrid:1.35, obsidian:1.40, scuderia:1.45, tridente:1.50
+};
+function worldDiffMult() {
+  const wid = currentWorldTheme().worldId;
+  return WORLD_DIFFICULTY[wid] || 1.0;
+}
+
 function loadSave() {
   try {
     const s = JSON.parse(localStorage.getItem('neonDashSave') || '{}');
@@ -4926,12 +4936,12 @@ function loop() {
     // Smooth lerp toward target multiplier
     speedMult += (targetSpeedMult - speedMult) * 0.05;
     slowMoMult += (targetSlowMoMult - slowMoMult) * 0.04;
-    const spd = speed * speedMult * slowMoMult;
+    const spd = speed * speedMult * slowMoMult * worldDiffMult();
 
     stars.forEach(s=>{s.x-=s.speed*(spd/3.5);s.twinkle+=0.05;if(s.x<0){s.x=canvas.width;s.y=Math.random()*canvas.height;}});
     nebula.forEach(n=>{n.x-=n.speed*(spd/3.5);if(n.x+n.r<0){n.x=canvas.width+n.r;n.y=Math.random()*canvas.height;}});
 
-    const spawnInterval=Math.max(80,130-score*1.5);
+    const spawnInterval=Math.max(60, (130-score*1.5) / worldDiffMult());
     if(!yupilandiaActive && !yupilandiaFrozen && frame%Math.floor(spawnInterval)===0) spawnBarrier();
 
     // YUPILANDIA: rain coins and chests, no barriers
