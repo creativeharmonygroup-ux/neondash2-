@@ -285,88 +285,6 @@
     border: 1px solid rgba(255,180,0,0.5);
   }
 
-  /* ── COIN PACKS MODAL ── */
-  #coinPacksModal {
-    position: absolute; inset: 0; z-index: 500;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: rgba(2,1,10,0.97); padding: 24px 20px;
-  }
-  #coinPacksModal.hidden { display: none; }
-  .coin-packs-title {
-    font-size: 18px; font-weight: 900; letter-spacing: 3px;
-    color: #ffdd00; font-family: 'Orbitron', monospace; text-align: center;
-    text-shadow: 0 0 18px rgba(255,200,0,0.8); margin-bottom: 4px;
-  }
-  .coin-packs-sub {
-    font-size: 9px; letter-spacing: 3px; color: rgba(255,200,100,0.55);
-    font-family: 'Orbitron', monospace; text-align: center; margin-bottom: 20px;
-  }
-  .coin-packs-grid {
-    display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px;
-  }
-  .coin-pack-card {
-    display: flex; flex-direction: row; align-items: center; justify-content: space-between;
-    border-radius: 12px; padding: 13px 16px;
-    border: 1.5px solid rgba(255,200,0,0.25);
-    background: linear-gradient(120deg, rgba(30,15,0,0.98), rgba(10,5,0,0.98));
-    box-shadow: inset 3px 0 0 #ffaa00, 0 0 10px rgba(255,160,0,0.06);
-    cursor: pointer; transition: transform 0.12s;
-  }
-  .coin-pack-card:active { transform: scale(0.97); }
-  .coin-pack-info { display: flex; flex-direction: column; gap: 3px; }
-  .coin-pack-name {
-    font-size: 12px; font-weight: 900; letter-spacing: 2px; color: #ffcc44;
-    font-family: 'Orbitron', monospace;
-  }
-  .coin-pack-coins {
-    font-size: 11px; font-weight: 700; color: #ffee88; letter-spacing: 0.5px;
-  }
-  .coin-pack-price {
-    font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px;
-    font-family: 'Orbitron', monospace;
-    text-shadow: 0 0 12px rgba(255,200,0,0.5);
-  }
-  .coin-packs-close {
-    margin-top: 20px; background: transparent;
-    border: 1.5px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.45);
-    font-family: 'Orbitron', monospace; font-size: 10px; letter-spacing: 2px;
-    padding: 9px 30px; border-radius: 50px; cursor: pointer;
-    transition: opacity 0.15s; pointer-events: all;
-  }
-  .coin-packs-close:active { opacity: 0.5; }
-  /* GET COINS button — game over screen */
-  #getCoinsBtn {
-    background: linear-gradient(135deg, #ffaa00, #ffee00);
-    color: #1a0800; font-family: 'Orbitron', monospace;
-    font-size: 12px; font-weight: 900; letter-spacing: 2px;
-    border: none; border-radius: 50px; padding: 12px 32px; cursor: pointer;
-    pointer-events: all; margin-bottom: 10px;
-    box-shadow: 0 0 20px rgba(255,180,0,0.6), 0 0 40px rgba(255,120,0,0.2);
-    animation: btnFloat 2.5s ease-in-out infinite;
-    transition: transform 0.15s;
-  }
-  #getCoinsBtn.hidden { display: none; }
-  #getCoinsBtn:active { transform: scale(0.96); animation: none; }
-  /* NEED MORE COINS button — world shop cards */
-  .need-coins-btn {
-    display: block; cursor: pointer; align-self: flex-start;
-    font-size: 9px; font-weight: 900; letter-spacing: 0.5px;
-    padding: 5px 10px; border-radius: 6px;
-    font-family: 'Orbitron', monospace; background: transparent;
-    color: #ffcc44; border: 1.5px solid rgba(255,180,0,0.45);
-    transition: transform 0.12s; white-space: nowrap;
-  }
-  .need-coins-btn:active { transform: scale(0.93); }
-  /* World screen header get-coins shortcut */
-  #worldGetCoinsBtn {
-    background: linear-gradient(135deg, #ffaa00, #ffdd00);
-    color: #1a0800; font-family: 'Orbitron', monospace;
-    font-size: 8px; font-weight: 900; letter-spacing: 1px;
-    border: none; border-radius: 20px; padding: 5px 12px; cursor: pointer;
-    pointer-events: all;
-  }
-  #worldGetCoinsBtn.hidden { display: none; }
-
   .world-launch-btn {
     background: transparent; border: 2px solid #b464ff; color: #d080ff;
     font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900;
@@ -743,7 +661,6 @@
     <button class="replay-btn" id="replayBtn">▶ REPLAY</button>
     <button class="restart-btn" id="restartBtn">PLAY AGAIN</button>
     <button class="share3pct-btn hidden" id="share3pctBtn">🎬 WOW TIKTOK MOMENT</button>
-    <button id="getCoinsBtn" class="hidden">GET COINS 💰</button>
     <button id="worldBtn" style="animation: btnFloat 2.5s ease-in-out infinite; background: linear-gradient(135deg, #ff006e, #bf00ff); color: white; box-shadow: 0 0 20px #ff006e, 0 0 40px #bf00ff;">🌌 DIMENSIONS</button>
   </div>
 
@@ -759,22 +676,11 @@
     <button class="rv-play-again" id="rvPlayAgainBtn">↺ PLAY AGAIN</button>
   </div>
 
-  <!-- COIN PACKS MODAL -->
-  <div id="coinPacksModal" class="hidden">
-    <div class="coin-packs-title">💰 GET COINS</div>
-    <div class="coin-packs-sub">CHOOSE YOUR PACK</div>
-    <div class="coin-packs-grid" id="coinPacksGrid"></div>
-    <button class="coin-packs-close" id="coinPacksCloseBtn">✕ CLOSE</button>
-  </div>
-
   <!-- DIMENSIONS WORLD SELECTOR -->
   <div id="worldScreen" class="hidden">
     <div class="world-header">
       <div class="world-title">DIMENSIONS</div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button id="worldGetCoinsBtn" class="hidden">💰 COINS</button>
-        <div class="shop-coins"><span id="worldCoinCount">0</span></div>
-      </div>
+      <div class="shop-coins"><span id="worldCoinCount">0</span></div>
       <button class="world-close-btn" id="worldCloseBtn">🔊</button>
     </div>
     <div class="world-subtitle">SELECT YOUR DIMENSION</div>
@@ -1001,12 +907,6 @@ const WORLD_DEFS = [
 const PAID_WORLD_IDS = { machinewar:1.99, thegrid:4.99, obsidian:2.99, scuderia:2.99, tridente:3.99 };
 const BUNDLE_IDS = ['machinewar','thegrid','obsidian','scuderia','tridente'];
 const BUNDLE_PRICE = 9.99;
-const COIN_PACKS = [
-  { id:'starter', name:'STARTER PACK', coins:1000,  price:0.99  },
-  { id:'pro',     name:'PRO PACK',     coins:5000,  price:2.99  },
-  { id:'elite',   name:'ELITE PACK',   coins:15000, price:6.99  },
-  { id:'legend',  name:'LEGEND PACK',  coins:50000, price:14.99 },
-];
 
 // Progressive difficulty per world: affects base speed and barrier spawn rate
 const WORLD_DIFFICULTY = {
@@ -2994,9 +2894,6 @@ document.getElementById('startWorldBtn').addEventListener('touchstart', e => { e
 document.getElementById('worldCloseBtn').addEventListener('click', e => { e.stopPropagation(); const nm=!AudioEngine.isMuted(); AudioEngine.setMuted(nm); applySoundIcon(nm); document.getElementById('worldCloseBtn').textContent = nm ? '🔇' : '🔊'; });
 document.getElementById('worldLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeWorldShop(); });
 document.getElementById('worldLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeWorldShop(); });
-document.getElementById('getCoinsBtn').addEventListener('click', e => { e.stopPropagation(); openCoinPackModal(); });
-document.getElementById('coinPacksCloseBtn').addEventListener('click', e => { e.stopPropagation(); closeCoinPackModal(); });
-document.getElementById('worldGetCoinsBtn').addEventListener('click', e => { e.stopPropagation(); openCoinPackModal(); });
 
 function doJump() {
   // Never fire while the hangar is open
@@ -3108,7 +3005,6 @@ function gameOver() {
   MomentRecorder.stop().then(blob => { if (blob) momentBlob = blob; });
   const share3btn = document.getElementById('share3pctBtn');
   share3btn.classList.toggle('hidden', !reached8);
-  document.getElementById('getCoinsBtn').classList.toggle('hidden', save.coins >= 1000);
   setTimeout(() => {
     const badge = document.getElementById('newBestBadge');
     badge.style.display = 'none';
@@ -3201,68 +3097,9 @@ function purchaseBundle() {
   }
 }
 
-function openCoinPackModal() {
-  const grid = document.getElementById('coinPacksGrid');
-  grid.innerHTML = '';
-  COIN_PACKS.forEach(pack => {
-    const card = document.createElement('div');
-    card.className = 'coin-pack-card';
-    const info = document.createElement('div');
-    info.className = 'coin-pack-info';
-    const nameEl = document.createElement('div');
-    nameEl.className = 'coin-pack-name';
-    nameEl.textContent = pack.name;
-    const coinsEl = document.createElement('div');
-    coinsEl.className = 'coin-pack-coins';
-    coinsEl.textContent = '🪙 ' + pack.coins.toLocaleString() + ' COINS';
-    info.appendChild(nameEl); info.appendChild(coinsEl);
-    const priceEl = document.createElement('div');
-    priceEl.className = 'coin-pack-price';
-    priceEl.textContent = '$' + pack.price.toFixed(2);
-    card.appendChild(info); card.appendChild(priceEl);
-    card.addEventListener('click', () => purchaseCoinPack(pack.id));
-    grid.appendChild(card);
-  });
-  document.getElementById('coinPacksModal').classList.remove('hidden');
-}
-
-function closeCoinPackModal() {
-  document.getElementById('coinPacksModal').classList.add('hidden');
-}
-
-function purchaseCoinPack(id) {
-  const pack = COIN_PACKS.find(p => p.id === id);
-  if (!pack) return;
-  // TODO: wire to real IAP (Capacitor Purchases plugin)
-  if (confirm(`Buy ${pack.coins.toLocaleString()} coins for $${pack.price.toFixed(2)}?\n\n(This will trigger the App Store purchase flow)`)) {
-    save.coins += pack.coins;
-    writeSave(save);
-    updateCoinHud();
-    closeCoinPackModal();
-    const worldCoinEl = document.getElementById('worldCoinCount');
-    if (worldCoinEl) worldCoinEl.textContent = save.coins;
-    renderWorldShop();
-  }
-}
-
-function purchaseCoinShip(id) {
-  const ship = SHIPS.find(s => s.id === id);
-  if (!ship || ship.price <= 0) return;
-  if (save.coins < ship.price) { openCoinPackModal(); return; }
-  if (confirm(`Buy ${ship.name} for 🪙 ${ship.price.toLocaleString()} coins?`)) {
-    save.coins -= ship.price;
-    if (!save.owned) save.owned = ['classic'];
-    if (!save.owned.includes(id)) save.owned.push(id);
-    writeSave(save); updateCoinHud(); renderWorldShop();
-  }
-}
-
 function renderWorldShop() {
   const coinEl = document.getElementById('worldCoinCount');
   if(coinEl) coinEl.textContent = save.coins;
-  // Show "💰 COINS" header button when player has < 1000 coins
-  const worldGetCoinsBtn = document.getElementById('worldGetCoinsBtn');
-  if (worldGetCoinsBtn) worldGetCoinsBtn.classList.toggle('hidden', save.coins >= 1000);
   const grid = document.getElementById('worldGrid');
   grid.innerHTML = '';
   const h2r = h => { if(!h||!h.startsWith('#')) return '170,170,170'; return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(','); };
@@ -3411,97 +3248,6 @@ function renderWorldShop() {
       ship.id, ship.name, ship.emoji, ship.description, accent,
       { bgA: wt.bgTop, bgB: wt.bgBot, accent, id: ship.id, worldId: wt.worldId }, null, true
     ));
-  });
-
-  // ── COIN SHIPS (HANGAR) ──────────────────────────────────────────────────
-  const shipSectionLabel = document.createElement('div');
-  shipSectionLabel.className = 'world-section-label';
-  shipSectionLabel.textContent = '🚀 SHIPS';
-  grid.appendChild(shipSectionLabel);
-
-  // Ships with coin prices that don't have a dedicated world (standalone ships)
-  const standaloneShips = SHIPS.filter(s => s.price > 0 && !s.worldTheme?.worldId);
-  standaloneShips.forEach(ship => {
-    const owned = (save.owned || ['classic']).includes(ship.id);
-    const sel = owned && save.selected === ship.id;
-    const canAfford = save.coins >= ship.price;
-    const rgb = h2r(ship.color);
-
-    const card = document.createElement('div');
-    card.className = 'world-card' + (sel ? ' world-selected' : '');
-    card.style.borderColor = sel ? `rgba(${rgb},0.55)` : `rgba(${rgb},0.18)`;
-    card.style.boxShadow = sel
-      ? `inset 4px 0 0 ${ship.color}, 0 0 22px rgba(${rgb},0.40), 0 0 48px rgba(${rgb},0.10)`
-      : `inset 3px 0 0 rgba(${rgb},0.45), 0 0 8px rgba(${rgb},0.10)`;
-    if (sel) card.style.background = `linear-gradient(120deg, rgba(${rgb},0.13) 0%, rgba(5,2,14,0.99) 55%)`;
-
-    // Preview panel
-    const previewPanel = document.createElement('div');
-    previewPanel.className = 'world-card-preview';
-    const miniCanvas = document.createElement('canvas');
-    miniCanvas.width = 110; miniCanvas.height = 82;
-    miniCanvas.className = 'world-card-canvas';
-    const wt = ship.worldTheme;
-    drawWorldPreview(miniCanvas, { bgA: wt.bgTop, bgB: wt.bgBot, accent: ship.color, id: ship.id }, sel);
-    previewPanel.appendChild(miniCanvas);
-    card.appendChild(previewPanel);
-
-    // Info panel
-    const info = document.createElement('div');
-    info.className = 'world-card-info';
-    info.style.minWidth = '0';
-
-    const nameEl = document.createElement('div');
-    nameEl.className = 'world-card-name';
-    nameEl.textContent = ship.emoji + ' ' + ship.name;
-    nameEl.style.color = sel ? ship.color : '#ffffff';
-    if (sel) nameEl.style.textShadow = `0 0 14px rgba(${rgb},0.75)`;
-    info.appendChild(nameEl);
-
-    const descEl = document.createElement('div');
-    descEl.className = 'world-card-desc';
-    descEl.textContent = ship.description;
-    info.appendChild(descEl);
-
-    if (owned) {
-      const badge = document.createElement('div');
-      badge.className = 'world-card-badge';
-      if (sel) {
-        badge.textContent = '✓ ACTIVE';
-        badge.style.background = ship.color;
-        badge.style.boxShadow = `0 0 12px rgba(${rgb},0.6)`;
-        badge.style.color = '#060612';
-      } else {
-        badge.textContent = 'SELECT';
-        badge.classList.add('badge-owned');
-        badge.style.borderColor = `rgba(${rgb},0.40)`;
-        badge.style.color = `rgba(${rgb},0.85)`;
-      }
-      info.appendChild(badge);
-      card.addEventListener('click', () => {
-        save.selected = ship.id;
-        writeSave(save); resetWorldState();
-        AudioEngine.init(); AudioEngine.resume(); AudioEngine.playScore();
-        renderWorldShop();
-      });
-    } else if (canAfford) {
-      const buyBtn = document.createElement('button');
-      buyBtn.className = 'badge-buy';
-      buyBtn.textContent = `BUY · 🪙 ${ship.price.toLocaleString()}`;
-      buyBtn.addEventListener('click', e => { e.stopPropagation(); purchaseCoinShip(ship.id); });
-      info.appendChild(buyBtn);
-      card.addEventListener('click', () => purchaseCoinShip(ship.id));
-    } else {
-      const needCoinsBtn = document.createElement('button');
-      needCoinsBtn.className = 'need-coins-btn';
-      needCoinsBtn.textContent = `🪙 ${ship.price.toLocaleString()} — NEED MORE COINS?`;
-      needCoinsBtn.addEventListener('click', e => { e.stopPropagation(); openCoinPackModal(); });
-      info.appendChild(needCoinsBtn);
-      card.addEventListener('click', () => openCoinPackModal());
-    }
-
-    card.appendChild(info);
-    grid.appendChild(card);
   });
 
   // ── PAID WORLDS at bottom ────────────────────────────────────────────────
