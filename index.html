@@ -3115,19 +3115,22 @@ function renderWorldShop() {
     ownedLabel.textContent = '✓ ALL WORLDS UNLOCKED';
     bundleCard.appendChild(ownedLabel);
   } else {
-    const SEPARATE_TOTAL = 1.99 + 4.99 + 2.99 + 2.99 + 3.99;
-    const savingsEl = document.createElement('div');
-    savingsEl.className = 'world-bundle-savings';
-    savingsEl.textContent = `Save $${(SEPARATE_TOTAL - BUNDLE_PRICE).toFixed(2)} vs buying separately`;
-    bundleCard.appendChild(savingsEl);
     const cta = document.createElement('button');
     cta.className = 'world-bundle-cta';
-    cta.textContent = `GET ALL 5 — $${BUNDLE_PRICE.toFixed(2)}`;
+    cta.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 28px;';
+    const strikeEl = document.createElement('span');
+    strikeEl.textContent = '$16.96';
+    strikeEl.style.cssText = 'text-decoration:line-through;font-size:10px;font-weight:600;opacity:0.6;letter-spacing:0.5px;';
+    const priceEl = document.createElement('span');
+    priceEl.textContent = '$9.99';
+    priceEl.style.cssText = 'font-size:20px;font-weight:900;letter-spacing:1px;line-height:1;';
+    const saveEl = document.createElement('span');
+    saveEl.textContent = 'YOU SAVE $6.97';
+    saveEl.style.cssText = 'font-size:8px;font-weight:700;letter-spacing:1px;opacity:0.75;';
+    cta.appendChild(strikeEl); cta.appendChild(priceEl); cta.appendChild(saveEl);
     cta.addEventListener('click', e => { e.stopPropagation(); purchaseBundle(); });
     bundleCard.appendChild(cta);
   }
-  grid.appendChild(bundleCard);
-
   // ── CARD BUILDER ─────────────────────────────────────────────────────────
   function makeCard(id, name, emoji, desc, accent, previewData, iapPrice, isLuxury) {
     const owned = isWorldOwned(id);
@@ -3256,6 +3259,8 @@ function renderWorldShop() {
       PAID_WORLD_IDS[ship.id], true
     ));
   });
+
+  grid.appendChild(bundleCard);
 }
 
 function drawWorldPreview(c, wd, selected) {
