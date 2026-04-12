@@ -226,6 +226,65 @@
     font-family: 'Orbitron', monospace;
   }
 
+  .world-card-lock-overlay {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.48); font-size: 22px;
+  }
+  .badge-buy {
+    display: block; cursor: pointer; box-sizing: border-box;
+    align-self: flex-start;
+    font-size: 10px; font-weight: 900; letter-spacing: 0;
+    padding: 6px 12px; border-radius: 6px;
+    font-family: 'Orbitron', monospace;
+    background: linear-gradient(135deg, #ff7700, #ffd000);
+    color: #1a0800; border: none;
+    box-shadow: 0 0 12px rgba(255,160,0,0.6);
+    transition: transform 0.12s; white-space: nowrap;
+  }
+  .badge-buy:active { transform: scale(0.93); }
+  .world-section-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 3px;
+    color: #ffaa33; font-family: 'Orbitron', monospace;
+    padding: 6px 2px 2px; text-align: center;
+    border-top: 1px solid rgba(255,180,0,0.25); margin-top: 2px;
+  }
+  .world-bundle-card {
+    display: flex; flex-direction: column; align-items: center;
+    border-radius: 14px;
+    border: 2px solid rgba(255,170,0,0.55);
+    background: #160c00;
+    box-shadow: 0 0 24px rgba(255,140,0,0.20);
+    padding: 16px 16px 14px; gap: 8px;
+  }
+  .world-bundle-title {
+    font-size: 14px; font-weight: 900; letter-spacing: 1.5px; color: #ffcc44;
+    text-shadow: 0 0 14px rgba(255,180,0,0.8);
+    font-family: 'Orbitron', monospace; text-align: center;
+  }
+  .world-bundle-items {
+    font-size: 10px; letter-spacing: 0.2px; color: #ffbb66;
+    text-align: center; line-height: 1.8; white-space: pre-line;
+  }
+  .world-bundle-savings {
+    font-size: 10px; color: #ff9933; letter-spacing: 0.2px; font-weight: 600;
+  }
+  .world-bundle-cta {
+    background: linear-gradient(135deg, #ff7700, #ffd000);
+    color: #1a0800; font-family: 'Orbitron', monospace;
+    font-size: 12px; font-weight: 900; letter-spacing: 1px;
+    border: none; border-radius: 8px; padding: 10px 24px; cursor: pointer;
+    box-shadow: 0 0 18px rgba(255,160,0,0.65);
+    transition: transform 0.12s;
+  }
+  .world-bundle-cta:active { transform: scale(0.93); }
+  .world-bundle-owned {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    color: #ffcc44; font-family: 'Orbitron', monospace;
+    padding: 5px 14px; border-radius: 6px;
+    border: 1px solid rgba(255,180,0,0.5);
+  }
+
   .world-launch-btn {
     background: transparent; border: 2px solid #b464ff; color: #d080ff;
     font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900;
@@ -781,7 +840,7 @@ const SHIPS = [
 // ── LUXURY SHIPS ─────────────────────────────────────────────────────────────
 const LUXURY_SHIPS = [
   {
-    id:'obsidian', name:'OBSIDIAN', premiumPrice:4.99,
+    id:'obsidian', name:'OBSIDIAN', premiumPrice:2.99,
     color:'#1e1e1e', trailColor:'#aaaaaa',
     flameColors:['#ffffff','#e0e0e0','#888888','#303030'],
     wingColor:'rgba(150,150,150,0.75)', glowColor:'#cccccc', emoji:'🚀',
@@ -790,7 +849,7 @@ const LUXURY_SHIPS = [
     worldTheme:{ bgTop:'#040404', bgBot:'#0c0c0c', nebulaHue:220, nebulaSpread:15, starRgb:'200,200,200', barrierHue:220, barrierSpread:12, grid:'rgba(160,160,160,0.018)', worldId:'obsidian', barrierStyle:'chrome', ambientColor:'#aaaaaa' }
   },
   {
-    id:'scuderia', name:'SCUDERIA', premiumPrice:4.99,
+    id:'scuderia', name:'SCUDERIA', premiumPrice:2.99,
     color:'#cc0000', trailColor:'#ff2200',
     flameColors:['#ffffff','#ffff44','#ff1100','#660000'],
     wingColor:'rgba(200,0,0,0.9)', glowColor:'#ff0000', emoji:'🚀',
@@ -799,7 +858,7 @@ const LUXURY_SHIPS = [
     worldTheme:{ bgTop:'#050000', bgBot:'#0e0000', nebulaHue:5, nebulaSpread:8, starRgb:'255,120,60', barrierHue:3, barrierSpread:8, grid:'rgba(200,0,0,0.028)', worldId:'scuderia', barrierStyle:'carbonfiber', ambientColor:'#ff2200' }
   },
   {
-    id:'tridente', name:'TRIDENTE', premiumPrice:4.99,
+    id:'tridente', name:'TRIDENTE', premiumPrice:3.99,
     color:'#002d7a', trailColor:'#4488ff',
     flameColors:['#ffffff','#aaccff','#0055cc','#001050'],
     wingColor:'rgba(0,45,122,0.9)', glowColor:'#3366ff', emoji:'🔱',
@@ -839,10 +898,15 @@ const TURBO_WORLD_THEME = {
 const WORLD_DEFS = [
   { id:'auto',       name:'TURBO',       emoji:'✨',  desc:"Black speed track · NOS barriers · Trap beat", accent:'#ff4400', bgA:'#000000', bgB:'#030005' },
   { id:'prehistoric',name:'PREHISTORIC', emoji:'🦕',  desc:'Dark jungle · Lava particles · Tribal drums', accent:'#ff6600', bgA:'#071409', bgB:'#0e2210' },
-  { id:'thegrid',    name:'THE GRID',    emoji:'💻',  desc:'Matrix code rain · Glitch barriers · Electronic', accent:'#00ff41', bgA:'#000000', bgB:'#000800' },
-  { id:'machinewar', name:'MACHINE WAR', emoji:'🤖',  desc:'Dark metal · Fire sparks · Industrial metal', accent:'#cc2200', bgA:'#0c0000', bgB:'#140000' },
   { id:'nitro',      name:'NITRO',       emoji:'🏎️', desc:'Speed streaks · Tire smoke · Trap beat', accent:'#ff7700', bgA:'#0d0500', bgB:'#1a0a00' },
+  { id:'machinewar', name:'MACHINE WAR', emoji:'🤖',  desc:'Dark metal · Fire sparks · Industrial metal', accent:'#cc2200', bgA:'#0c0000', bgB:'#140000', iapPrice:1.99 },
+  { id:'thegrid',    name:'THE GRID',    emoji:'💻',  desc:'Matrix code rain · Glitch barriers · Electronic', accent:'#00ff41', bgA:'#000000', bgB:'#000800', iapPrice:4.99 },
 ];
+
+// Paid world IDs → price, and bundle config
+const PAID_WORLD_IDS = { machinewar:1.99, thegrid:4.99, obsidian:2.99, scuderia:2.99, tridente:3.99 };
+const BUNDLE_IDS = ['machinewar','thegrid','obsidian','scuderia','tridente'];
+const BUNDLE_PRICE = 9.99;
 
 function loadSave() {
   try {
@@ -853,9 +917,10 @@ function loadSave() {
       owned: s.owned || ['classic'],
       selected: s.selected || 'thegrid',
       selectedWorld: s.selectedWorld || 'thegrid',
-      luxuryOwned: s.luxuryOwned || []
+      luxuryOwned: s.luxuryOwned || [],
+      ownedWorlds: s.ownedWorlds || []
     };
-  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'thegrid', selectedWorld: 'thegrid', luxuryOwned: [] }; }
+  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'thegrid', selectedWorld: 'thegrid', luxuryOwned: [], ownedWorlds: [] }; }
 }
 function writeSave(s) {
   localStorage.setItem('neonDashSave', JSON.stringify(s));
@@ -874,6 +939,7 @@ function writeCloudSave(s) {
     best: s.best || 0,
     owned: s.owned || ['classic'],
     luxuryOwned: s.luxuryOwned || [],
+    ownedWorlds: s.ownedWorlds || [],
     selected: s.selected || 'classic',
     selectedWorld: s.selectedWorld || 'auto',
     ts: firebase.firestore.FieldValue.serverTimestamp()
@@ -903,6 +969,7 @@ function writeCloudSave(s) {
         save.best         = Math.max(save.best,  d.best  || 0);
         if ((d.owned       || []).length > save.owned.length)       save.owned       = d.owned;
         if ((d.luxuryOwned || []).length > save.luxuryOwned.length) save.luxuryOwned = d.luxuryOwned;
+        if ((d.ownedWorlds || []).length > (save.ownedWorlds||[]).length) save.ownedWorlds = d.ownedWorlds;
         if (d.selected)     save.selected     = d.selected;
         if (d.selectedWorld) save.selectedWorld = d.selectedWorld;
         localStorage.setItem('neonDashSave', JSON.stringify(save));
@@ -2989,6 +3056,37 @@ function resetWorldState() {
   ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
 }
 
+// Returns true if a paid world/ship id is unlocked
+function isWorldOwned(id) {
+  if (!PAID_WORLD_IDS[id]) return true; // free worlds always owned
+  if ((save.ownedWorlds || []).includes(id)) return true;
+  return false;
+}
+
+function purchaseWorld(id) {
+  const price = PAID_WORLD_IDS[id];
+  if (!price) return;
+  // TODO: wire to real IAP (Capacitor Purchases plugin)
+  if (confirm(`Unlock this world for $${price.toFixed(2)}?\n\n(This will trigger the App Store purchase flow)`)) {
+    if (!save.ownedWorlds) save.ownedWorlds = [];
+    if (!save.ownedWorlds.includes(id)) save.ownedWorlds.push(id);
+    writeSave(save);
+    renderWorldShop();
+  }
+}
+
+function purchaseBundle() {
+  const allOwned = BUNDLE_IDS.every(id => isWorldOwned(id));
+  if (allOwned) return;
+  // TODO: wire to real IAP (Capacitor Purchases plugin)
+  if (confirm(`Unlock ALL 5 WORLDS for $${BUNDLE_PRICE.toFixed(2)}?\n\nIncludes: Machine War, The Grid, Obsidian, Scuderia, Tridente\n\n(This will trigger the App Store purchase flow)`)) {
+    if (!save.ownedWorlds) save.ownedWorlds = [];
+    BUNDLE_IDS.forEach(id => { if (!save.ownedWorlds.includes(id)) save.ownedWorlds.push(id); });
+    writeSave(save);
+    renderWorldShop();
+  }
+}
+
 function renderWorldShop() {
   const coinEl = document.getElementById('worldCoinCount');
   if(coinEl) coinEl.textContent = save.coins;
@@ -2996,137 +3094,167 @@ function renderWorldShop() {
   grid.innerHTML = '';
   const h2r = h => { if(!h||!h.startsWith('#')) return '170,170,170'; return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(','); };
 
-  WORLD_DEFS.forEach(wd => {
-    const sel = (save.selectedWorld || 'auto') === wd.id;
-    const rgb = h2r(wd.accent);
+  // ── BUNDLE CARD ─────────────────────────────────────────────────────────
+  const allBundleOwned = BUNDLE_IDS.every(id => isWorldOwned(id));
+  const bundleCard = document.createElement('div');
+  bundleCard.className = 'world-bundle-card';
 
-    const card = document.createElement('div');
-    card.className = 'world-card' + (sel ? ' world-selected' : '');
-    card.style.borderColor = sel ? `rgba(${rgb},0.55)` : `rgba(${rgb},0.18)`;
-    card.style.boxShadow = sel
-      ? `inset 4px 0 0 ${wd.accent}, 0 0 22px rgba(${rgb},0.40), 0 0 48px rgba(${rgb},0.10)`
-      : `inset 3px 0 0 rgba(${rgb},0.45), 0 0 8px rgba(${rgb},0.10)`;
-    if(sel) card.style.background = `linear-gradient(120deg, rgba(${rgb},0.13) 0%, rgba(5,2,14,0.99) 55%)`;
+  const bundleTitle = document.createElement('div');
+  bundleTitle.className = 'world-bundle-title';
+  bundleTitle.textContent = '🌌 ALL 5 WORLDS PACK';
+  bundleCard.appendChild(bundleTitle);
 
-    // Left: world preview canvas
-    const previewPanel = document.createElement('div');
-    previewPanel.className = 'world-card-preview';
-    const miniCanvas = document.createElement('canvas');
-    miniCanvas.width = 110; miniCanvas.height = 82;
-    miniCanvas.className = 'world-card-canvas';
-    drawWorldPreview(miniCanvas, wd, sel);
-    previewPanel.appendChild(miniCanvas);
-    card.appendChild(previewPanel);
+  const bundleItems = document.createElement('div');
+  bundleItems.className = 'world-bundle-items';
+  bundleItems.textContent = 'Machine War $1.99  ·  The Grid $4.99  ·  Obsidian $2.99\nScuderia $2.99  ·  Tridente $3.99';
+  bundleCard.appendChild(bundleItems);
 
-    // Right: info
-    const info = document.createElement('div');
-    info.className = 'world-card-info';
+  if (allBundleOwned) {
+    const ownedLabel = document.createElement('div');
+    ownedLabel.className = 'world-bundle-owned';
+    ownedLabel.textContent = '✓ ALL WORLDS UNLOCKED';
+    bundleCard.appendChild(ownedLabel);
+  } else {
+    const SEPARATE_TOTAL = 1.99 + 4.99 + 2.99 + 2.99 + 3.99;
+    const savingsEl = document.createElement('div');
+    savingsEl.className = 'world-bundle-savings';
+    savingsEl.textContent = `Save $${(SEPARATE_TOTAL - BUNDLE_PRICE).toFixed(2)} vs buying separately`;
+    bundleCard.appendChild(savingsEl);
+    const cta = document.createElement('button');
+    cta.className = 'world-bundle-cta';
+    cta.textContent = `GET ALL 5 — $${BUNDLE_PRICE.toFixed(2)}`;
+    cta.addEventListener('click', e => { e.stopPropagation(); purchaseBundle(); });
+    bundleCard.appendChild(cta);
+  }
+  grid.appendChild(bundleCard);
 
-    const nameEl = document.createElement('div');
-    nameEl.className = 'world-card-name';
-    nameEl.textContent = wd.emoji + ' ' + wd.name;
-    nameEl.style.color = sel ? wd.accent : '#ffffff';
-    if(sel) nameEl.style.textShadow = `0 0 14px rgba(${rgb},0.75)`;
-    info.appendChild(nameEl);
-
-    const descEl = document.createElement('div');
-    descEl.className = 'world-card-desc';
-    descEl.textContent = wd.desc;
-    info.appendChild(descEl);
-
-    const badge = document.createElement('div');
-    badge.className = 'world-card-badge';
-    if(sel) {
-      badge.textContent = '✓ ACTIVE';
-      badge.style.background = wd.accent;
-      badge.style.boxShadow = `0 0 12px rgba(${rgb},0.6)`;
-      badge.style.color = '#060612';
-    } else {
-      badge.textContent = 'SELECT';
-      badge.classList.add('badge-owned');
-      badge.style.borderColor = `rgba(${rgb},0.40)`;
-      badge.style.color = `rgba(${rgb},0.85)`;
-    }
-    info.appendChild(badge);
-    card.appendChild(info);
-
-    card.addEventListener('click', () => {
-      save.selectedWorld = wd.id;
-      if (wd.id === 'auto') save.selected = 'nitro';
-      else save.selected = wd.id;
-      writeSave(save);
-      resetWorldState();
-      AudioEngine.init(); AudioEngine.resume();
-      AudioEngine.playScore();
-      renderWorldShop();
-    });
-    grid.appendChild(card);
-  });
-
-  LUXURY_SHIPS.forEach(ship => {
-    const sel = save.selected === ship.id;
-    const wt = ship.worldTheme;
-    const accent = wt.ambientColor || ship.color;
+  // ── CARD BUILDER ─────────────────────────────────────────────────────────
+  function makeCard(id, name, emoji, desc, accent, previewData, iapPrice, isLuxury) {
+    const owned = isWorldOwned(id);
+    const isSelectedWorld = !isLuxury ? (save.selectedWorld || 'auto') === id && !PAID_WORLD_IDS[save.selected] : false;
+    const isSelectedShip  = isLuxury  ? save.selected === id : false;
+    const sel = owned && (isSelectedWorld || isSelectedShip);
     const rgb = h2r(accent);
 
     const card = document.createElement('div');
     card.className = 'world-card' + (sel ? ' world-selected' : '');
-    card.style.borderColor = sel ? `rgba(${rgb},0.55)` : `rgba(${rgb},0.18)`;
-    card.style.boxShadow = sel
-      ? `inset 4px 0 0 ${accent}, 0 0 22px rgba(${rgb},0.40), 0 0 48px rgba(${rgb},0.10)`
-      : `inset 3px 0 0 rgba(${rgb},0.45), 0 0 8px rgba(${rgb},0.10)`;
-    if(sel) card.style.background = `linear-gradient(120deg, rgba(${rgb},0.13) 0%, rgba(5,2,14,0.99) 55%)`;
+    if (!owned && iapPrice) {
+      card.style.borderColor = 'rgba(255,170,0,0.25)';
+      card.style.boxShadow = 'inset 3px 0 0 rgba(255,140,0,0.35), 0 0 8px rgba(255,120,0,0.08)';
+    } else {
+      card.style.borderColor = sel ? `rgba(${rgb},0.55)` : `rgba(${rgb},0.18)`;
+      card.style.boxShadow = sel
+        ? `inset 4px 0 0 ${accent}, 0 0 22px rgba(${rgb},0.40), 0 0 48px rgba(${rgb},0.10)`
+        : `inset 3px 0 0 rgba(${rgb},0.45), 0 0 8px rgba(${rgb},0.10)`;
+      if (sel) card.style.background = `linear-gradient(120deg, rgba(${rgb},0.13) 0%, rgba(5,2,14,0.99) 55%)`;
+    }
 
+    // Preview panel
     const previewPanel = document.createElement('div');
     previewPanel.className = 'world-card-preview';
     const miniCanvas = document.createElement('canvas');
     miniCanvas.width = 110; miniCanvas.height = 82;
     miniCanvas.className = 'world-card-canvas';
-    drawWorldPreview(miniCanvas, { bgA: wt.bgTop, bgB: wt.bgBot, accent, id: ship.id }, sel);
+    drawWorldPreview(miniCanvas, previewData, sel);
     previewPanel.appendChild(miniCanvas);
+    if (!owned && iapPrice) {
+      const lockEl = document.createElement('div');
+      lockEl.className = 'world-card-lock-overlay';
+      lockEl.textContent = '🔒';
+      previewPanel.appendChild(lockEl);
+    }
     card.appendChild(previewPanel);
 
+    // Info panel
     const info = document.createElement('div');
     info.className = 'world-card-info';
+    info.style.minWidth = '0';
 
     const nameEl = document.createElement('div');
     nameEl.className = 'world-card-name';
-    nameEl.textContent = ship.emoji + ' ' + ship.name;
+    nameEl.textContent = emoji + ' ' + name;
     nameEl.style.color = sel ? accent : '#ffffff';
-    if(sel) nameEl.style.textShadow = `0 0 14px rgba(${rgb},0.75)`;
+    if (sel) nameEl.style.textShadow = `0 0 14px rgba(${rgb},0.75)`;
     info.appendChild(nameEl);
 
     const descEl = document.createElement('div');
     descEl.className = 'world-card-desc';
-    descEl.textContent = ship.description;
+    descEl.textContent = desc;
     info.appendChild(descEl);
 
-    const badge = document.createElement('div');
-    badge.className = 'world-card-badge';
-    if(sel) {
-      badge.textContent = '✓ ACTIVE';
-      badge.style.background = accent;
-      badge.style.boxShadow = `0 0 12px rgba(${rgb},0.6)`;
-      badge.style.color = '#060612';
+    if (!owned && iapPrice) {
+      const buyBtn = document.createElement('button');
+      buyBtn.className = 'badge-buy';
+      buyBtn.textContent = `UNLOCK — $${iapPrice.toFixed(2)}`;
+      buyBtn.addEventListener('click', e => { e.stopPropagation(); purchaseWorld(id); });
+      info.appendChild(buyBtn);
+      card.addEventListener('click', () => purchaseWorld(id));
     } else {
-      badge.textContent = 'SELECT';
-      badge.classList.add('badge-owned');
-      badge.style.borderColor = `rgba(${rgb},0.40)`;
-      badge.style.color = `rgba(${rgb},0.85)`;
+      const badge = document.createElement('div');
+      badge.className = 'world-card-badge';
+      if (sel) {
+        badge.textContent = '✓ ACTIVE';
+        badge.style.background = accent;
+        badge.style.boxShadow = `0 0 12px rgba(${rgb},0.6)`;
+        badge.style.color = '#060612';
+      } else {
+        badge.textContent = 'SELECT';
+        badge.classList.add('badge-owned');
+        badge.style.borderColor = `rgba(${rgb},0.40)`;
+        badge.style.color = `rgba(${rgb},0.85)`;
+      }
+      info.appendChild(badge);
+      card.addEventListener('click', () => {
+        if (isLuxury) {
+          save.selected = id;
+          save.selectedWorld = previewData.worldId || id;
+        } else {
+          save.selectedWorld = id;
+          save.selected = id === 'auto' ? 'nitro' : id;
+        }
+        writeSave(save); resetWorldState();
+        AudioEngine.init(); AudioEngine.resume(); AudioEngine.playScore();
+        renderWorldShop();
+      });
     }
-    info.appendChild(badge);
-    card.appendChild(info);
 
-    card.addEventListener('click', () => {
-      save.selected = ship.id;
-      save.selectedWorld = wt.worldId;
-      writeSave(save);
-      resetWorldState();
-      AudioEngine.init(); AudioEngine.resume();
-      AudioEngine.playScore();
-      renderWorldShop();
-    });
-    grid.appendChild(card);
+    card.appendChild(info);
+    return card;
+  }
+
+  // ── FREE WORLDS first ────────────────────────────────────────────────────
+  WORLD_DEFS.filter(wd => !wd.iapPrice).forEach(wd => {
+    grid.appendChild(makeCard(wd.id, wd.name, wd.emoji, wd.desc, wd.accent, wd, null, false));
+  });
+
+  // Free luxury ships (VEYRON, RAGING BULL — not in PAID_WORLD_IDS)
+  LUXURY_SHIPS.filter(s => !PAID_WORLD_IDS[s.id]).forEach(ship => {
+    const wt = ship.worldTheme;
+    const accent = wt.ambientColor || ship.color;
+    grid.appendChild(makeCard(
+      ship.id, ship.name, ship.emoji, ship.description, accent,
+      { bgA: wt.bgTop, bgB: wt.bgBot, accent, id: ship.id, worldId: wt.worldId }, null, true
+    ));
+  });
+
+  // ── PAID WORLDS at bottom ────────────────────────────────────────────────
+  const sectionLabel = document.createElement('div');
+  sectionLabel.className = 'world-section-label';
+  sectionLabel.textContent = '💎 PREMIUM WORLDS';
+  grid.appendChild(sectionLabel);
+
+  WORLD_DEFS.filter(wd => wd.iapPrice).forEach(wd => {
+    grid.appendChild(makeCard(wd.id, wd.name, wd.emoji, wd.desc, wd.accent, wd, wd.iapPrice, false));
+  });
+
+  LUXURY_SHIPS.filter(s => PAID_WORLD_IDS[s.id]).forEach(ship => {
+    const wt = ship.worldTheme;
+    const accent = wt.ambientColor || ship.color;
+    grid.appendChild(makeCard(
+      ship.id, ship.name, ship.emoji, ship.description, accent,
+      { bgA: wt.bgTop, bgB: wt.bgBot, accent, id: ship.id, worldId: wt.worldId },
+      PAID_WORLD_IDS[ship.id], true
+    ));
   });
 }
 
