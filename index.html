@@ -132,7 +132,80 @@
   #soundToggle:hover { border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0,255,240,0.3); }
   #soundToggle.muted { opacity: 0.4; }
 
+  /* ── COIN SHOP HUD BUTTON ── */
+  #coinShopBtn {
+    position: absolute; top: 52px; left: 16px;
+    background: linear-gradient(135deg, #ffaa00, #ffdd00);
+    color: #1a0800; font-family: 'Orbitron', monospace;
+    font-size: 9px; font-weight: 900; letter-spacing: 1px;
+    border: none; border-radius: 20px; padding: 5px 11px;
+    cursor: pointer; pointer-events: all; z-index: 10;
+    box-shadow: 0 0 10px rgba(255,160,0,0.4);
+    transition: transform 0.12s;
+  }
+  #coinShopBtn:active { transform: scale(0.94); }
 
+  /* ── COIN SHOP SCREEN ── */
+  #coinShopScreen {
+    position: absolute; inset: 0; z-index: 150;
+    display: flex; flex-direction: column; align-items: stretch;
+    background: radial-gradient(ellipse at 50% 0%, rgba(70,40,0,0.65) 0%, #030200 58%);
+    overflow: hidden; pointer-events: all;
+  }
+  #coinShopScreen.hidden { display: none; }
+  .coin-shop-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 18px 10px; flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,180,0,0.18);
+  }
+  .coin-shop-title {
+    font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 900;
+    letter-spacing: 5px; color: #ffcc44;
+    text-shadow: 0 0 18px rgba(255,180,0,0.85), 0 0 40px rgba(255,130,0,0.3);
+  }
+  .coin-shop-close-btn {
+    background: transparent; border: 1.5px solid rgba(255,180,0,0.35); color: #ffcc44;
+    width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', monospace; transition: all 0.15s;
+  }
+  .coin-shop-close-btn:active { border-color: #ffcc44; transform: scale(0.93); }
+  .coin-shop-subtitle {
+    font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 3px;
+    color: rgba(255,180,0,0.5); text-align: center; padding: 5px 0 10px; flex-shrink: 0;
+  }
+  .coin-packs-list {
+    flex: 1; overflow-y: auto; padding: 10px 16px 20px;
+    display: flex; flex-direction: column; gap: 12px; scrollbar-width: none;
+  }
+  .coin-packs-list::-webkit-scrollbar { display: none; }
+  .coin-pack-card {
+    display: flex; flex-direction: row; align-items: center;
+    justify-content: space-between; border-radius: 14px; padding: 16px 18px;
+    border: 1px solid rgba(255,180,0,0.18);
+    background: linear-gradient(120deg, rgba(28,13,0,0.98) 0%, rgba(10,5,0,0.98) 100%);
+    box-shadow: inset 4px 0 0 #ffaa00, 0 0 14px rgba(255,140,0,0.05);
+    cursor: pointer; transition: transform 0.12s;
+  }
+  .coin-pack-card:active { transform: scale(0.97); }
+  .coin-pack-left { display: flex; flex-direction: column; gap: 5px; }
+  .coin-pack-name {
+    font-size: 12px; font-weight: 900; letter-spacing: 2px; color: #ffcc44;
+    font-family: 'Orbitron', monospace; line-height: 1;
+  }
+  .coin-pack-amount {
+    font-size: 21px; font-weight: 900; color: #ffee88;
+    font-family: 'Rajdhani', sans-serif; line-height: 1.15; letter-spacing: 0.5px;
+  }
+  .coin-pack-price-btn {
+    background: linear-gradient(135deg, #ff8800, #ffdd00);
+    color: #1a0800; font-family: 'Orbitron', monospace;
+    font-size: 15px; font-weight: 900; letter-spacing: 0.5px;
+    border: none; border-radius: 10px; padding: 11px 20px; cursor: pointer;
+    box-shadow: 0 0 16px rgba(255,160,0,0.5); flex-shrink: 0;
+    transition: transform 0.12s;
+  }
+  .coin-pack-price-btn:active { transform: scale(0.93); }
 
   /* World/Universe button — game over screen */
   #worldBtn {
@@ -623,6 +696,7 @@
     <div id="bestDisplay">BEST: 0</div>
     <div id="comboDisplay">x2 COMBO!</div>
     <div id="coinHud"><span id="coinCount">0</span></div>
+    <button id="coinShopBtn">💰 GET COINS</button>
     <button id="soundToggle" title="Toggle Sound">🔊</button>
   </div>
 
@@ -674,6 +748,16 @@
       SHARE TO TIKTOK
     </button>
     <button class="rv-play-again" id="rvPlayAgainBtn">↺ PLAY AGAIN</button>
+  </div>
+
+  <!-- COIN SHOP -->
+  <div id="coinShopScreen" class="hidden">
+    <div class="coin-shop-header">
+      <div class="coin-shop-title">💰 COIN SHOP</div>
+      <button class="coin-shop-close-btn" id="coinShopCloseBtn">✕</button>
+    </div>
+    <div class="coin-shop-subtitle">POWER UP YOUR GAME</div>
+    <div class="coin-packs-list" id="coinPacksList"></div>
   </div>
 
   <!-- DIMENSIONS WORLD SELECTOR -->
@@ -907,6 +991,12 @@ const WORLD_DEFS = [
 const PAID_WORLD_IDS = { machinewar:1.99, thegrid:4.99, obsidian:2.99, scuderia:2.99, tridente:3.99 };
 const BUNDLE_IDS = ['machinewar','thegrid','obsidian','scuderia','tridente'];
 const BUNDLE_PRICE = 9.99;
+const COIN_PACKS = [
+  { id:'starter', name:'STARTER PACK', coins:1000,  price:0.99  },
+  { id:'pro',     name:'PRO PACK',     coins:5000,  price:2.99  },
+  { id:'elite',   name:'ELITE PACK',   coins:15000, price:6.99  },
+  { id:'legend',  name:'LEGEND PACK',  coins:50000, price:14.99 },
+];
 
 // Progressive difficulty per world: affects base speed and barrier spawn rate
 const WORLD_DIFFICULTY = {
@@ -2895,9 +2985,14 @@ document.getElementById('worldCloseBtn').addEventListener('click', e => { e.stop
 document.getElementById('worldLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeWorldShop(); });
 document.getElementById('worldLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeWorldShop(); });
 
+document.getElementById('coinShopBtn').addEventListener('click', e => { e.stopPropagation(); openCoinShop(); });
+document.getElementById('coinShopBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); openCoinShop(); }, { passive: false });
+document.getElementById('coinShopCloseBtn').addEventListener('click', e => { e.stopPropagation(); closeCoinShop(); });
+
 function doJump() {
-  // Never fire while the hangar is open
+  // Never fire while the hangar or coin shop is open
   if (!document.getElementById('worldScreen').classList.contains('hidden')) return;
+  if (!document.getElementById('coinShopScreen').classList.contains('hidden')) return;
   AudioEngine.init(); AudioEngine.resume();
   if (state === 'start') { startGame(); return; }
   if (state === 'playing' && !player.dead && !yupilandiaFrozen) {
@@ -3094,6 +3189,56 @@ function purchaseBundle() {
     BUNDLE_IDS.forEach(id => { if (!save.ownedWorlds.includes(id)) save.ownedWorlds.push(id); });
     writeSave(save);
     renderWorldShop();
+  }
+}
+
+function openCoinShop() {
+  AudioEngine.init(); AudioEngine.resume();
+  const list = document.getElementById('coinPacksList');
+  list.innerHTML = '';
+  COIN_PACKS.forEach(pack => {
+    const card = document.createElement('div');
+    card.className = 'coin-pack-card';
+
+    const left = document.createElement('div');
+    left.className = 'coin-pack-left';
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'coin-pack-name';
+    nameEl.textContent = pack.name;
+
+    const amountEl = document.createElement('div');
+    amountEl.className = 'coin-pack-amount';
+    amountEl.textContent = '🪙 ' + pack.coins.toLocaleString() + ' COINS';
+
+    left.appendChild(nameEl);
+    left.appendChild(amountEl);
+
+    const priceBtn = document.createElement('button');
+    priceBtn.className = 'coin-pack-price-btn';
+    priceBtn.textContent = '$' + pack.price.toFixed(2);
+    priceBtn.addEventListener('click', e => { e.stopPropagation(); purchaseCoinPack(pack.id); });
+
+    card.appendChild(left);
+    card.appendChild(priceBtn);
+    card.addEventListener('click', () => purchaseCoinPack(pack.id));
+    list.appendChild(card);
+  });
+  document.getElementById('coinShopScreen').classList.remove('hidden');
+}
+
+function closeCoinShop() {
+  document.getElementById('coinShopScreen').classList.add('hidden');
+}
+
+function purchaseCoinPack(id) {
+  const pack = COIN_PACKS.find(p => p.id === id);
+  if (!pack) return;
+  // TODO: wire to real IAP (Capacitor Purchases plugin)
+  if (confirm(`Buy ${pack.coins.toLocaleString()} coins for $${pack.price.toFixed(2)}?\n\n(This will trigger the App Store purchase flow)`)) {
+    save.coins += pack.coins;
+    writeSave(save);
+    updateCoinHud();
   }
 }
 
