@@ -1107,7 +1107,7 @@ const AudioEngine = (() => {
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     masterGain = ctx.createGain(); masterGain.gain.value = 0.6; masterGain.connect(ctx.destination);
   }
-  function resume() { if (ctx && ctx.state === 'suspended') ctx.resume(); }
+  function resume() { if (ctx && ctx.state === 'suspended') return ctx.resume(); return Promise.resolve(); }
   function setMuted(v) { muted = v; if (masterGain) masterGain.gain.value = muted ? 0 : 0.6; }
   function isMuted() { return muted; }
 
@@ -2566,6 +2566,18 @@ const AudioEngine = (() => {
   return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic };
 })();
 
+// iOS Safari: unlock AudioContext on first user touch (required before any sound can play)
+(function() {
+  function iosAudioUnlock() {
+    AudioEngine.init();
+    AudioEngine.resume();
+    document.removeEventListener('touchstart', iosAudioUnlock, true);
+    document.removeEventListener('touchend',   iosAudioUnlock, true);
+  }
+  document.addEventListener('touchstart', iosAudioUnlock, { capture: true, passive: true });
+  document.addEventListener('touchend',   iosAudioUnlock, { capture: true, passive: true });
+})();
+
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 //  GAME ENGINE
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
@@ -2985,9 +2997,10 @@ document.getElementById('worldCloseBtn').addEventListener('click', e => { e.stop
 document.getElementById('worldLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeWorldShop(); });
 document.getElementById('worldLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeWorldShop(); });
 
-document.getElementById('coinShopBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playCoin(); openCoinShop(); });
-document.getElementById('coinShopBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playCoin(); openCoinShop(); }, { passive: false });
-document.getElementById('coinShopCloseBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playCoin(); closeCoinShop(); });
+document.getElementById('coinShopBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playCoin()); openCoinShop(); });
+document.getElementById('coinShopBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playCoin()); openCoinShop(); }, { passive: false });
+document.getElementById('coinShopCloseBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playCoin()); closeCoinShop(); });
+document.getElementById('coinShopCloseBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playCoin()); closeCoinShop(); }, { passive: false });
 
 function doJump() {
   // Never fire while the hangar or coin shop is open
@@ -3217,11 +3230,11 @@ function openCoinShop() {
     const priceBtn = document.createElement('button');
     priceBtn.className = 'coin-pack-price-btn';
     priceBtn.textContent = '$' + pack.price.toFixed(2);
-    priceBtn.addEventListener('click', e => { e.stopPropagation(); AudioEngine.playCoin(); purchaseCoinPack(pack.id); });
+    priceBtn.addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playCoin()); purchaseCoinPack(pack.id); });
 
     card.appendChild(left);
     card.appendChild(priceBtn);
-    card.addEventListener('click', () => { AudioEngine.playCoin(); purchaseCoinPack(pack.id); });
+    card.addEventListener('click', () => { AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playCoin()); purchaseCoinPack(pack.id); });
     list.appendChild(card);
   });
   document.getElementById('coinShopScreen').classList.remove('hidden');
