@@ -431,6 +431,53 @@
   }
   .world-launch-btn:active { background: #b464ff; color: #06020a; transform: scale(0.96); animation: none; }
 
+  /* ── COIN UNLOCK CONFIRMATION POPUP ── */
+  #coinUnlockPopup {
+    position: absolute; inset: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.72); backdrop-filter: blur(3px);
+  }
+  #coinUnlockPopup.hidden { display: none; }
+  #coinUnlockPopupBox {
+    background: linear-gradient(160deg, #1e2b14, #2a3a1a);
+    border: 2px solid #6a8a3a;
+    border-radius: 16px;
+    box-shadow: 0 0 32px rgba(80,140,30,0.45), inset 0 0 20px rgba(60,100,20,0.15);
+    padding: 26px 24px 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    max-width: 280px; width: 85%;
+  }
+  #coinUnlockPopupTitle {
+    font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900;
+    letter-spacing: 3px; color: #a8d060;
+    text-shadow: 0 0 12px rgba(140,200,50,0.7);
+    text-align: center;
+  }
+  #coinUnlockPopupMsg {
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px; color: #ffd700;
+    text-shadow: 0 0 8px rgba(255,215,0,0.6);
+    text-align: center; line-height: 1.5;
+  }
+  #coinUnlockPopupYes {
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 900;
+    letter-spacing: 2px; color: #0d1a06;
+    background: linear-gradient(135deg, #6abf20, #a0d840);
+    border: none; border-radius: 8px;
+    padding: 10px 28px; cursor: pointer;
+    box-shadow: 0 0 16px rgba(100,190,30,0.55);
+    transition: transform 0.12s;
+  }
+  #coinUnlockPopupYes:active { transform: scale(0.93); }
+  #coinUnlockPopupNo {
+    font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; color: #7a9060;
+    background: transparent; border: 1px solid #4a6030;
+    border-radius: 8px; padding: 8px 24px; cursor: pointer;
+    transition: transform 0.12s;
+  }
+  #coinUnlockPopupNo:active { transform: scale(0.93); }
+
   #comboDisplay {
     position: absolute; top: 110px; left: 50%; transform: translateX(-50%);
     font-size: 13px; font-weight: 700; color: var(--neon-yellow);
@@ -833,6 +880,16 @@
     <div class="world-subtitle">SELECT YOUR DIMENSION</div>
     <div class="world-grid" id="worldGrid"></div>
     <button class="world-launch-btn" id="worldLaunchBtn">▶ LAUNCH</button>
+  </div>
+
+  <!-- COIN UNLOCK CONFIRMATION POPUP -->
+  <div id="coinUnlockPopup" class="hidden">
+    <div id="coinUnlockPopupBox">
+      <div id="coinUnlockPopupTitle">UNLOCK DIMENSION</div>
+      <div id="coinUnlockPopupMsg"></div>
+      <button id="coinUnlockPopupYes">YES UNLOCK</button>
+      <button id="coinUnlockPopupNo">CANCEL</button>
+    </div>
   </div>
 
 </div>
@@ -3419,16 +3476,36 @@ function purchaseBundle() {
 function coinUnlockWorld(id) {
   const price = COIN_UNLOCK_WORLDS[id];
   if (!price) return;
-  if (save.coins >= price) {
+  if (save.coins < price) {
+    AudioEngine.init(); AudioEngine.resume(); AudioEngine.playLocked();
+    return;
+  }
+  const popup = document.getElementById('coinUnlockPopup');
+  const msg = document.getElementById('coinUnlockPopupMsg');
+  msg.textContent = `COST: ${price.toLocaleString()} 🪙\nYOU HAVE: ${save.coins.toLocaleString()} 🪙`;
+  popup.classList.remove('hidden');
+
+  const yesBtn = document.getElementById('coinUnlockPopupYes');
+  const noBtn = document.getElementById('coinUnlockPopupNo');
+
+  function close() {
+    popup.classList.add('hidden');
+    yesBtn.removeEventListener('click', onYes);
+    noBtn.removeEventListener('click', onNo);
+  }
+  function onYes() {
+    close();
     save.coins -= price;
     if (!save.ownedWorlds) save.ownedWorlds = [];
     if (!save.ownedWorlds.includes(id)) save.ownedWorlds.push(id);
     writeSave(save);
     updateCoinHud();
     renderWorldShop();
-  } else {
-    AudioEngine.init(); AudioEngine.resume(); AudioEngine.playLocked();
   }
+  function onNo() { close(); }
+
+  yesBtn.addEventListener('click', onYes);
+  noBtn.addEventListener('click', onNo);
 }
 
 function openCoinShop() {
