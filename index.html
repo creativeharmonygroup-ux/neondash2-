@@ -3491,10 +3491,12 @@ function coinUnlockWorld(id) {
   function close() {
     popup.classList.add('hidden');
     yesBtn.removeEventListener('click', onYes);
+    yesBtn.removeEventListener('touchstart', onYesTouch);
     noBtn.removeEventListener('click', onNo);
     noBtn.removeEventListener('touchstart', onNoTouch);
     noBtn.removeEventListener('touchend', onNo);
   }
+  function onYesTouch(e) { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playMissionAccepted(); }
   function onYes() {
     close();
     save.coins -= price;
@@ -3504,9 +3506,10 @@ function coinUnlockWorld(id) {
     updateCoinHud();
     renderWorldShop();
   }
-  function onNo(e) { e.preventDefault(); e.stopPropagation(); close(); }
+  function onNo(e) { e.preventDefault(); e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playMissionAborted(); close(); }
   function onNoTouch(e) { e.preventDefault(); e.stopPropagation(); }
 
+  yesBtn.addEventListener('touchstart', onYesTouch, { passive: false });
   yesBtn.addEventListener('click', onYes);
   noBtn.addEventListener('click', onNo);
   noBtn.addEventListener('touchstart', onNoTouch, { passive: false });
