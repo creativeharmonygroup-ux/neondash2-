@@ -3549,9 +3549,9 @@ function renderWorldShop() {
       const buyBtn = document.createElement('button');
       buyBtn.className = 'badge-buy';
       buyBtn.textContent = `UNLOCK — $${iapPrice.toFixed(2)}`;
-      buyBtn.addEventListener('click', e => { e.stopPropagation(); purchaseWorld(id); });
+      buyBtn.addEventListener('click', e => { e.stopPropagation(); AudioEngine.playLocked(); purchaseWorld(id); });
       info.appendChild(buyBtn);
-      card.addEventListener('click', () => purchaseWorld(id));
+      card.addEventListener('click', () => { AudioEngine.playLocked(); purchaseWorld(id); });
     } else if (!owned && coinPrice) {
       const coinBadge = document.createElement('div');
       coinBadge.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start;gap:2px;cursor:pointer;';
@@ -3563,9 +3563,9 @@ function renderWorldShop() {
       earnRow.textContent = 'EARN IN GAME';
       coinBadge.appendChild(priceRow);
       coinBadge.appendChild(earnRow);
-      coinBadge.addEventListener('click', e => { e.stopPropagation(); coinUnlockWorld(id); });
+      coinBadge.addEventListener('click', e => { e.stopPropagation(); AudioEngine.playLocked(); coinUnlockWorld(id); });
       info.appendChild(coinBadge);
-      card.addEventListener('click', () => coinUnlockWorld(id));
+      card.addEventListener('click', () => { AudioEngine.playLocked(); coinUnlockWorld(id); });
     } else {
       const badge = document.createElement('div');
       badge.className = 'world-card-badge';
