@@ -2985,8 +2985,8 @@ document.getElementById('worldCloseBtn').addEventListener('click', e => { e.stop
 document.getElementById('worldLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeWorldShop(); });
 document.getElementById('worldLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeWorldShop(); });
 
-document.getElementById('coinShopBtn').addEventListener('click', e => { e.stopPropagation(); openCoinShop(); });
-document.getElementById('coinShopBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); openCoinShop(); }, { passive: false });
+document.getElementById('coinShopBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playCoin(); openCoinShop(); });
+document.getElementById('coinShopBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playCoin(); openCoinShop(); }, { passive: false });
 document.getElementById('coinShopCloseBtn').addEventListener('click', e => { e.stopPropagation(); closeCoinShop(); });
 
 function doJump() {
