@@ -3093,10 +3093,10 @@ document.getElementById('worldCloseBtn').addEventListener('click', e => { e.stop
 document.getElementById('worldLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeWorldShop(); });
 document.getElementById('worldLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeWorldShop(); });
 
-document.getElementById('coinShopBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playCoin()); openCoinShop(); });
-document.getElementById('coinShopBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playCoin()); openCoinShop(); }, { passive: false });
-document.getElementById('coinShopCloseBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playCoin()); closeCoinShop(); });
-document.getElementById('coinShopCloseBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playCoin()); closeCoinShop(); }, { passive: false });
+document.getElementById('coinShopBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playShopOpen(); openCoinShop(); });
+document.getElementById('coinShopBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openCoinShop(); }, { passive: false });
+document.getElementById('coinShopCloseBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeCoinShop(); });
+document.getElementById('coinShopCloseBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeCoinShop(); }, { passive: false });
 
 function doJump() {
   // Never fire while the hangar or coin shop is open
@@ -3239,6 +3239,7 @@ function gameOver() {
 
 // ── UNIVERSE WORLD SHOP ──────────────────────────────────────────────────────
 let _worldScrollLastIdx = -1;
+let _coinShopScrollLastIdx = -1;
 function openWorldShop() {
   _worldScrollLastIdx = -1;
   AudioEngine.init(); AudioEngine.resume();
@@ -3262,6 +3263,24 @@ document.getElementById('worldGrid').addEventListener('scroll', () => {
   });
   if (closestIdx !== _worldScrollLastIdx) {
     _worldScrollLastIdx = closestIdx;
+    AudioEngine.init(); AudioEngine.resume();
+    AudioEngine.playScore();
+  }
+}, { passive: true });
+
+document.getElementById('coinPacksList').addEventListener('scroll', () => {
+  const grid = document.getElementById('coinPacksList');
+  const cards = grid.querySelectorAll('.coin-shop-card');
+  if (!cards.length) return;
+  const gridMid = grid.getBoundingClientRect().top + grid.getBoundingClientRect().height / 2;
+  let closestIdx = 0, closestDist = Infinity;
+  cards.forEach((card, i) => {
+    const r = card.getBoundingClientRect();
+    const dist = Math.abs((r.top + r.height / 2) - gridMid);
+    if (dist < closestDist) { closestDist = dist; closestIdx = i; }
+  });
+  if (closestIdx !== _coinShopScrollLastIdx) {
+    _coinShopScrollLastIdx = closestIdx;
     AudioEngine.init(); AudioEngine.resume();
     AudioEngine.playScore();
   }
@@ -3334,12 +3353,15 @@ function coinUnlockWorld(id) {
 }
 
 function openCoinShop() {
+  _coinShopScrollLastIdx = -1;
   AudioEngine.init(); AudioEngine.resume();
+  AudioEngine.playHangarOpen();
+  AudioEngine.startHangarMusic();
   const list = document.getElementById('coinPacksList');
   list.innerHTML = '';
   COIN_PACKS.forEach(pack => {
     const card = document.createElement('div');
-    card.className = 'coin-pack-card';
+    card.className = 'coin-pack-card coin-shop-card';
 
     const left = document.createElement('div');
     left.className = 'coin-pack-left';
@@ -3374,7 +3396,7 @@ function openCoinShop() {
 
   SHIELD_PACKS.forEach(pack => {
     const card = document.createElement('div');
-    card.className = 'shield-pack-card';
+    card.className = 'shield-pack-card coin-shop-card';
 
     const left = document.createElement('div');
     left.className = 'shield-pack-left';
@@ -3405,6 +3427,7 @@ function openCoinShop() {
 }
 
 function closeCoinShop() {
+  AudioEngine.stopHangarMusic();
   document.getElementById('coinShopScreen').classList.add('hidden');
 }
 
