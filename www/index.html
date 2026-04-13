@@ -3492,6 +3492,8 @@ function coinUnlockWorld(id) {
     popup.classList.add('hidden');
     yesBtn.removeEventListener('click', onYes);
     noBtn.removeEventListener('click', onNo);
+    noBtn.removeEventListener('touchstart', onNoTouch);
+    noBtn.removeEventListener('touchend', onNo);
   }
   function onYes() {
     close();
@@ -3502,10 +3504,13 @@ function coinUnlockWorld(id) {
     updateCoinHud();
     renderWorldShop();
   }
-  function onNo() { close(); }
+  function onNo(e) { e.preventDefault(); e.stopPropagation(); close(); }
+  function onNoTouch(e) { e.preventDefault(); e.stopPropagation(); }
 
   yesBtn.addEventListener('click', onYes);
   noBtn.addEventListener('click', onNo);
+  noBtn.addEventListener('touchstart', onNoTouch, { passive: false });
+  noBtn.addEventListener('touchend', onNo, { passive: false });
 }
 
 function openCoinShop() {
