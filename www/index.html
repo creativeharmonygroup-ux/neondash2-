@@ -221,6 +221,19 @@
     letter-spacing: 2px; font-family: 'Orbitron', monospace;
   }
 
+  /* Shield chest countdown HUD */
+  #shieldChestHud {
+    position: absolute; top: 70px; left: 16px;
+    display: flex; align-items: center; gap: 5px;
+    pointer-events: none;
+  }
+  #shieldChestHud.hidden { display: none !important; }
+  #shieldChestCount {
+    font-size: 14px; font-weight: 700; color: #bf00ff;
+    text-shadow: 0 0 10px #bf00ff, 0 0 22px rgba(191,0,255,0.5);
+    letter-spacing: 2px; font-family: 'Orbitron', monospace;
+  }
+
   /* Shield packs in coin shop */
   .shield-section-label {
     font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
@@ -745,6 +758,7 @@
     <div id="comboDisplay">x2 COMBO!</div>
     <div id="coinHud"><span id="coinCount">0</span></div>
     <div id="shieldHud" class="hidden">🛡️ <span id="shieldCount">0</span></div>
+    <div id="shieldChestHud" class="hidden">🛡️ <span id="shieldChestCount">10</span></div>
     <button id="soundToggle" title="Toggle Sound">🔊</button>
   </div>
 
@@ -2701,6 +2715,9 @@ let surpriseObstacle = null;
 let nextSurpriseScore = 10 + Math.floor(Math.random() * 6); // first at score 10-15
 let shieldPulse = 0;
 let shieldCrackTimer = 0;
+let shieldChest = null;
+let shieldChestSpawned = false;
+let shieldChestTimer = 0; // frames remaining (600 = 10s at 60fps)
 function spawnCoinPickup() {
   // Enforce minimum horizontal gap so coins never cluster
   const MIN_GAP = 90;
@@ -3059,6 +3076,79 @@ function updateShieldHud() {
   }
 }
 
+function updateShieldChestHud() {
+  const el = document.getElementById('shieldChestHud');
+  if (shieldChestTimer > 0) {
+    document.getElementById('shieldChestCount').textContent = Math.ceil(shieldChestTimer / 60);
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
+}
+
+function drawShieldChest() {
+  if (!shieldChest || shieldChest.collected) return;
+  const ch = shieldChest;
+  ch.t = (ch.t || 0) + 0.06;
+  const pulse = 1 + Math.sin(ch.t * 2.5) * 0.1;
+  const W = ch.w * pulse, H = ch.h * pulse;
+  const lh = H * 0.38;
+  ctx.save();
+  ctx.translate(ch.x, ch.y);
+  // Outer purple glow
+  ctx.shadowColor = '#bf00ff';
+  ctx.shadowBlur = 32 + Math.sin(ch.t * 3) * 14;
+  // Body
+  const bodyG = ctx.createLinearGradient(0, -H/2+lh, 0, H/2);
+  bodyG.addColorStop(0, '#6600aa');
+  bodyG.addColorStop(0.5, '#3d0066');
+  bodyG.addColorStop(1, '#1a0033');
+  ctx.fillStyle = bodyG;
+  rrect(ctx, -W/2, -H/2+lh, W, H*(1-0.38), 5); ctx.fill();
+  // Lid
+  const lidG = ctx.createLinearGradient(0, -H/2, 0, -H/2+lh);
+  lidG.addColorStop(0, '#dd66ff');
+  lidG.addColorStop(0.5, '#9900cc');
+  lidG.addColorStop(1, '#6600aa');
+  ctx.fillStyle = lidG;
+  rrect(ctx, -W/2, -H/2, W, lh+4, 6); ctx.fill();
+  // Lid highlight
+  ctx.globalAlpha = 0.4; ctx.shadowBlur = 0;
+  ctx.strokeStyle = '#ee99ff'; ctx.lineWidth = 1.5;
+  rrect(ctx, -W/2+4, -H/2+4, W-8, lh-4, 4); ctx.stroke();
+  ctx.globalAlpha = 1;
+  // Band
+  ctx.fillStyle = '#4d0080'; ctx.shadowColor = '#bf00ff'; ctx.shadowBlur = 8;
+  ctx.fillRect(-W/2, -H/2+lh-3, W, 6);
+  // Shield emoji in center of body
+  ctx.shadowBlur = 18; ctx.shadowColor = '#bf00ff';
+  ctx.font = `${Math.round(W * 0.44)}px serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('🛡️', 0, H * 0.1);
+  // Pulsing ring around chest
+  ctx.shadowBlur = 18 + Math.sin(ch.t * 4) * 10;
+  ctx.strokeStyle = `rgba(191,0,255,${0.45 + Math.sin(ch.t * 4) * 0.3})`;
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(0, 0, W * 0.74, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
+
+function checkShieldChestCollection() {
+  if (!shieldChest || shieldChest.collected) return;
+  const dx = player.x - shieldChest.x, dy = player.y - shieldChest.y;
+  if (Math.sqrt(dx*dx+dy*dy) < player.size + Math.max(shieldChest.w, shieldChest.h) * 0.52) {
+    shieldChest.collected = true;
+    shieldChestTimer = 600;
+    shieldCrackTimer = 0;
+    AudioEngine.playShieldActivate();
+    flashScreen('#bf00ff', 0.5);
+    triggerShake(6);
+    spawnParticles(shieldChest.x, shieldChest.y, '#bf00ff', 20, 1.2);
+    spawnParticles(shieldChest.x, shieldChest.y, '#dd88ff', 12, 0.9);
+    updateShieldChestHud();
+  }
+}
+
 function purchaseShieldPack(id) {
   const pack = SHIELD_PACKS.find(p => p.id === id);
   if (!pack) return;
@@ -3132,6 +3222,8 @@ function startGame() {
   nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
   surpriseObstacle=null; nextSurpriseScore=10+Math.floor(Math.random()*6);
   shieldPulse=0; shieldCrackTimer=0;
+  shieldChest=null; shieldChestSpawned=false; shieldChestTimer=0;
+  document.getElementById('shieldChestHud').classList.add('hidden');
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
   momentBlob=null; reached8=false; MomentRecorder.stop();
 
@@ -3182,13 +3274,19 @@ function awardCoins(amount, x, y) {
 
 function gameOver() {
   // ── Shield absorbs death ──
-  if (save.shieldCharges > 0) {
-    save.shieldCharges--;
-    writeSave(save);
-    updateShieldHud();
+  if (save.shieldCharges > 0 || shieldChestTimer > 0) {
     shieldCrackTimer = 45;
     AudioEngine.playShieldAbsorb();
-    if (save.shieldCharges === 0) setTimeout(() => AudioEngine.playShieldBreak(), 220);
+    if (save.shieldCharges > 0) {
+      save.shieldCharges--;
+      writeSave(save);
+      updateShieldHud();
+      if (save.shieldCharges === 0) setTimeout(() => AudioEngine.playShieldBreak(), 220);
+    } else {
+      shieldChestTimer = 0;
+      updateShieldChestHud();
+      setTimeout(() => AudioEngine.playShieldBreak(), 220);
+    }
     flashScreen('#bf00ff', 0.6);
     triggerShake(8);
     spawnParticles(player.x, player.y, '#bf00ff', 18, 1.1);
@@ -4736,13 +4834,19 @@ function checkCursedChestCollision() {
     if (Math.sqrt(dx*dx+dy*dy) < player.size + Math.max(ch.w, ch.h) * 0.52) {
       ch.collected = true;
       // ── Shield absorbs cursed chest ──
-      if (save.shieldCharges > 0) {
-        save.shieldCharges--;
-        writeSave(save);
-        updateShieldHud();
+      if (save.shieldCharges > 0 || shieldChestTimer > 0) {
         shieldCrackTimer = 45;
         AudioEngine.playShieldAbsorb();
-        if (save.shieldCharges === 0) setTimeout(() => AudioEngine.playShieldBreak(), 220);
+        if (save.shieldCharges > 0) {
+          save.shieldCharges--;
+          writeSave(save);
+          updateShieldHud();
+          if (save.shieldCharges === 0) setTimeout(() => AudioEngine.playShieldBreak(), 220);
+        } else {
+          shieldChestTimer = 0;
+          updateShieldChestHud();
+          setTimeout(() => AudioEngine.playShieldBreak(), 220);
+        }
         flashScreen('#bf00ff', 0.5);
         triggerShake(6);
         spawnParticles(ch.x, ch.y, '#bf00ff', 14, 1.0);
@@ -5219,27 +5323,43 @@ function drawPlayer() {
   ctx.restore(); ctx.shadowBlur=0;
 
   // ── Shield bubble ──
-  if (save.shieldCharges > 0) {
+  if (save.shieldCharges > 0 || shieldChestTimer > 0) {
     shieldPulse = (shieldPulse + 0.06) % (Math.PI * 2);
     if (shieldCrackTimer > 0) shieldCrackTimer--;
-    const sR = player.size * 1.65 + Math.sin(shieldPulse) * 2.5;
+    const sR = player.size * 8.0 + Math.sin(shieldPulse) * 5;
     const crackAlpha = shieldCrackTimer / 45;
     ctx.save();
+    // Outer glow ring
     ctx.shadowColor = '#bf00ff';
-    ctx.shadowBlur = 16 + Math.sin(shieldPulse) * 6;
-    ctx.strokeStyle = `rgba(191,0,255,${0.62 + Math.sin(shieldPulse)*0.16})`;
-    ctx.lineWidth = 1.8;
+    ctx.shadowBlur = 48 + Math.sin(shieldPulse) * 18;
+    ctx.strokeStyle = `rgba(191,0,255,${0.75 + Math.sin(shieldPulse)*0.18})`;
+    ctx.lineWidth = 3.5;
     ctx.beginPath(); ctx.arc(player.x, player.y, sR, 0, Math.PI*2); ctx.stroke();
-    const sg = ctx.createRadialGradient(player.x, player.y, sR*0.4, player.x, player.y, sR);
+    // Inner glow ring
+    ctx.shadowBlur = 20;
+    ctx.strokeStyle = `rgba(220,100,255,${0.30 + Math.sin(shieldPulse)*0.12})`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(player.x, player.y, sR * 0.82, 0, Math.PI*2); ctx.stroke();
+    // Fill gradient
+    const sg = ctx.createRadialGradient(player.x, player.y, sR*0.3, player.x, player.y, sR);
     sg.addColorStop(0, 'transparent');
-    sg.addColorStop(0.75, `rgba(191,0,255,${0.03 + Math.sin(shieldPulse)*0.02})`);
-    sg.addColorStop(1, `rgba(220,0,255,${0.10 + Math.sin(shieldPulse)*0.04})`);
+    sg.addColorStop(0.65, `rgba(191,0,255,${0.05 + Math.sin(shieldPulse)*0.02})`);
+    sg.addColorStop(1, `rgba(220,0,255,${0.16 + Math.sin(shieldPulse)*0.06})`);
     ctx.fillStyle = sg; ctx.shadowBlur = 0;
     ctx.beginPath(); ctx.arc(player.x, player.y, sR, 0, Math.PI*2); ctx.fill();
+    // 🛡️ icon on the front (right side = direction of movement)
+    const iconSize = Math.round(sR * 0.55);
+    ctx.shadowColor = '#bf00ff';
+    ctx.shadowBlur = 22;
+    ctx.font = `${iconSize}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🛡️', player.x + sR * 0.68, player.y);
+    // Crack animation on hit
     if (crackAlpha > 0) {
       ctx.strokeStyle = `rgba(220,160,255,${crackAlpha * 0.9})`;
-      ctx.lineWidth = 1;
-      ctx.shadowColor = '#dd88ff'; ctx.shadowBlur = 10 * crackAlpha;
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = '#dd88ff'; ctx.shadowBlur = 14 * crackAlpha;
       [[0, 0.5], [Math.PI*0.45, 0.6], [Math.PI, 0.4], [Math.PI*1.55, 0.7]].forEach(([angle, len]) => {
         const x1 = player.x + Math.cos(angle) * sR * 0.5;
         const y1 = player.y + Math.sin(angle) * sR * 0.5;
@@ -5407,6 +5527,23 @@ function loop() {
     if(epicChest&&!epicChest.collected){ epicChest.x-=spd; }
     if(epicChest&&epicChest.x<-110) epicChest=null;
 
+    // Spawn shield chest at frame 120 (~2s in), only once per run
+    if (frame === 120 && !shieldChestSpawned) {
+      shieldChestSpawned = true;
+      shieldChest = { x: canvas.width + 60, y: canvas.height * 0.5, w: 52, h: 44, collected: false, t: 0 };
+    }
+    // Update shield chest
+    if (shieldChest && !shieldChest.collected) { shieldChest.x -= spd; }
+    if (shieldChest && shieldChest.x < -90) shieldChest = null;
+    // Decrement shield chest timer
+    if (shieldChestTimer > 0) {
+      const prevCountdown = Math.ceil(shieldChestTimer / 60);
+      shieldChestTimer--;
+      const newCountdown = Math.ceil(shieldChestTimer / 60);
+      if (newCountdown !== prevCountdown) updateShieldChestHud();
+      if (shieldChestTimer === 0) updateShieldChestHud();
+    }
+
     // Legendary chest milestone check — runs every frame, catches any coin source
     if(!legendaryChest && save.coins >= nextLegendaryCoinThreshold) {
       console.log(`[LegendaryChest] SPAWN — coins:${save.coins} threshold:${nextLegendaryCoinThreshold}`);
@@ -5489,6 +5626,7 @@ function loop() {
       checkSupremeChestCollection();
       checkEpicChestCollection();
       checkCursedChestCollision();
+      checkShieldChestCollection();
       checkSurpriseCollision();
       if(!yupilandiaActive && !yupilandiaFrozen && checkCollision()){combo=0;gameOver();}
       if(yupilandiaActive && (player.y - player.size < 0 || player.y + player.size > canvas.height)){combo=0;gameOver();}
@@ -5498,6 +5636,7 @@ function loop() {
   barriers.forEach(drawBarrier);
   drawCoinPickups();
   drawTreasureChest();
+  drawShieldChest();
   drawLegendaryChest();
   if(supremeChest && !supremeChest.collected) drawSupremeChest();
   if(epicChest && !epicChest.collected) drawEpicChest();
