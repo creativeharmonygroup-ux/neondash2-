@@ -2987,7 +2987,7 @@ document.getElementById('worldLaunchBtn').addEventListener('touchend', e => { e.
 
 document.getElementById('coinShopBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playCoin(); openCoinShop(); });
 document.getElementById('coinShopBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playCoin(); openCoinShop(); }, { passive: false });
-document.getElementById('coinShopCloseBtn').addEventListener('click', e => { e.stopPropagation(); closeCoinShop(); });
+document.getElementById('coinShopCloseBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playCoin(); closeCoinShop(); });
 
 function doJump() {
   // Never fire while the hangar or coin shop is open
@@ -3217,11 +3217,11 @@ function openCoinShop() {
     const priceBtn = document.createElement('button');
     priceBtn.className = 'coin-pack-price-btn';
     priceBtn.textContent = '$' + pack.price.toFixed(2);
-    priceBtn.addEventListener('click', e => { e.stopPropagation(); purchaseCoinPack(pack.id); });
+    priceBtn.addEventListener('click', e => { e.stopPropagation(); AudioEngine.playCoin(); purchaseCoinPack(pack.id); });
 
     card.appendChild(left);
     card.appendChild(priceBtn);
-    card.addEventListener('click', () => purchaseCoinPack(pack.id));
+    card.addEventListener('click', () => { AudioEngine.playCoin(); purchaseCoinPack(pack.id); });
     list.appendChild(card);
   });
   document.getElementById('coinShopScreen').classList.remove('hidden');
