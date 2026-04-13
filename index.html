@@ -951,7 +951,7 @@ const LUXURY_SHIPS = [
     worldTheme:{ bgTop:'#000814', bgBot:'#001028', nebulaHue:220, nebulaSpread:20, starRgb:'100,155,255', barrierHue:218, barrierSpread:15, grid:'rgba(60,110,210,0.022)', worldId:'tridente', barrierStyle:'carbonfiber', ambientColor:'#d4af37' }
   },
   {
-    id:'veyron', name:'VEYRON', premiumPrice:4.99,
+    id:'veyron', name:'VEYRON', premiumPrice:4.99, coinPrice:18000,
     color:'#001050', trailColor:'#0055ff',
     flameColors:['#ffffff','#88aaff','#0033ee','#000820'],
     wingColor:'rgba(0,20,88,0.9)', glowColor:'#0055ff', emoji:'🚀',
@@ -960,7 +960,7 @@ const LUXURY_SHIPS = [
     worldTheme:{ bgTop:'#010108', bgBot:'#020214', nebulaHue:228, nebulaSpread:10, starRgb:'70,110,255', barrierHue:228, barrierSpread:12, grid:'rgba(0,55,200,0.028)', worldId:'veyron', barrierStyle:'chrome', ambientColor:'#0044ff' }
   },
   {
-    id:'ragingbull', name:'RAGING BULL', premiumPrice:4.99,
+    id:'ragingbull', name:'RAGING BULL', premiumPrice:4.99, coinPrice:30000,
     color:'#9fff00', trailColor:'#ccff00',
     flameColors:['#ffffff','#eeff88','#ccff00','#446600'],
     wingColor:'rgba(148,220,0,0.9)', glowColor:'#aaff00', emoji:'🐂',
@@ -981,14 +981,15 @@ const TURBO_WORLD_THEME = {
 // World definitions for UNIVERSE hangar
 const WORLD_DEFS = [
   { id:'auto',       name:'TURBO',       emoji:'✨',  desc:"Black speed track · NOS barriers · Trap beat", accent:'#ff4400', bgA:'#000000', bgB:'#030005' },
-  { id:'prehistoric',name:'PREHISTORIC', emoji:'🦕',  desc:'Dark jungle · Lava particles · Tribal drums', accent:'#ff6600', bgA:'#071409', bgB:'#0e2210' },
-  { id:'nitro',      name:'NITRO',       emoji:'🏎️', desc:'Speed streaks · Tire smoke · Trap beat', accent:'#ff7700', bgA:'#0d0500', bgB:'#1a0a00' },
+  { id:'prehistoric',name:'PREHISTORIC', emoji:'🦕',  desc:'Dark jungle · Lava particles · Tribal drums', accent:'#ff6600', bgA:'#071409', bgB:'#0e2210', coinPrice:5000 },
+  { id:'nitro',      name:'NITRO',       emoji:'🏎️', desc:'Speed streaks · Tire smoke · Trap beat', accent:'#ff7700', bgA:'#0d0500', bgB:'#1a0a00', coinPrice:10000 },
   { id:'machinewar', name:'MACHINE WAR', emoji:'🤖',  desc:'Dark metal · Fire sparks · Industrial metal', accent:'#cc2200', bgA:'#0c0000', bgB:'#140000', iapPrice:1.99 },
   { id:'thegrid',    name:'THE GRID',    emoji:'💻',  desc:'Matrix code rain · Glitch barriers · Electronic', accent:'#00ff41', bgA:'#000000', bgB:'#000800', iapPrice:4.99 },
 ];
 
 // Paid world IDs → price, and bundle config
 const PAID_WORLD_IDS = { machinewar:1.99, thegrid:4.99, obsidian:2.99, scuderia:2.99, tridente:3.99 };
+const COIN_UNLOCK_WORLDS = { prehistoric:5000, nitro:10000, veyron:18000, ragingbull:30000 };
 const BUNDLE_IDS = ['machinewar','thegrid','obsidian','scuderia','tridente'];
 const BUNDLE_PRICE = 9.99;
 const COIN_PACKS = [
@@ -3176,7 +3177,7 @@ function resetWorldState() {
 
 // Returns true if a paid world/ship id is unlocked
 function isWorldOwned(id) {
-  if (!PAID_WORLD_IDS[id]) return true; // free worlds always owned
+  if (!PAID_WORLD_IDS[id] && !COIN_UNLOCK_WORLDS[id]) return true; // truly free worlds always owned
   if ((save.ownedWorlds || []).includes(id)) return true;
   return false;
 }
@@ -3200,6 +3201,22 @@ function purchaseBundle() {
   if (confirm(`Unlock ALL 5 WORLDS for $${BUNDLE_PRICE.toFixed(2)}?\n\nIncludes: Machine War, The Grid, Obsidian, Scuderia, Tridente\n\n(This will trigger the App Store purchase flow)`)) {
     if (!save.ownedWorlds) save.ownedWorlds = [];
     BUNDLE_IDS.forEach(id => { if (!save.ownedWorlds.includes(id)) save.ownedWorlds.push(id); });
+    writeSave(save);
+    renderWorldShop();
+  }
+}
+
+function coinUnlockWorld(id) {
+  const price = COIN_UNLOCK_WORLDS[id];
+  if (!price) return;
+  if (save.coins < price) {
+    alert(`Not enough coins!\n\nYou need ${price.toLocaleString()} coins to unlock this world.\nYou have ${save.coins.toLocaleString()} coins.`);
+    return;
+  }
+  if (confirm(`Unlock this world for ${price.toLocaleString()} coins?`)) {
+    save.coins -= price;
+    if (!save.ownedWorlds) save.ownedWorlds = [];
+    if (!save.ownedWorlds.includes(id)) save.ownedWorlds.push(id);
     writeSave(save);
     renderWorldShop();
   }
@@ -3300,7 +3317,7 @@ function renderWorldShop() {
     bundleCard.appendChild(cta);
   }
   // ── CARD BUILDER ─────────────────────────────────────────────────────────
-  function makeCard(id, name, emoji, desc, accent, previewData, iapPrice, isLuxury) {
+  function makeCard(id, name, emoji, desc, accent, previewData, iapPrice, isLuxury, coinPrice) {
     const owned = isWorldOwned(id);
     const isSelectedWorld = !isLuxury ? (save.selectedWorld || 'auto') === id && !PAID_WORLD_IDS[save.selected] : false;
     const isSelectedShip  = isLuxury  ? save.selected === id : false;
@@ -3312,6 +3329,9 @@ function renderWorldShop() {
     if (!owned && iapPrice) {
       card.style.borderColor = 'rgba(255,170,0,0.25)';
       card.style.boxShadow = 'inset 3px 0 0 rgba(255,140,0,0.35), 0 0 8px rgba(255,120,0,0.08)';
+    } else if (!owned && coinPrice) {
+      card.style.borderColor = 'rgba(255,200,0,0.25)';
+      card.style.boxShadow = 'inset 3px 0 0 rgba(255,200,0,0.35), 0 0 8px rgba(255,180,0,0.08)';
     } else {
       card.style.borderColor = sel ? `rgba(${rgb},0.55)` : `rgba(${rgb},0.18)`;
       card.style.boxShadow = sel
@@ -3360,6 +3380,20 @@ function renderWorldShop() {
       buyBtn.addEventListener('click', e => { e.stopPropagation(); purchaseWorld(id); });
       info.appendChild(buyBtn);
       card.addEventListener('click', () => purchaseWorld(id));
+    } else if (!owned && coinPrice) {
+      const coinBadge = document.createElement('div');
+      coinBadge.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start;gap:2px;cursor:pointer;';
+      const priceRow = document.createElement('div');
+      priceRow.style.cssText = 'font-family:"Orbitron",monospace;font-size:11px;font-weight:900;letter-spacing:0.5px;color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,0.7);white-space:nowrap;';
+      priceRow.textContent = `${coinPrice.toLocaleString()} 🪙`;
+      const earnRow = document.createElement('div');
+      earnRow.style.cssText = 'font-family:"Orbitron",monospace;font-size:7px;font-weight:700;letter-spacing:1.5px;color:#ffaa00;opacity:0.8;';
+      earnRow.textContent = 'EARN IN GAME';
+      coinBadge.appendChild(priceRow);
+      coinBadge.appendChild(earnRow);
+      coinBadge.addEventListener('click', e => { e.stopPropagation(); coinUnlockWorld(id); });
+      info.appendChild(coinBadge);
+      card.addEventListener('click', () => coinUnlockWorld(id));
     } else {
       const badge = document.createElement('div');
       badge.className = 'world-card-badge';
@@ -3395,7 +3429,7 @@ function renderWorldShop() {
 
   // ── FREE WORLDS first ────────────────────────────────────────────────────
   WORLD_DEFS.filter(wd => !wd.iapPrice).forEach(wd => {
-    grid.appendChild(makeCard(wd.id, wd.name, wd.emoji, wd.desc, wd.accent, wd, null, false));
+    grid.appendChild(makeCard(wd.id, wd.name, wd.emoji, wd.desc, wd.accent, wd, null, false, wd.coinPrice));
   });
 
   // Free luxury ships (VEYRON, RAGING BULL — not in PAID_WORLD_IDS)
@@ -3404,7 +3438,7 @@ function renderWorldShop() {
     const accent = wt.ambientColor || ship.color;
     grid.appendChild(makeCard(
       ship.id, ship.name, ship.emoji, ship.description, accent,
-      { bgA: wt.bgTop, bgB: wt.bgBot, accent, id: ship.id, worldId: wt.worldId }, null, true
+      { bgA: wt.bgTop, bgB: wt.bgBot, accent, id: ship.id, worldId: wt.worldId }, null, true, ship.coinPrice
     ));
   });
 
