@@ -3273,26 +3273,6 @@ function awardCoins(amount, x, y) {
 }
 
 function gameOver() {
-  // ── Shield absorbs death ──
-  if (save.shieldCharges > 0 || shieldChestTimer > 0) {
-    shieldCrackTimer = 45;
-    AudioEngine.playShieldAbsorb();
-    if (save.shieldCharges > 0) {
-      save.shieldCharges--;
-      writeSave(save);
-      updateShieldHud();
-      if (save.shieldCharges === 0) setTimeout(() => AudioEngine.playShieldBreak(), 220);
-    } else {
-      shieldChestTimer = 0;
-      updateShieldChestHud();
-      setTimeout(() => AudioEngine.playShieldBreak(), 220);
-    }
-    flashScreen('#bf00ff', 0.6);
-    triggerShake(8);
-    spawnParticles(player.x, player.y, '#bf00ff', 18, 1.1);
-    spawnParticles(player.x, player.y, '#dd88ff', 10, 0.8);
-    return;
-  }
   state='dead'; player.dead=true;
   // Cleanup YUPILANDIA if active
   yupilandiaActive=false; yupilandiaFrozen=false;
@@ -4842,11 +4822,8 @@ function checkCursedChestCollision() {
           writeSave(save);
           updateShieldHud();
           if (save.shieldCharges === 0) setTimeout(() => AudioEngine.playShieldBreak(), 220);
-        } else {
-          shieldChestTimer = 0;
-          updateShieldChestHud();
-          setTimeout(() => AudioEngine.playShieldBreak(), 220);
         }
+        // timed shield: keep timer running, just show crack
         flashScreen('#bf00ff', 0.5);
         triggerShake(6);
         spawnParticles(ch.x, ch.y, '#bf00ff', 14, 1.0);
