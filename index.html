@@ -207,6 +207,53 @@
   }
   .coin-pack-price-btn:active { transform: scale(0.93); }
 
+  /* Shield HUD */
+  #shieldHud {
+    position: absolute; top: 46px; left: 16px;
+    display: flex; align-items: center; gap: 5px;
+    pointer-events: none;
+  }
+  #shieldHud.hidden { display: none !important; }
+  #shieldCount {
+    font-size: 14px; font-weight: 700; color: #bf00ff;
+    text-shadow: 0 0 10px #bf00ff, 0 0 22px rgba(191,0,255,0.5);
+    letter-spacing: 2px; font-family: 'Orbitron', monospace;
+  }
+
+  /* Shield packs in coin shop */
+  .shield-section-label {
+    font-family: 'Orbitron', monospace; font-size: 9px; font-weight: 700;
+    letter-spacing: 3px; color: #bf00ff; padding: 8px 0 4px;
+    text-shadow: 0 0 8px rgba(191,0,255,0.6);
+  }
+  .shield-pack-card {
+    display: flex; flex-direction: row; align-items: center;
+    justify-content: space-between; border-radius: 14px; padding: 16px 18px;
+    border: 1px solid rgba(191,0,255,0.22);
+    background: linear-gradient(120deg, rgba(14,0,28,0.98) 0%, rgba(8,0,16,0.98) 100%);
+    box-shadow: inset 4px 0 0 #9900cc, 0 0 14px rgba(191,0,255,0.07);
+    cursor: pointer; transition: transform 0.12s;
+  }
+  .shield-pack-card:active { transform: scale(0.97); }
+  .shield-pack-left { display: flex; flex-direction: column; gap: 5px; }
+  .shield-pack-name {
+    font-size: 12px; font-weight: 900; letter-spacing: 2px; color: #bf00ff;
+    font-family: 'Orbitron', monospace; line-height: 1;
+  }
+  .shield-pack-charges {
+    font-size: 21px; font-weight: 900; color: #dd88ff;
+    font-family: 'Rajdhani', sans-serif; line-height: 1.15; letter-spacing: 0.5px;
+  }
+  .shield-pack-price-btn {
+    background: linear-gradient(135deg, #7700bb, #bf00ff);
+    color: #ffffff; font-family: 'Orbitron', monospace;
+    font-size: 15px; font-weight: 900; letter-spacing: 0.5px;
+    border: none; border-radius: 10px; padding: 11px 20px; cursor: pointer;
+    box-shadow: 0 0 16px rgba(191,0,255,0.45); flex-shrink: 0;
+    transition: transform 0.12s;
+  }
+  .shield-pack-price-btn:active { transform: scale(0.93); }
+
   /* World/Universe button — game over screen */
   #worldBtn {
     background: transparent; border: 1.5px solid rgba(180,100,255,0.45);
@@ -696,6 +743,7 @@
     <div id="bestDisplay">BEST: 0</div>
     <div id="comboDisplay">x2 COMBO!</div>
     <div id="coinHud"><span id="coinCount">0</span></div>
+    <div id="shieldHud" class="hidden">🛡️ <span id="shieldCount">0</span></div>
     <button id="soundToggle" title="Toggle Sound">🔊</button>
   </div>
 
@@ -998,6 +1046,11 @@ const COIN_PACKS = [
   { id:'elite',   name:'ELITE PACK',   coins:15000, price:6.99  },
   { id:'legend',  name:'LEGEND PACK',  coins:50000, price:14.99 },
 ];
+const SHIELD_PACKS = [
+  { id:'mini',     name:'MINI SHIELD',     charges:5,  price:0.99 },
+  { id:'mega',     name:'MEGA SHIELD',     charges:20, price:2.99 },
+  { id:'ultimate', name:'ULTIMATE SHIELD', charges:50, price:5.99 },
+];
 
 // Progressive difficulty per world: affects base speed and barrier spawn rate
 const WORLD_DIFFICULTY = {
@@ -1019,9 +1072,10 @@ function loadSave() {
       selected: s.selected || 'thegrid',
       selectedWorld: s.selectedWorld || 'thegrid',
       luxuryOwned: s.luxuryOwned || [],
-      ownedWorlds: s.ownedWorlds || []
+      ownedWorlds: s.ownedWorlds || [],
+      shieldCharges: s.shieldCharges || 0
     };
-  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'thegrid', selectedWorld: 'thegrid', luxuryOwned: [], ownedWorlds: [] }; }
+  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'thegrid', selectedWorld: 'thegrid', luxuryOwned: [], ownedWorlds: [], shieldCharges: 0 }; }
 }
 function writeSave(s) {
   localStorage.setItem('neonDashSave', JSON.stringify(s));
@@ -2564,7 +2618,25 @@ const AudioEngine = (() => {
     wmGain=null; wmId=null;
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic };
+  function playShieldActivate() {
+    init(); resume(); const t = ctx.currentTime;
+    playTone({type:'sine',    freq:500,  freqEnd:1400, duration:0.22, gainPeak:0.28, startTime:t});
+    playTone({type:'sine',    freq:900,  freqEnd:2200, duration:0.18, gainPeak:0.18, startTime:t+0.06});
+    playTone({type:'triangle',freq:1800, freqEnd:3200, duration:0.14, gainPeak:0.12, startTime:t+0.13});
+  }
+  function playShieldAbsorb() {
+    init(); resume(); const t = ctx.currentTime;
+    playTone({type:'square',  freq:280, freqEnd:70,   duration:0.22, gainPeak:0.32, startTime:t});
+    playTone({type:'sine',    freq:1100,freqEnd:500,  duration:0.16, gainPeak:0.18, startTime:t});
+    playTone({type:'triangle',freq:700, freqEnd:1800, duration:0.12, gainPeak:0.13, startTime:t+0.06});
+  }
+  function playShieldBreak() {
+    init(); resume(); const t = ctx.currentTime;
+    [1100,800,500,250].forEach((f,i) => playTone({type:'sine',freq:f,freqEnd:f*0.25,duration:0.28,gainPeak:0.22,startTime:t+i*0.055}));
+    playNoise(t+0.08, 0.38, 0.18);
+  }
+
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic, playShieldActivate, playShieldAbsorb, playShieldBreak };
 })();
 
 // iOS Safari: unlock AudioContext on first user touch (required before any sound can play)
@@ -2626,6 +2698,8 @@ let epicChest = null, supremeChest = null;
 // ── Surprise obstacles ──
 let surpriseObstacle = null;
 let nextSurpriseScore = 10 + Math.floor(Math.random() * 6); // first at score 10-15
+let shieldPulse = 0;
+let shieldCrackTimer = 0;
 function spawnCoinPickup() {
   // Enforce minimum horizontal gap so coins never cluster
   const MIN_GAP = 90;
@@ -2974,6 +3048,27 @@ function updateCoinHud() {
   document.getElementById('coinCount').textContent = save.coins;
 }
 
+function updateShieldHud() {
+  const el = document.getElementById('shieldHud');
+  if (save.shieldCharges > 0) {
+    document.getElementById('shieldCount').textContent = save.shieldCharges;
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
+}
+
+function purchaseShieldPack(id) {
+  const pack = SHIELD_PACKS.find(p => p.id === id);
+  if (!pack) return;
+  if (confirm(`Buy ${pack.charges} shield charges for $${pack.price.toFixed(2)}?\n\n(This will trigger the App Store purchase flow)`)) {
+    save.shieldCharges = (save.shieldCharges || 0) + pack.charges;
+    writeSave(save);
+    updateShieldHud();
+    AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playShieldActivate());
+  }
+}
+
 // \u2500\u2500 Controls \u2500\u2500
 const soundBtn = document.getElementById('soundToggle');
 
@@ -3034,6 +3129,7 @@ function startGame() {
   epicChest=null; supremeChest=null;
   nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
   surpriseObstacle=null; nextSurpriseScore=10+Math.floor(Math.random()*6);
+  shieldPulse=0; shieldCrackTimer=0;
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
   momentBlob=null; reached8=false; MomentRecorder.stop();
 
@@ -3068,6 +3164,7 @@ function updateUI() {
   document.getElementById('scoreDisplay').textContent = score;
   document.getElementById('bestDisplay').textContent = 'BEST: ' + save.best;
   updateCoinHud();
+  updateShieldHud();
 }
 
 function awardCoins(amount, x, y) {
@@ -3082,6 +3179,20 @@ function awardCoins(amount, x, y) {
 }
 
 function gameOver() {
+  // ── Shield absorbs death ──
+  if (save.shieldCharges > 0) {
+    save.shieldCharges--;
+    writeSave(save);
+    updateShieldHud();
+    shieldCrackTimer = 45;
+    AudioEngine.playShieldAbsorb();
+    if (save.shieldCharges === 0) setTimeout(() => AudioEngine.playShieldBreak(), 220);
+    flashScreen('#bf00ff', 0.6);
+    triggerShake(8);
+    spawnParticles(player.x, player.y, '#bf00ff', 18, 1.1);
+    spawnParticles(player.x, player.y, '#dd88ff', 10, 0.8);
+    return;
+  }
   state='dead'; player.dead=true;
   // Cleanup YUPILANDIA if active
   yupilandiaActive=false; yupilandiaFrozen=false;
@@ -3254,6 +3365,42 @@ function openCoinShop() {
     card.addEventListener('click', () => { AudioEngine.init(); AudioEngine.resume().then(() => AudioEngine.playCoin()); purchaseCoinPack(pack.id); });
     list.appendChild(card);
   });
+
+  // ── SHIELD PACKS ──
+  const shieldLabel = document.createElement('div');
+  shieldLabel.className = 'shield-section-label';
+  shieldLabel.textContent = '🛡️ SHIELD PACKS';
+  list.appendChild(shieldLabel);
+
+  SHIELD_PACKS.forEach(pack => {
+    const card = document.createElement('div');
+    card.className = 'shield-pack-card';
+
+    const left = document.createElement('div');
+    left.className = 'shield-pack-left';
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'shield-pack-name';
+    nameEl.textContent = pack.name;
+
+    const chargesEl = document.createElement('div');
+    chargesEl.className = 'shield-pack-charges';
+    chargesEl.textContent = '🛡️ ' + pack.charges + ' CHARGES';
+
+    left.appendChild(nameEl);
+    left.appendChild(chargesEl);
+
+    const priceBtn = document.createElement('button');
+    priceBtn.className = 'shield-pack-price-btn';
+    priceBtn.textContent = '$' + pack.price.toFixed(2);
+    priceBtn.addEventListener('click', e => { e.stopPropagation(); purchaseShieldPack(pack.id); });
+
+    card.appendChild(left);
+    card.appendChild(priceBtn);
+    card.addEventListener('click', () => purchaseShieldPack(pack.id));
+    list.appendChild(card);
+  });
+
   document.getElementById('coinShopScreen').classList.remove('hidden');
 }
 
@@ -4562,6 +4709,20 @@ function checkCursedChestCollision() {
     const dx = player.x - ch.x, dy = player.y - ch.y;
     if (Math.sqrt(dx*dx+dy*dy) < player.size + Math.max(ch.w, ch.h) * 0.52) {
       ch.collected = true;
+      // ── Shield absorbs cursed chest ──
+      if (save.shieldCharges > 0) {
+        save.shieldCharges--;
+        writeSave(save);
+        updateShieldHud();
+        shieldCrackTimer = 45;
+        AudioEngine.playShieldAbsorb();
+        if (save.shieldCharges === 0) setTimeout(() => AudioEngine.playShieldBreak(), 220);
+        flashScreen('#bf00ff', 0.5);
+        triggerShake(6);
+        spawnParticles(ch.x, ch.y, '#bf00ff', 14, 1.0);
+        spawnParticles(ch.x, ch.y, '#dd88ff', 8, 0.7);
+        return;
+      }
       if (ch.kind === 'devil') AudioEngine.playDevilChest();
       else AudioEngine.playCursedChest();
       const penalty = ch.kind === 'devil' ? 300 : 100;
@@ -5030,6 +5191,38 @@ function drawPlayer() {
   fg.addColorStop(0,ship.flameColors[0]); fg.addColorStop(0.2,ship.flameColors[1]); fg.addColorStop(0.6,ship.flameColors[2]); fg.addColorStop(1,'transparent');
   ctx.fillStyle=fg; ctx.beginPath(); ctx.ellipse(0,player.size+flameSize*0.4,player.size*0.28,flameSize,0,0,Math.PI*2); ctx.fill();
   ctx.restore(); ctx.shadowBlur=0;
+
+  // ── Shield bubble ──
+  if (save.shieldCharges > 0) {
+    shieldPulse = (shieldPulse + 0.06) % (Math.PI * 2);
+    if (shieldCrackTimer > 0) shieldCrackTimer--;
+    const sR = player.size * 1.65 + Math.sin(shieldPulse) * 2.5;
+    const crackAlpha = shieldCrackTimer / 45;
+    ctx.save();
+    ctx.shadowColor = '#bf00ff';
+    ctx.shadowBlur = 16 + Math.sin(shieldPulse) * 6;
+    ctx.strokeStyle = `rgba(191,0,255,${0.62 + Math.sin(shieldPulse)*0.16})`;
+    ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.arc(player.x, player.y, sR, 0, Math.PI*2); ctx.stroke();
+    const sg = ctx.createRadialGradient(player.x, player.y, sR*0.4, player.x, player.y, sR);
+    sg.addColorStop(0, 'transparent');
+    sg.addColorStop(0.75, `rgba(191,0,255,${0.03 + Math.sin(shieldPulse)*0.02})`);
+    sg.addColorStop(1, `rgba(220,0,255,${0.10 + Math.sin(shieldPulse)*0.04})`);
+    ctx.fillStyle = sg; ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.arc(player.x, player.y, sR, 0, Math.PI*2); ctx.fill();
+    if (crackAlpha > 0) {
+      ctx.strokeStyle = `rgba(220,160,255,${crackAlpha * 0.9})`;
+      ctx.lineWidth = 1;
+      ctx.shadowColor = '#dd88ff'; ctx.shadowBlur = 10 * crackAlpha;
+      [[0, 0.5], [Math.PI*0.45, 0.6], [Math.PI, 0.4], [Math.PI*1.55, 0.7]].forEach(([angle, len]) => {
+        const x1 = player.x + Math.cos(angle) * sR * 0.5;
+        const y1 = player.y + Math.sin(angle) * sR * 0.5;
+        ctx.beginPath(); ctx.moveTo(x1, y1);
+        ctx.lineTo(x1 + Math.cos(angle+0.4)*sR*len, y1 + Math.sin(angle+0.4)*sR*len); ctx.stroke();
+      });
+    }
+    ctx.restore();
+  }
 }
 
 function drawParticles() {
