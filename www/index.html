@@ -917,9 +917,45 @@
   @media (max-width: 420px) {
     #gameWrapper { width:100vw; height:100vh; border-radius:0; border:none; }
   }
+  /* ── WEB SPLASH SCREEN ── */
+  #webSplash {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0;
+    opacity: 1; transition: opacity 0.6s ease;
+    pointer-events: all;
+  }
+  #webSplash.fade-out { opacity: 0; pointer-events: none; }
+  #webSplash.hidden { display: none; }
+  .splash-furious {
+    font-family: 'Orbitron', monospace; font-weight: 900; font-style: italic;
+    font-size: clamp(36px, 10vw, 80px); letter-spacing: 2px; line-height: 1;
+    filter: drop-shadow(0 0 18px #ff00cc) drop-shadow(0 0 36px #bf00ff);
+  }
+  .splash-dash {
+    font-family: 'Orbitron', monospace; font-weight: 900;
+    font-size: clamp(80px, 26vw, 200px); letter-spacing: -4px; line-height: 1;
+    filter: drop-shadow(0 0 24px #ffee00) drop-shadow(0 0 50px #ff00cc);
+  }
+  .splash-sep {
+    width: 70%; height: 3px; margin: 12px 0;
+    background: linear-gradient(90deg, transparent, #ff00cc, #bf00ff, #00fff0, #ffee00, transparent);
+    border-radius: 2px;
+    filter: drop-shadow(0 0 6px #bf00ff);
+  }
 </style>
 </head>
 <body>
+<div id="webSplash">
+  <div class="splash-furious">
+    <span style="color:#ff00cc">F</span><span style="color:#bf00ff">U</span><span style="color:#00fff0">R</span><span style="color:#ffee00">I</span><span style="color:#ff00cc">O</span><span style="color:#bf00ff">U</span><span style="color:#00fff0">S</span>
+  </div>
+  <div class="splash-sep"></div>
+  <div class="splash-dash">
+    <span style="color:#ffee00">D</span><span style="color:#ff00cc">A</span><span style="color:#bf00ff">S</span><span style="color:#00fff0">H</span>
+  </div>
+</div>
 <div id="gameWrapper">
   <canvas id="gameCanvas"></canvas>
   <div id="ui">
@@ -6196,6 +6232,15 @@ function loop() {
 // Init
 updateUI();
 loop();
+
+// ── WEB SPLASH ──
+(function() {
+  const splash = document.getElementById('webSplash');
+  setTimeout(() => {
+    splash.classList.add('fade-out');
+    setTimeout(() => splash.classList.add('hidden'), 650);
+  }, 2000);
+})();
 
 // ═══════════════════════════════════════════════
 //  REPLAY RECORDER  — rolling 5-second buffer
