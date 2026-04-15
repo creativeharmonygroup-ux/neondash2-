@@ -189,6 +189,48 @@
     cursor: pointer; transition: transform 0.12s;
   }
   .coin-pack-card:active { transform: scale(0.97); }
+
+  /* ── PREMIUM CARD ── */
+  .premium-pack-card {
+    display: flex; flex-direction: row; align-items: center;
+    justify-content: space-between; border-radius: 14px; padding: 18px 18px;
+    border: 2px solid #ffd700;
+    background: linear-gradient(120deg, rgba(40,25,0,0.99) 0%, rgba(20,10,0,0.99) 100%);
+    box-shadow: 0 0 22px rgba(255,215,0,0.45), 0 0 44px rgba(255,165,0,0.2), inset 0 0 18px rgba(255,200,0,0.07);
+    cursor: pointer; transition: transform 0.12s;
+    position: relative; overflow: hidden;
+  }
+  .premium-pack-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,215,0,0.08) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .premium-pack-card:active { transform: scale(0.97); }
+  .premium-pack-left { display: flex; flex-direction: column; gap: 5px; }
+  .premium-pack-name {
+    font-size: 11px; font-weight: 900; letter-spacing: 2px; color: #ffd700;
+    font-family: 'Orbitron', monospace; line-height: 1;
+    text-shadow: 0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,165,0,0.4);
+  }
+  .premium-pack-desc {
+    font-size: 18px; font-weight: 700; color: #ffe566;
+    font-family: 'Rajdhani', sans-serif; line-height: 1.2; letter-spacing: 0.5px;
+    text-shadow: 0 0 8px rgba(255,215,0,0.5);
+  }
+  .premium-pack-owned {
+    font-size: 13px; font-weight: 700; color: #ffd700;
+    font-family: 'Orbitron', monospace; letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(255,215,0,0.7);
+  }
+  .premium-pack-price-btn {
+    background: linear-gradient(135deg, #b8860b, #ffd700);
+    color: #1a0800; font-family: 'Orbitron', monospace;
+    font-size: 15px; font-weight: 900; letter-spacing: 0.5px;
+    border: none; border-radius: 10px; padding: 11px 20px; cursor: pointer;
+    box-shadow: 0 0 18px rgba(255,215,0,0.6); flex-shrink: 0;
+    transition: transform 0.12s;
+  }
+  .premium-pack-price-btn:active { transform: scale(0.93); }
   .coin-pack-left { display: flex; flex-direction: column; gap: 5px; }
   .coin-pack-name {
     font-size: 12px; font-weight: 900; letter-spacing: 2px; color: #ffcc44;
@@ -1145,9 +1187,10 @@ function loadSave() {
       selectedWorld: s.selectedWorld || 'thegrid',
       luxuryOwned: s.luxuryOwned || [],
       ownedWorlds: s.ownedWorlds || [],
-      shieldCharges: s.shieldCharges || 0
+      shieldCharges: s.shieldCharges || 0,
+      premium: s.premium || false
     };
-  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'thegrid', selectedWorld: 'thegrid', luxuryOwned: [], ownedWorlds: [], shieldCharges: 0 }; }
+  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'thegrid', selectedWorld: 'thegrid', luxuryOwned: [], ownedWorlds: [], shieldCharges: 0, premium: false }; }
 }
 function writeSave(s) {
   localStorage.setItem('neonDashSave', JSON.stringify(s));
@@ -3523,6 +3566,36 @@ function openCoinShop() {
   AudioEngine.startHangarMusic();
   const list = document.getElementById('coinPacksList');
   list.innerHTML = '';
+
+  // ── FURIOUS DASH PREMIUM ──
+  const premCard = document.createElement('div');
+  premCard.className = 'premium-pack-card coin-shop-card';
+  const premLeft = document.createElement('div');
+  premLeft.className = 'premium-pack-left';
+  const premName = document.createElement('div');
+  premName.className = 'premium-pack-name';
+  premName.textContent = '👑 FURIOUS DASH PREMIUM';
+  const premDesc = document.createElement('div');
+  premDesc.className = 'premium-pack-desc';
+  premDesc.textContent = 'No ads forever';
+  premLeft.appendChild(premName);
+  premLeft.appendChild(premDesc);
+  premCard.appendChild(premLeft);
+  if (save.premium) {
+    const ownedEl = document.createElement('div');
+    ownedEl.className = 'premium-pack-owned';
+    ownedEl.textContent = '✓ OWNED';
+    premCard.appendChild(ownedEl);
+  } else {
+    const premBtn = document.createElement('button');
+    premBtn.className = 'premium-pack-price-btn';
+    premBtn.textContent = '$2.99';
+    premBtn.addEventListener('click', e => { e.stopPropagation(); purchasePremium(); });
+    premCard.appendChild(premBtn);
+    premCard.addEventListener('click', () => purchasePremium());
+  }
+  list.appendChild(premCard);
+
   COIN_PACKS.forEach(pack => {
     const card = document.createElement('div');
     card.className = 'coin-pack-card coin-shop-card';
@@ -3603,6 +3676,16 @@ function purchaseCoinPack(id) {
     save.coins += pack.coins;
     writeSave(save);
     updateCoinHud();
+  }
+}
+
+function purchasePremium() {
+  if (save.premium) return;
+  // TODO: wire to real IAP (Capacitor Purchases plugin)
+  if (confirm('Buy FURIOUS DASH PREMIUM for $2.99?\nRemoves all ads forever.\n\n(This will trigger the App Store purchase flow)')) {
+    save.premium = true;
+    writeSave(save);
+    openCoinShop(); // refresh to show OWNED state
   }
 }
 
