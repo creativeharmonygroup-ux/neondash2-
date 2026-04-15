@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+
+    <!-- Glow filter — medium -->
+    <filter id="glow" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="10" result="blur1"/>
+      <feGaussianBlur stdDeviation="20" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Glow filter — strong (for DASH) -->
+    <filter id="glowStrong" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="14" result="blur1"/>
+      <feGaussianBlur stdDeviation="28" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Glow filter — dot corners -->
+    <filter id="glowDot" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Glow filter — line separator -->
+    <filter id="glowLine" x="-5%" y="-400%" width="110%" height="900%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Radial glow bg -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%"   stop-color="#1a0030" stop-opacity="1"/>
+      <stop offset="55%"  stop-color="#0a0010" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="1"/>
+    </radialGradient>
+
+    <!-- Separator line gradient -->
+    <linearGradient id="sepGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#ff00cc" stop-opacity="0"/>
+      <stop offset="20%"  stop-color="#ff00cc" stop-opacity="1"/>
+      <stop offset="40%"  stop-color="#bf00ff" stop-opacity="1"/>
+      <stop offset="60%"  stop-color="#00fff0" stop-opacity="1"/>
+      <stop offset="80%"  stop-color="#ffee00" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#ffee00" stop-opacity="0"/>
+    </linearGradient>
+
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="#000000"/>
+  <rect width="1024" height="1024" fill="url(#bgGlow)"/>
+
+  <!-- ── CORNER ACCENT DOTS ── -->
+
+  <!-- Top-left: pink -->
+  <circle cx="52" cy="52" r="16" fill="#ff00cc" filter="url(#glowDot)" opacity="0.85"/>
+  <circle cx="52" cy="52" r="7"  fill="#ff00cc"/>
+  <circle cx="52" cy="52" r="3"  fill="#ffffff" opacity="0.8"/>
+
+  <!-- Top-right: cyan -->
+  <circle cx="972" cy="52" r="16" fill="#00fff0" filter="url(#glowDot)" opacity="0.85"/>
+  <circle cx="972" cy="52" r="7"  fill="#00fff0"/>
+  <circle cx="972" cy="52" r="3"  fill="#ffffff" opacity="0.8"/>
+
+  <!-- Bottom-left: yellow -->
+  <circle cx="52" cy="972" r="16" fill="#ffee00" filter="url(#glowDot)" opacity="0.85"/>
+  <circle cx="52" cy="972" r="7"  fill="#ffee00"/>
+  <circle cx="52" cy="972" r="3"  fill="#ffffff" opacity="0.8"/>
+
+  <!-- Bottom-right: purple -->
+  <circle cx="972" cy="972" r="16" fill="#bf00ff" filter="url(#glowDot)" opacity="0.85"/>
+  <circle cx="972" cy="972" r="7"  fill="#bf00ff"/>
+  <circle cx="972" cy="972" r="3"  fill="#ffffff" opacity="0.8"/>
+
+  <!-- ── FURIOUS — glow layer ── -->
+  <text
+    filter="url(#glow)"
+    font-size="148"
+    font-style="italic"
+    font-weight="900"
+    font-family="'Arial Black', 'Impact', 'Helvetica Neue', sans-serif"
+    x="512" y="290"
+    text-anchor="middle"
+    opacity="0.72"
+    letter-spacing="-2">
+    <tspan fill="#ff00cc">F</tspan><tspan fill="#bf00ff">U</tspan><tspan fill="#00fff0">R</tspan><tspan fill="#ffee00">I</tspan><tspan fill="#ff00cc">O</tspan><tspan fill="#bf00ff">U</tspan><tspan fill="#00fff0">S</tspan>
+  </text>
+
+  <!-- FURIOUS — sharp layer -->
+  <text
+    font-size="148"
+    font-style="italic"
+    font-weight="900"
+    font-family="'Arial Black', 'Impact', 'Helvetica Neue', sans-serif"
+    x="512" y="290"
+    text-anchor="middle"
+    letter-spacing="-2">
+    <tspan fill="#ff00cc">F</tspan><tspan fill="#bf00ff">U</tspan><tspan fill="#00fff0">R</tspan><tspan fill="#ffee00">I</tspan><tspan fill="#ff00cc">O</tspan><tspan fill="#bf00ff">U</tspan><tspan fill="#00fff0">S</tspan>
+  </text>
+
+  <!-- ── SEPARATOR LINE ── -->
+  <rect x="80" y="322" width="864" height="3" fill="url(#sepGrad)" filter="url(#glowLine)" rx="2"/>
+
+  <!-- ── DASH — glow layer ── -->
+  <text
+    filter="url(#glowStrong)"
+    font-size="310"
+    font-weight="900"
+    font-family="'Arial Black', 'Impact', 'Helvetica Neue', sans-serif"
+    x="512" y="720"
+    text-anchor="middle"
+    opacity="0.80"
+    letter-spacing="-8">
+    <tspan fill="#ffee00">D</tspan><tspan fill="#ff00cc">A</tspan><tspan fill="#bf00ff">S</tspan><tspan fill="#00fff0">H</tspan>
+  </text>
+
+  <!-- DASH — sharp layer -->
+  <text
+    font-size="310"
+    font-weight="900"
+    font-family="'Arial Black', 'Impact', 'Helvetica Neue', sans-serif"
+    x="512" y="720"
+    text-anchor="middle"
+    letter-spacing="-8">
+    <tspan fill="#ffee00">D</tspan><tspan fill="#ff00cc">A</tspan><tspan fill="#bf00ff">S</tspan><tspan fill="#00fff0">H</tspan>
+  </text>
+
+  <!-- ── BOTTOM SEPARATOR LINE ── -->
+  <rect x="80" y="760" width="864" height="2" fill="url(#sepGrad)" filter="url(#glowLine)" rx="1" opacity="0.6"/>
+
+  <!-- ── TAGLINE ── -->
+  <text
+    font-size="27"
+    font-weight="700"
+    font-family="'Arial', 'Helvetica Neue', sans-serif"
+    x="984" y="984"
+    text-anchor="end"
+    fill="#ffffff"
+    opacity="0.55"
+    letter-spacing="3">THE MOST VIRAL GAME</text>
+
+</svg>
