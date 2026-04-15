@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>NEON DASH \ud83d\ude80</title>
+<title>FURIOUS DASH \ud83d\ude80</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;600&display=swap');
 
@@ -825,7 +825,7 @@
 
   <!-- START -->
   <div class="screen" id="startScreen">
-    <div class="game-title">NEON DASH</div>
+    <div class="game-title">FURIOUS DASH</div>
     <div class="game-subtitle">Hypercasual · Infinite</div>
     <div class="ship-preview" id="startShipEmoji">🚀</div>
     <div class="tap-hint">TAP TO START</div>
@@ -5867,14 +5867,14 @@ function drawOverlayText(ctx, W, H) {
   botGrad.addColorStop(1, 'rgba(0,0,0,0.78)');
   ctx.fillStyle = botGrad; ctx.fillRect(0, H * 0.68, W, H * 0.32);
 
-  // NEON DASH — top center, cyan glow
+  // FURIOUS DASH — top center, cyan glow
   ctx.textAlign = 'center';
   ctx.font = `900 ${Math.round(W * 0.1)}px Orbitron, monospace`;
   ctx.fillStyle = '#00fff0';
   ctx.shadowColor = '#00fff0'; ctx.shadowBlur = 32;
-  ctx.fillText('NEON DASH', W / 2, H * 0.1);
+  ctx.fillText('FURIOUS DASH', W / 2, H * 0.1);
   ctx.shadowBlur = 14;
-  ctx.fillText('NEON DASH', W / 2, H * 0.1); // double-draw to boost glow
+  ctx.fillText('FURIOUS DASH', W / 2, H * 0.1); // double-draw to boost glow
 
   // "ONLY 3% REACH THIS." — middle-lower
   ctx.font = `900 ${Math.round(W * 0.057)}px Orbitron, monospace`;
@@ -5955,8 +5955,8 @@ document.getElementById('shareTiktokBtn').addEventListener('click', async () => 
   if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({
-        title: '💀 Morí en NEON DASH',
-        text: '¿Puedes superar mi score? 🚀 Descarga NEON DASH gratis',
+        title: '💀 Morí en FURIOUS DASH',
+        text: '¿Puedes superar mi score? 🚀 Descarga FURIOUS DASH gratis',
         files: [file]
       });
       return;
