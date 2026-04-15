@@ -696,6 +696,40 @@
     display: none;
   }
 
+  /* ── CHEST STREAK notifications ── */
+  #streakNotif {
+    position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%) scale(0);
+    pointer-events: none; z-index: 15; white-space: nowrap; text-align: center;
+    font-family: 'Orbitron', monospace; font-weight: 900; letter-spacing: 4px;
+    opacity: 0;
+  }
+  #streakNotif.triple {
+    font-size: 36px;
+    color: #ff6600;
+    text-shadow: 0 0 18px #ff6600, 0 0 36px #ff3300, 0 0 70px #ffaa00;
+  }
+  #streakNotif.godlike {
+    font-size: 44px;
+    color: #ffffff;
+    text-shadow: 0 0 20px #bf00ff, 0 0 40px #ff00ff, 0 0 80px #bf00ff, 0 0 120px #ffffff;
+  }
+  @keyframes streakPop {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+    18%  { opacity: 1; transform: translate(-50%, -50%) scale(1.25); }
+    32%  { transform: translate(-50%, -50%) scale(0.95); }
+    45%  { transform: translate(-50%, -50%) scale(1.08); }
+    70%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  }
+  @keyframes godlikePop {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.1) rotate(-6deg); }
+    15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.5) rotate(3deg); }
+    28%  { transform: translate(-50%, -50%) scale(0.9) rotate(-2deg); }
+    42%  { transform: translate(-50%, -50%) scale(1.12) rotate(1deg); }
+    65%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0) rotate(0deg); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.75); }
+  }
+
   @keyframes titlePulse {
     0%,100% { text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan); }
     50% { text-shadow: 0 0 40px var(--neon-cyan), 0 0 80px var(--neon-cyan), 0 0 120px rgba(0,255,240,0.4); }
@@ -853,6 +887,7 @@
 
   <div id="flashOverlay"></div>
   <div id="speedNotif">⚡ SPEED UP!</div>
+  <div id="streakNotif"></div>
   <div id="fluctNotif"></div>
   <div id="phaseIndicator"></div>
   <div id="achieve15"><div class="achieve-text">ONLY 3% REACH HERE</div></div>
@@ -2753,6 +2788,28 @@ const AudioEngine = (() => {
     playTone({type:'sine',    freq:1100,freqEnd:500,  duration:0.16, gainPeak:0.18, startTime:t});
     playTone({type:'triangle',freq:700, freqEnd:1800, duration:0.12, gainPeak:0.13, startTime:t+0.06});
   }
+  function playTripleChest() {
+    init(); resume(); const t = ctx.currentTime;
+    // Ascending power arpeggio (C-E-G-C)
+    [523, 659, 784, 1047].forEach((f, i) => playTone({type:'sine', freq:f, freqEnd:f*1.5, duration:0.22, gainPeak:0.32, startTime:t+i*0.06}));
+    // Shimmer layer on top
+    playTone({type:'triangle', freq:2100, freqEnd:3200, duration:0.35, gainPeak:0.14, startTime:t+0.10});
+    playNoise(t+0.02, 0.18, 0.18);
+  }
+  function playGodlike() {
+    init(); resume(); const t = ctx.currentTime;
+    // Massive sub-bass slam
+    playTone({type:'sine',     freq:55,  freqEnd:28,   duration:0.5,  gainPeak:0.65, startTime:t});
+    playTone({type:'square',   freq:110, freqEnd:55,   duration:0.4,  gainPeak:0.35, startTime:t});
+    // Dissonant power chord cluster
+    [440, 554, 660, 880, 1100].forEach((f, i) => playTone({type:'sawtooth', freq:f, freqEnd:f*0.5, duration:0.45, gainPeak:0.18, startTime:t+i*0.03}));
+    // Heaven shimmer piercing through
+    playTone({type:'sine',     freq:4400, freqEnd:8000, duration:0.28, gainPeak:0.12, startTime:t+0.12});
+    playTone({type:'triangle', freq:3300, freqEnd:6000, duration:0.32, gainPeak:0.10, startTime:t+0.08});
+    // Noise crash
+    playNoise(t, 0.18, 0.45);
+    playNoise(t+0.15, 0.30, 0.20);
+  }
   function playShieldImpact() {
     init(); resume(); const t = ctx.currentTime;
     // Deep bass punch
@@ -2772,7 +2829,7 @@ const AudioEngine = (() => {
     playNoise(t+0.08, 0.38, 0.18);
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCoinShield, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic, playShieldActivate, playShieldAbsorb, playShieldImpact, playShieldBreak };
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCoinShield, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic, playShieldActivate, playShieldAbsorb, playShieldImpact, playShieldBreak, playTripleChest, playGodlike };
 })();
 
 // iOS Safari: unlock AudioContext on first user touch (required before any sound can play)
@@ -2803,6 +2860,11 @@ let state = 'start';
 let score = 0, frame = 0, speed = 4.55, combo = 0;
 let coinsThisRun = 0;
 let nearMissCooldown = 0;
+
+// Chest streak
+let chestStreak = 0;
+let streakCoinMult = 1;
+let streakCoinTimer = 0; // frames remaining (300 = 5s at 60fps)
 
 // Speed fluctuation
 let speedMult = 1.0, targetSpeedMult = 1.0;
@@ -3097,6 +3159,39 @@ function showYupiCountdownNum(n, onDone) {
   setTimeout(() => { yupiCountdownText.classList.remove('show'); if (onDone) onDone(); }, 900);
 }
 
+function showStreakNotif(text, type) {
+  const el = document.getElementById('streakNotif');
+  el.textContent = text;
+  el.className = type;
+  el.style.animation = 'none';
+  void el.offsetWidth; // reflow to restart animation
+  el.style.animation = (type === 'godlike' ? 'godlikePop' : 'streakPop') + ' 1.6s ease-out forwards';
+}
+
+function onChestCollected() {
+  chestStreak++;
+  if (chestStreak === 3) {
+    streakCoinMult = 3;
+    streakCoinTimer = 300;
+    AudioEngine.playTripleChest();
+    flashScreen('#ff6600', 0.5);
+    triggerShake(10);
+    spawnParticles(player.x, player.y, '#ff6600', 20, 1.4);
+    spawnParticles(player.x, player.y, '#ffee00', 12, 1.0);
+    showStreakNotif('TRIPLE CHEST! 🔥', 'triple');
+  } else if (chestStreak >= 4) {
+    streakCoinMult = 4;
+    streakCoinTimer = 300;
+    AudioEngine.playGodlike();
+    flashScreen('#ffffff', 0.7);
+    triggerShake(18);
+    spawnParticles(player.x, player.y, '#bf00ff', 35, 2.0);
+    spawnParticles(player.x, player.y, '#ff80ff', 22, 1.6);
+    spawnParticles(player.x, player.y, '#ffffff', 15, 1.2);
+    showStreakNotif('GODLIKE! 💥', 'godlike');
+  }
+}
+
 function cancelYupilandia() {
   yupilandiaActive = false;
   yupilandiaFrozen = false;
@@ -3366,6 +3461,7 @@ function startGame() {
   surpriseObstacle=null; nextSurpriseScore=10+Math.floor(Math.random()*6);
   shieldPulse=0; shieldCrackTimer=0;
   shieldChest=null; shieldChestSpawned=false; shieldChestTimer=0;
+  chestStreak=0; streakCoinMult=1; streakCoinTimer=0;
   document.getElementById('shieldChestHud').classList.add('hidden');
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
   momentBlob=null; reached8=false; MomentRecorder.stop();
@@ -3407,6 +3503,7 @@ function updateUI() {
 function awardCoins(amount, x, y) {
   const shieldOn = save.shieldCharges > 0 || shieldChestTimer > 0;
   if (shieldOn) amount *= 2;
+  if (streakCoinMult > 1) amount *= streakCoinMult;
   const prevCoins = save.coins;
   save.coins += amount;
   coinsThisRun += amount;
@@ -3419,6 +3516,7 @@ function awardCoins(amount, x, y) {
 
 function gameOver() {
   state='dead'; player.dead=true;
+  chestStreak=0; streakCoinMult=1; streakCoinTimer=0;
   // Cleanup YUPILANDIA if active
   yupilandiaActive=false; yupilandiaFrozen=false;
   if(yupiVortexAnim){cancelAnimationFrame(yupiVortexAnim);yupiVortexAnim=null;}
@@ -4347,6 +4445,7 @@ function checkChestCollection() {
     spawnParticles(ch.x, ch.y, '#FFFAAA', 10, 0.9);
     awardCoins(5, ch.x, ch.y);
     showTreasureFloat(ch.x, ch.y);
+    onChestCollected();
   }
 }
 
@@ -4479,6 +4578,7 @@ function checkLegendaryChestCollection() {
     spawnParticles(cx, cy, '#ffffff', 12, 1.0);
     awardCoins(30, ch.x, ch.y);
     showLegendaryFloat();
+    onChestCollected();
   }
 }
 
@@ -4614,6 +4714,7 @@ function checkSupremeChestCollection() {
     spawnParticles(cx, cy, '#55bbff', 14, 1.0);
     awardCoins(300, ch.x, ch.y);
     showSupremeFloat(ch.x, ch.y);
+    onChestCollected();
   }
 }
 
@@ -4766,6 +4867,7 @@ function checkEpicChestCollection() {
     spawnParticles(cx, cy, '#fff8c0', 15, 1.0);
     awardCoins(500, ch.x, ch.y);
     showEpicFloat(ch.x, ch.y);
+    onChestCollected();
   }
 }
 
@@ -5620,6 +5722,7 @@ function loop() {
 
   if(state==='playing' && !yupilandiaFrozen){
     frame++;
+    if (streakCoinTimer > 0) { streakCoinTimer--; if (streakCoinTimer === 0) streakCoinMult = 1; }
 
     // ── Base speed progression (every 300 frames) ──
     if(frame%300===0){
@@ -5767,6 +5870,7 @@ function loop() {
           spawnParticles(c.x,c.y,'#FFFAAA',10,0.9);
           awardCoins(5,c.x,c.y);
           showTreasureFloat(c.x,c.y);
+          onChestCollected();
         }
       });
     }
