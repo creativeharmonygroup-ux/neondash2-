@@ -3097,8 +3097,21 @@ function showYupiCountdownNum(n, onDone) {
   setTimeout(() => { yupiCountdownText.classList.remove('show'); if (onDone) onDone(); }, 900);
 }
 
+function cancelYupilandia() {
+  yupilandiaActive = false;
+  yupilandiaFrozen = false;
+  if (yupiVortexAnim) { cancelAnimationFrame(yupiVortexAnim); yupiVortexAnim = null; }
+  yupiOverlay.classList.add('hidden');
+  yupiVortexCanvas.classList.remove('show');
+  yupiWelcomeText.classList.remove('show');
+  yupiCountdownText.classList.remove('show');
+  backToRealityText.classList.remove('show');
+  AudioEngine.stopYupiMusic();
+}
+
 function triggerYupilandia() {
   if (yupilandiaTriggered) return;
+  if (state !== 'playing') return;
   yupilandiaTriggered = true;
   yupilandiaFrozen = true;
   yupilandiaActive = false;
@@ -3121,17 +3134,20 @@ function triggerYupilandia() {
 
   // Animate vortex in (1.4s)
   animateVortex(true, () => {
+    if (state !== 'playing') { cancelYupilandia(); return; }
     // Show WELCOME text
     yupiWelcomeText.classList.add('show');
     flashScreen('#ffee00', 0.3);
     triggerShake(5);
 
     setTimeout(() => {
+      if (state !== 'playing') { cancelYupilandia(); return; }
       // Fade out vortex, begin active phase
       yupiWelcomeText.classList.remove('show');
       yupiVortexCanvas.classList.remove('show');
 
       setTimeout(() => {
+        if (state !== 'playing') { cancelYupilandia(); return; }
         // ACTIVE PHASE BEGINS
         yupilandiaFrozen = false;
         yupilandiaActive = true;
@@ -3148,11 +3164,16 @@ function triggerYupilandia() {
 
         // After 5 seconds, countdown
         setTimeout(() => {
+          if (state !== 'playing') { cancelYupilandia(); return; }
           // Show countdown 3-2-1
           showYupiCountdownNum(3, () => {
+            if (state !== 'playing') { cancelYupilandia(); return; }
             showYupiCountdownNum(2, () => {
+              if (state !== 'playing') { cancelYupilandia(); return; }
               showYupiCountdownNum(1, () => {
+                if (state !== 'playing') { cancelYupilandia(); return; }
                 showYupiCountdownNum(0, () => {
+                  if (state !== 'playing') { cancelYupilandia(); return; }
                   // BACK TO REALITY
                   backToRealityText.classList.add('show');
                   yupiVortexCanvas.classList.add('show');
@@ -3161,6 +3182,7 @@ function triggerYupilandia() {
                   flashScreen('#00fff0', 0.3);
 
                   setTimeout(() => {
+                    if (state !== 'playing') { cancelYupilandia(); return; }
                     // Restore normal game
                     yupilandiaActive = false;
                     yupilandiaFrozen = false;
