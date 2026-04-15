@@ -195,32 +195,32 @@
     display: flex; flex-direction: row; align-items: center;
     justify-content: space-between; border-radius: 14px; padding: 18px 18px;
     border: 2px solid #ffd700;
-    background: linear-gradient(120deg, rgba(40,25,0,0.99) 0%, rgba(20,10,0,0.99) 100%);
-    box-shadow: 0 0 22px rgba(255,215,0,0.45), 0 0 44px rgba(255,165,0,0.2), inset 0 0 18px rgba(255,200,0,0.07);
+    background: linear-gradient(120deg, #fffef5 0%, #fff8d6 100%);
+    box-shadow: 0 0 22px rgba(255,215,0,0.55), 0 0 44px rgba(255,165,0,0.25);
     cursor: pointer; transition: transform 0.12s;
     position: relative; overflow: hidden;
   }
   .premium-pack-card::before {
     content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(255,215,0,0.08) 0%, transparent 55%);
+    background: linear-gradient(135deg, rgba(255,215,0,0.18) 0%, transparent 55%);
     pointer-events: none;
   }
   .premium-pack-card:active { transform: scale(0.97); }
   .premium-pack-left { display: flex; flex-direction: column; gap: 5px; }
   .premium-pack-name {
-    font-size: 11px; font-weight: 900; letter-spacing: 2px; color: #ffd700;
+    font-size: 11px; font-weight: 900; letter-spacing: 2px; color: #a06800;
     font-family: 'Orbitron', monospace; line-height: 1;
-    text-shadow: 0 0 10px rgba(255,215,0,0.8), 0 0 20px rgba(255,165,0,0.4);
+    text-shadow: none;
   }
   .premium-pack-desc {
-    font-size: 13px; font-weight: 700; color: #ffe566;
+    font-size: 13px; font-weight: 700; color: #2a1a00;
     font-family: 'Rajdhani', sans-serif; line-height: 1.2; letter-spacing: 0.5px;
-    text-shadow: 0 0 8px rgba(255,215,0,0.5);
+    text-shadow: none;
   }
   .premium-pack-owned {
-    font-size: 11px; font-weight: 700; color: #ffd700;
+    font-size: 11px; font-weight: 700; color: #a06800;
     font-family: 'Orbitron', monospace; letter-spacing: 1px;
-    text-shadow: 0 0 8px rgba(255,215,0,0.7);
+    text-shadow: none;
   }
   .premium-pack-price-btn {
     background: linear-gradient(135deg, #b8860b, #ffd700);
