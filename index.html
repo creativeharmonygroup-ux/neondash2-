@@ -595,6 +595,20 @@
     0%,100% { text-shadow: 0 0 20px var(--neon-pink), 0 0 50px var(--neon-pink), 0 0 100px rgba(255,0,110,0.5); }
     50%      { text-shadow: 0 0 30px var(--neon-pink), 0 0 70px var(--neon-pink), 0 0 140px rgba(255,0,110,0.7), 0 0 200px rgba(255,0,110,0.25); }
   }
+  #deathStreakMsg {
+    font-family: 'Orbitron', monospace; font-weight: 900; letter-spacing: 2px;
+    text-align: center; line-height: 1.2; max-width: 88%;
+    font-size: 20px; margin-bottom: 6px;
+    display: none;
+  }
+  #deathStreakMsg.ds3 { color: #ff8800; text-shadow: 0 0 12px #ff8800, 0 0 28px #ff4400; animation: phrasePulse 2s ease-in-out infinite; }
+  #deathStreakMsg.ds5 { color: #ff4444; text-shadow: 0 0 12px #ff4444, 0 0 28px #ff0000; animation: phrasePulse 1.6s ease-in-out infinite; }
+  #deathStreakMsg.ds7 { color: #ff00ff; text-shadow: 0 0 14px #ff00ff, 0 0 32px #cc00ff; animation: phrasePulse 1.3s ease-in-out infinite; }
+  #deathStreakMsg.ds10 {
+    font-size: 22px; color: #ffd700;
+    text-shadow: 0 0 16px #ffd700, 0 0 36px #ff8800, 0 0 70px #ffd700;
+    animation: scoreGlow 1.2s ease-in-out infinite;
+  }
   .over-phrase {
     font-size: 23px; font-weight: 900; color: #ff00cc;
     letter-spacing: 2px; text-align: center; line-height: 1.3;
@@ -945,6 +959,7 @@
 
   <!-- GAME OVER -->
   <div class="screen hidden" id="gameOverScreen">
+    <div id="deathStreakMsg"></div>
     <div class="over-phrase" id="overPhrase"></div>
     <div class="over-label">GAME OVER</div>
     <div class="over-score" id="finalScore">0</div>
@@ -2828,6 +2843,40 @@ const AudioEngine = (() => {
     playTone({type:'sine',    freq:1100,freqEnd:500,  duration:0.16, gainPeak:0.18, startTime:t});
     playTone({type:'triangle',freq:700, freqEnd:1800, duration:0.12, gainPeak:0.13, startTime:t+0.06});
   }
+  function playViolin() {
+    // Sad descending violin: slow sawtooth glide down
+    init(); resume(); const t = ctx.currentTime;
+    [[660,440,0.0],[550,330,0.35],[440,220,0.70]].forEach(([f,fe,dt]) => {
+      playTone({type:'sawtooth', freq:f, freqEnd:fe, duration:0.55, gainPeak:0.18, startTime:t+dt});
+    });
+    playTone({type:'sine', freq:220, freqEnd:110, duration:0.8, gainPeak:0.10, startTime:t+1.0});
+  }
+  function playClown() {
+    // Womp womp: descending trombone-like tones
+    init(); resume(); const t = ctx.currentTime;
+    playTone({type:'sawtooth', freq:440, freqEnd:220, duration:0.28, gainPeak:0.28, startTime:t});
+    playTone({type:'sawtooth', freq:330, freqEnd:165, duration:0.28, gainPeak:0.28, startTime:t+0.30});
+    playTone({type:'sawtooth', freq:220, freqEnd:110, duration:0.45, gainPeak:0.25, startTime:t+0.60});
+    playNoise(t+0.60, 0.12, 0.08);
+  }
+  function playEpicFail() {
+    // Ba-dum-tss descending crash
+    init(); resume(); const t = ctx.currentTime;
+    playTone({type:'sawtooth', freq:370, freqEnd:185, duration:0.20, gainPeak:0.32, startTime:t});
+    playTone({type:'sawtooth', freq:277, freqEnd:138, duration:0.20, gainPeak:0.30, startTime:t+0.22});
+    playTone({type:'sawtooth', freq:185, freqEnd:70,  duration:0.55, gainPeak:0.28, startTime:t+0.44});
+    playNoise(t+0.44, 0.55, 0.25);
+  }
+  function playFanfare() {
+    // Dramatic ironic fanfare: trumpet-like ascending then crash
+    init(); resume(); const t = ctx.currentTime;
+    [[262,0],[330,0.10],[392,0.20],[523,0.30],[659,0.40],[784,0.52]].forEach(([f,dt]) =>
+      playTone({type:'square', freq:f, freqEnd:f*0.9, duration:0.22, gainPeak:0.24, startTime:t+dt})
+    );
+    // Big crash at the end
+    playTone({type:'sawtooth', freq:784, freqEnd:80, duration:0.9, gainPeak:0.38, startTime:t+0.74});
+    playNoise(t+0.74, 0.6, 0.30);
+  }
   function playTripleChest() {
     init(); resume(); const t = ctx.currentTime;
     // Ascending power arpeggio (C-E-G-C)
@@ -2869,7 +2918,7 @@ const AudioEngine = (() => {
     playNoise(t+0.08, 0.38, 0.18);
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCoinShield, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic, playShieldActivate, playShieldAbsorb, playShieldImpact, playShieldBreak, playTripleChest, playGodlike };
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCoinShield, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic, playShieldActivate, playShieldAbsorb, playShieldImpact, playShieldBreak, playTripleChest, playGodlike, playViolin, playClown, playEpicFail, playFanfare };
 })();
 
 // iOS Safari: unlock AudioContext on first user touch (required before any sound can play)
@@ -2903,6 +2952,9 @@ let nearMissCooldown = 0;
 
 // Revive (watch ad) — once per session
 let reviveUsed = false;
+
+// Death streak — consecutive deaths without reaching score 5
+let deathStreak = 0;
 
 // Chest streak
 let chestStreak = 0;
@@ -3566,6 +3618,7 @@ function awardCoins(amount, x, y) {
 function gameOver() {
   state='dead'; player.dead=true;
   chestStreak=0; streakCoinMult=1; streakCoinTimer=0;
+  deathStreak++;
   // Cleanup YUPILANDIA if active
   yupilandiaActive=false; yupilandiaFrozen=false;
   if(yupiVortexAnim){cancelAnimationFrame(yupiVortexAnim);yupiVortexAnim=null;}
@@ -3599,6 +3652,21 @@ function gameOver() {
   const share3btn = document.getElementById('share3pctBtn');
   share3btn.classList.toggle('hidden', !reached8);
   document.getElementById('reviveBtn').classList.toggle('hidden', reviveUsed);
+  const dsEl = document.getElementById('deathStreakMsg');
+  dsEl.className = ''; dsEl.style.display = 'none';
+  if (deathStreak >= 10) {
+    dsEl.textContent = 'LEGENDARY LOSER 👑'; dsEl.className = 'ds10'; dsEl.style.display = 'block';
+    setTimeout(() => AudioEngine.playFanfare(), 500);
+  } else if (deathStreak >= 7) {
+    dsEl.textContent = 'MAYBE TRY ANOTHER GAME? 😂'; dsEl.className = 'ds7'; dsEl.style.display = 'block';
+    setTimeout(() => AudioEngine.playEpicFail(), 500);
+  } else if (deathStreak >= 5) {
+    dsEl.textContent = 'SKILL ISSUE 🤡'; dsEl.className = 'ds5'; dsEl.style.display = 'block';
+    setTimeout(() => AudioEngine.playClown(), 500);
+  } else if (deathStreak >= 3) {
+    dsEl.textContent = 'ARE YOU OKAY? 💀'; dsEl.className = 'ds3'; dsEl.style.display = 'block';
+    setTimeout(() => AudioEngine.playViolin(), 500);
+  }
   setTimeout(() => {
     const badge = document.getElementById('newBestBadge');
     badge.style.display = 'none';
@@ -6058,6 +6126,7 @@ function loop() {
       }
       if(!b.scored&&b.x+BAR_W<player.x){
         b.scored=true; score++; combo++;
+        if (score === 5) deathStreak = 0;
         updateUI(); popScore();
         spawnParticles(player.x+20,player.y,currentShip().trailColor,6,0.8);
         // Near miss: check closest approach recorded during overlap
