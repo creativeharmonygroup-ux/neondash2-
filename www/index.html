@@ -1305,6 +1305,14 @@ const AudioEngine = (() => {
   function playJump() { init(); resume(); playTone({type:'square',freq:280,freqEnd:520,duration:0.12,gainPeak:0.25}); playTone({type:'sine',freq:420,freqEnd:800,duration:0.1,gainPeak:0.15}); }
   function playScore() { init(); resume(); const t=ctx.currentTime; playTone({type:'sine',freq:660,duration:0.15,gainPeak:0.3,startTime:t}); playTone({type:'sine',freq:880,duration:0.15,gainPeak:0.2,startTime:t+0.05}); playTone({type:'triangle',freq:1100,duration:0.2,gainPeak:0.15,startTime:t+0.1}); }
   function playCoin() { init(); resume(); playTone({type:'sine',freq:1200,freqEnd:1600,duration:0.08,gainPeak:0.2}); }
+  function playCoinShield() {
+    init(); resume(); const t = ctx.currentTime;
+    // Deep power chord: low punch + rising shimmer + high sparkle
+    playTone({type:'triangle', freq:220, freqEnd:440,  duration:0.18, gainPeak:0.28, startTime:t});
+    playTone({type:'sine',     freq:880, freqEnd:1760, duration:0.14, gainPeak:0.22, startTime:t});
+    playTone({type:'sine',     freq:2200,freqEnd:3200, duration:0.10, gainPeak:0.16, startTime:t+0.04});
+    playTone({type:'square',   freq:440, freqEnd:880,  duration:0.12, gainPeak:0.10, startTime:t+0.02});
+  }
   function playCombo() { init(); resume(); const t=ctx.currentTime; [523,659,784,1047].forEach((f,i)=>playTone({type:'sine',freq:f,duration:0.15,gainPeak:0.3,startTime:t+i*0.07})); }
   function playSpeedUp() { init(); resume(); const t=ctx.currentTime; playTone({type:'sawtooth',freq:200,freqEnd:800,duration:0.4,gainPeak:0.35,startTime:t}); playTone({type:'sine',freq:1200,freqEnd:2400,duration:0.3,gainPeak:0.2,startTime:t+0.1}); }
   function playDeath() {
@@ -2751,7 +2759,7 @@ const AudioEngine = (() => {
     playNoise(t+0.08, 0.38, 0.18);
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic, playShieldActivate, playShieldAbsorb, playShieldBreak };
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCoinShield, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic, playShieldActivate, playShieldAbsorb, playShieldBreak };
 })();
 
 // iOS Safari: unlock AudioContext on first user touch (required before any sound can play)
@@ -3362,13 +3370,15 @@ function updateUI() {
 }
 
 function awardCoins(amount, x, y) {
+  const shieldOn = save.shieldCharges > 0 || shieldChestTimer > 0;
+  if (shieldOn) amount *= 2;
   const prevCoins = save.coins;
   save.coins += amount;
   coinsThisRun += amount;
   writeSave(save);
   updateCoinHud();
   popCoin();
-  AudioEngine.playCoin();
+  if (shieldOn) AudioEngine.playCoinShield(); else AudioEngine.playCoin();
   if (x !== undefined) showCoinFloat(x, y, amount);
 }
 
