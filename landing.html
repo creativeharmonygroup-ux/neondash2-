@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEON DASH — 12 Mundos. 1 Nave. Infinitas Vidas.</title>
+<title>FURIOUS DASH — 12 Mundos. 1 Nave. Infinitas Vidas.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -401,7 +401,7 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
 <body>
 
 <nav>
-  <a href="#" class="logo">NEON DASH</a>
+  <a href="#" class="logo">FURIOUS DASH</a>
   <a href="#download" class="nav-btn">DESCARGAR</a>
 </nav>
 
@@ -429,7 +429,7 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
     <iframe id="gameFrame" src="about:blank" style="width:100%;height:580px;border:none;display:block;background:#020208;" scrolling="no"></iframe>
     <div class="demo-start" id="demoStart">
       <div class="demo-start-icon">🚀</div>
-      <div class="demo-start-title">NEON DASH</div>
+      <div class="demo-start-title">FURIOUS DASH</div>
       <div class="demo-start-sub">60 SEGUNDOS · DEMO GRATUITA<br>TAP PARA VOLAR</div>
       <button class="demo-start-btn" id="demoStartBtn">⚡ JUGAR AHORA</button>
     </div>
@@ -511,10 +511,10 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
 </section>
 
 <footer>
-  <div class="footer-logo">NEON DASH</div>
+  <div class="footer-logo">FURIOUS DASH</div>
   <div class="footer-dots"><div class="dot" style="background:var(--c1)"></div><div class="dot" style="background:var(--c3)"></div><div class="dot" style="background:var(--c5)"></div><div class="dot" style="background:var(--c7)"></div><div class="dot" style="background:var(--c9)"></div><div class="dot" style="background:var(--c12)"></div></div>
   <div class="footer-links"><a href="#">Privacidad</a><a href="#">Términos</a><a href="#">Contacto</a><a href="https://tiktok.com" target="_blank">TikTok</a></div>
-  <div class="footer-copy">© 2026 NEON DASH · neondash.juegos</div>
+  <div class="footer-copy">© 2026 FURIOUS DASH · neondash.juegos</div>
 </footer>
 
 <!-- SHARE CARD OVERLAY -->
@@ -600,7 +600,7 @@ const rainStyle=document.createElement('style');
 rainStyle.textContent='@keyframes rainFall{to{transform:translateY(110vh) rotate(360deg);opacity:0;}}';
 document.head.appendChild(rainStyle);
 
-// ── LETRAS NEON DASH — partículas al tocar ──
+// ── LETRAS FURIOUS DASH — partículas al tocar ──
 document.querySelectorAll('.letter').forEach(letter => {
   const handleTap = e => {
     e.stopPropagation();
@@ -808,7 +808,7 @@ const HUMILIATE = [
   "GG EZ COPE L + RATIO",
   "ERES EL JEFE FINAL DEL FRACASO",
   "ESO NO FUE VOLAR, FUE CAER",
-  "NEON DASH TE RECHAZA 💔"
+  "FURIOUS DASH TE RECHAZA 💔"
 ];
 
 function wrapTextCanvas(ctx, text, x, y, maxWidth, lineH) {
@@ -856,7 +856,7 @@ async function showShareCard(score, imgDataUrl) {
   ctx.font = '900 32px Orbitron, monospace';
   ctx.shadowColor = '#00fff0'; ctx.shadowBlur = 25;
   ctx.fillStyle = '#00fff0';
-  ctx.fillText('NEON DASH', W / 2, 80);
+  ctx.fillText('FURIOUS DASH', W / 2, 80);
 
   ctx.font = '700 13px Orbitron, monospace';
   ctx.fillStyle = 'rgba(0,255,240,0.5)';
@@ -939,12 +939,12 @@ document.getElementById('shareAgainBtn').addEventListener('click', hideShareCard
 document.getElementById('shareTiktokBtn').addEventListener('click', () => {
   const sc = document.getElementById('shareCanvas');
   sc.toBlob(async blob => {
-    const file = new File([blob], 'neon-dash-muerte.png', {type: 'image/png'});
+    const file = new File([blob], 'furious-dash-muerte.png', {type: 'image/png'});
     if (navigator.share && navigator.canShare && navigator.canShare({files: [file]})) {
       try {
         await navigator.share({
-          title: '💀 Morí en NEON DASH',
-          text: '¿Puedes superar mi puntuación? Descarga NEON DASH gratis 🚀',
+          title: '💀 Morí en FURIOUS DASH',
+          text: '¿Puedes superar mi puntuación? Descarga FURIOUS DASH gratis 🚀',
           files: [file]
         });
         return;
@@ -952,7 +952,7 @@ document.getElementById('shareTiktokBtn').addEventListener('click', () => {
     }
     // Fallback: download the image
     const a = document.createElement('a');
-    a.download = 'neon-dash-muerte.png';
+    a.download = 'furious-dash-muerte.png';
     a.href = sc.toDataURL('image/png');
     a.click();
   }, 'image/png');
