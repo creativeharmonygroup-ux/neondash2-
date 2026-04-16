@@ -545,6 +545,29 @@
     text-align: center; width: 100%;
     animation: titlePulse 2s ease-in-out infinite; margin-bottom: 6px;
   }
+  .game-title span {
+    display: inline-block;
+    animation: letterWave 3s ease-in-out infinite, letterGlowPulse 2s ease-in-out infinite;
+  }
+  .game-title span:nth-child(1)  { animation-delay: 0.0s, 0.0s; }
+  .game-title span:nth-child(2)  { animation-delay: 0.1s, 0.1s; }
+  .game-title span:nth-child(3)  { animation-delay: 0.2s, 0.2s; }
+  .game-title span:nth-child(4)  { animation-delay: 0.3s, 0.3s; }
+  .game-title span:nth-child(5)  { animation-delay: 0.4s, 0.4s; }
+  .game-title span:nth-child(6)  { animation-delay: 0.5s, 0.5s; }
+  .game-title span:nth-child(7)  { animation-delay: 0.6s, 0.6s; }
+  .game-title span:nth-child(9)  { animation-delay: 0.7s, 0.7s; }
+  .game-title span:nth-child(10) { animation-delay: 0.8s, 0.8s; }
+  .game-title span:nth-child(11) { animation-delay: 0.9s, 0.9s; }
+  .game-title span:nth-child(12) { animation-delay: 1.0s, 1.0s; }
+  @keyframes letterWave {
+    0%,100% { transform: translateY(0px); }
+    50%      { transform: translateY(-12px); }
+  }
+  @keyframes letterGlowPulse {
+    0%,100% { filter: brightness(1); }
+    50%     { filter: brightness(1.5) drop-shadow(0 0 8px currentColor); }
+  }
   .game-subtitle {
     font-family: 'Rajdhani', sans-serif; font-size: 13px; color: var(--neon-pink);
     letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.9;
@@ -985,7 +1008,7 @@
 
   <!-- START -->
   <div class="screen" id="startScreen">
-    <div class="game-title">FURIOUS DASH</div>
+    <div class="game-title"><span style="color:#ff006e;text-shadow:0 0 20px #ff006e,0 0 40px #ff006e">F</span><span style="color:#bf00ff;text-shadow:0 0 20px #bf00ff,0 0 40px #bf00ff">U</span><span style="color:#00fff0;text-shadow:0 0 20px #00fff0,0 0 40px #00fff0">R</span><span style="color:#ffee00;text-shadow:0 0 20px #ffee00,0 0 40px #ffee00">I</span><span style="color:#ff006e;text-shadow:0 0 20px #ff006e,0 0 40px #ff006e">O</span><span style="color:#bf00ff;text-shadow:0 0 20px #bf00ff,0 0 40px #bf00ff">U</span><span style="color:#00fff0;text-shadow:0 0 20px #00fff0,0 0 40px #00fff0">S</span><br><span style="color:#ffee00;text-shadow:0 0 20px #ffee00,0 0 40px #ffee00">D</span><span style="color:#ff006e;text-shadow:0 0 20px #ff006e,0 0 40px #ff006e">A</span><span style="color:#bf00ff;text-shadow:0 0 20px #bf00ff,0 0 40px #bf00ff">S</span><span style="color:#00fff0;text-shadow:0 0 20px #00fff0,0 0 40px #00fff0">H</span></div>
     <div class="game-subtitle">Hypercasual · Infinite</div>
     <div class="ship-preview" id="startShipEmoji">🚀</div>
     <div class="tap-hint">TAP TO START</div>
