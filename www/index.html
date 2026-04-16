@@ -3074,6 +3074,7 @@ let scorePhase = -1; // tracks last applied phase to detect changes
 let yupilandiaTriggered = false;
 let yupilandiaActive = false;
 let yupilandiaFrozen = false;
+let yupiNegativeTimer = null;
 let yupilandiaRainbowT = 0;
 let yupiVortexT = 0;
 let yupiVortexAnim = null;
@@ -3397,9 +3398,33 @@ function onChestCollected() {
   }
 }
 
+function stopYupiNegativeSounds() {
+  if (yupiNegativeTimer) { clearTimeout(yupiNegativeTimer); yupiNegativeTimer = null; }
+}
+
+function startYupiNegativeSounds() {
+  stopYupiNegativeSounds();
+  const sounds = [
+    () => AudioEngine.playCursedChest(),
+    () => AudioEngine.playDevilChest(),
+    () => AudioEngine.playCursedChestMax()
+  ];
+  let last = -1;
+  function scheduleNext() {
+    if (!yupilandiaActive) return;
+    let idx;
+    do { idx = Math.floor(Math.random() * sounds.length); } while (idx === last && sounds.length > 1);
+    last = idx;
+    sounds[idx]();
+    yupiNegativeTimer = setTimeout(scheduleNext, 500 + Math.random() * 1000);
+  }
+  scheduleNext();
+}
+
 function cancelYupilandia() {
   yupilandiaActive = false;
   yupilandiaFrozen = false;
+  stopYupiNegativeSounds();
   if (yupiVortexAnim) { cancelAnimationFrame(yupiVortexAnim); yupiVortexAnim = null; }
   yupiOverlay.classList.add('hidden');
   yupiVortexCanvas.classList.remove('show');
@@ -3460,6 +3485,7 @@ function triggerYupilandia() {
         spawnYupiChest();
 
         AudioEngine.startYupiMusic();
+        startYupiNegativeSounds();
 
         // After 5 seconds, countdown
         setTimeout(() => {
@@ -3478,6 +3504,7 @@ function triggerYupilandia() {
                   yupiVortexCanvas.classList.add('show');
                   animateVortex(true, null); // vortex out effect
                   AudioEngine.stopYupiMusic();
+                  stopYupiNegativeSounds();
                   flashScreen('#00fff0', 0.3);
 
                   setTimeout(() => {
@@ -3728,6 +3755,7 @@ function gameOver() {
   deathStreak++;
   // Cleanup YUPILANDIA if active
   yupilandiaActive=false; yupilandiaFrozen=false;
+  stopYupiNegativeSounds();
   if(yupiVortexAnim){cancelAnimationFrame(yupiVortexAnim);yupiVortexAnim=null;}
   yupiOverlay.classList.add('hidden');
   AudioEngine.stopYupiMusic();
