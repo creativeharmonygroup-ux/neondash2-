@@ -899,17 +899,6 @@
     background: #000; display: block; object-fit: cover;
   }
 
-  .replay-btn {
-    background: rgba(255,0,110,0.1); border: 2px solid var(--neon-pink);
-    color: var(--neon-pink); font-family: 'Orbitron', monospace;
-    font-size: 13px; font-weight: 900; letter-spacing: 4px;
-    padding: 12px 36px; border-radius: 50px; cursor: pointer;
-    pointer-events: all;
-    box-shadow: 0 0 20px rgba(255,0,110,0.3);
-    animation: btnFloat 3.6s ease-in-out infinite 0.4s;
-    transition: background 0.15s, transform 0.15s;
-  }
-  .replay-btn:active { background: var(--neon-pink); color: #020208; transform: scale(0.96); }
 
   .epic-moment-btn {
     background: rgba(255,102,0,0.1); border: 2px solid #ff6600;
@@ -1037,7 +1026,6 @@
     <div class="over-best" id="overBest">BEST: 0</div>
     <div class="over-coins-earned" id="overCoinsEarned">+0 \u25cf COINS</div>
     <div class="new-best-badge" id="newBestBadge">★ NEW RECORD ★</div>
-    <button class="replay-btn" id="replayBtn">▶ REPLAY</button>
     <button class="epic-moment-btn hidden" id="epicMomentBtn" style="display:none">🔥 EPIC MOMENT</button>
     <button class="revive-btn hidden" id="reviveBtn">📺 WATCH AD TO REVIVE</button>
     <button class="restart-btn" id="restartBtn">PLAY AGAIN</button>
@@ -1054,7 +1042,7 @@
 
   <!-- REPLAY OVERLAY -->
   <div id="replayOverlay" class="screen hidden">
-    <video id="replayVideo" playsinline muted autoplay loop></video>
+    <video id="replayVideo" playsinline webkit-playsinline muted autoplay loop></video>
     <button id="shareTiktokBtn">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
         <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.19 8.19 0 0 0 4.79 1.52V6.76a4.85 4.85 0 0 1-1.02-.07z"/>
@@ -3190,8 +3178,6 @@ function showCombo(n) { const el=document.getElementById('comboDisplay'); el.tex
 function showAchieve15() {
   const el=document.getElementById('achieve15'); el.classList.add('show');
   flashScreen('#00fff0',0.25); triggerShake(6);
-  reached8 = true;
-  MomentRecorder.capture(document.getElementById('gameCanvas'), 2000, blob => { momentBlob = blob; });
   setTimeout(()=>el.classList.remove('show'),2000);
 }
 function popScore() { const el=document.getElementById('scoreDisplay'); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(()=>el.classList.remove('pop'),150); }
@@ -3331,6 +3317,7 @@ function showYupiCountdownNum(n, onDone) {
 }
 
 function showStreakNotif(text, type) {
+  if (state !== 'playing') return;
   const el = document.getElementById('streakNotif');
   el.textContent = text;
   el.className = type;
@@ -3351,7 +3338,7 @@ function onChestCollected() {
     spawnParticles(player.x, player.y, '#ffee00', 12, 1.0);
     showStreakNotif('TRIPLE CHEST! 🔥', 'triple');
     hasEpicMoment = true; chestStreakReached3 = true;
-    EpicMomentRecorder.capture(canvas, 3000, blob => { epicMomentBlob = blob; });
+    if (epicMomentSupported) EpicMomentRecorder.capture(canvas, 3000, blob => { epicMomentBlob = blob; });
   } else if (chestStreak >= 4) {
     streakCoinMult = 4;
     streakCoinTimer = 300;
@@ -3362,7 +3349,7 @@ function onChestCollected() {
     spawnParticles(player.x, player.y, '#ff80ff', 22, 1.6);
     spawnParticles(player.x, player.y, '#ffffff', 15, 1.2);
     showStreakNotif('GODLIKE! 💥', 'godlike');
-    EpicMomentRecorder.capture(canvas, 3000, blob => { epicMomentBlob = blob; });
+    if (epicMomentSupported) EpicMomentRecorder.capture(canvas, 3000, blob => { epicMomentBlob = blob; });
   }
 }
 
@@ -3384,8 +3371,6 @@ function triggerYupilandia() {
   yupilandiaTriggered = true;
   yupilandiaFrozen = true;
   yupilandiaActive = false;
-  reached8 = true;
-  MomentRecorder.capture(document.getElementById('gameCanvas'), 2000, blob => { momentBlob = blob; });
 
   // Clear existing SPEED UP notification
   fluctNotif.classList.remove('show');
@@ -3421,6 +3406,7 @@ function triggerYupilandia() {
         yupilandiaFrozen = false;
         yupilandiaActive = true;
         barriers = []; // clear all barriers
+        YupiRecorder.capture(document.getElementById('gameCanvas'), 6000, blob => { yupilandiaBlob = blob; });
         targetSpeedMult = 3.6; // 50% faster than previous 2.4x
         targetSlowMoMult = 1.0;
         yupilandiaRainbowT = 0;
@@ -3640,8 +3626,8 @@ function startGame() {
   reviveUsed=false;
   document.getElementById('shieldChestHud').classList.add('hidden');
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
-  momentBlob=null; reached8=false; MomentRecorder.stop();
   epicMomentBlob=null; hasEpicMoment=false; chestStreakReached3=false; EpicMomentRecorder.stop();
+  yupilandiaBlob=null; YupiRecorder.stop();
 
   // Reset YUPILANDIA
   yupilandiaTriggered=false; yupilandiaActive=false; yupilandiaFrozen=false;
@@ -3664,10 +3650,8 @@ function startGame() {
   const rv = document.getElementById('replayVideo');
   rv.pause(); rv.src = '';
   document.getElementById('replayOverlay').classList.add('hidden');
-  Replay.reset();
   spawnBarrier();
   (function(){ var _w=currentWorldTheme().worldId; if(_w) AudioEngine.startWorldMusic(_w); else AudioEngine.startMusic(); })();
-  Replay.start(canvas);
 }
 
 function updateUI() {
@@ -3693,6 +3677,8 @@ function awardCoins(amount, x, y) {
 
 function gameOver() {
   state='dead'; player.dead=true;
+  const _sn = document.getElementById('streakNotif');
+  _sn.style.animation = 'none'; _sn.className = ''; _sn.textContent = '';
   chestStreak=0; streakCoinMult=1; streakCoinTimer=0;
   deathStreak++;
   // Cleanup YUPILANDIA if active
@@ -3700,7 +3686,6 @@ function gameOver() {
   if(yupiVortexAnim){cancelAnimationFrame(yupiVortexAnim);yupiVortexAnim=null;}
   yupiOverlay.classList.add('hidden');
   AudioEngine.stopYupiMusic();
-  const clipPromise = Replay.stop();
   AudioEngine.stopMusic(); AudioEngine.playDeath();
   flashScreen('#ff006e', 0.7); triggerShake(12);
   spawnParticles(player.x,player.y,'#ff006e',30,1.5);
@@ -3723,11 +3708,8 @@ function gameOver() {
   setTimeout(() => AudioEngine.playMockLaugh(), 400);
   document.getElementById('overBest').textContent = 'BEST: ' + save.best;
   document.getElementById('overCoinsEarned').textContent = `+${coinsThisRun + bonus} \u25cf COINS`;
-  clipPromise.then(blob => { lastClipBlob = blob; });
-  MomentRecorder.stop().then(blob => { if (blob) momentBlob = blob; });
   EpicMomentRecorder.stop().then(blob => { if (hasEpicMoment && blob) epicMomentBlob = blob; else epicMomentBlob = null; });
-  const share3btn = document.getElementById('share3pctBtn');
-  share3btn.classList.toggle('hidden', !reached8);
+  YupiRecorder.stop().then(blob => { if (blob) yupilandiaBlob = blob; else yupilandiaBlob = null; });
   document.getElementById('reviveBtn').classList.toggle('hidden', reviveUsed);
   const dsEl = document.getElementById('deathStreakMsg');
   dsEl.className = ''; dsEl.style.display = 'none';
@@ -3749,14 +3731,26 @@ function gameOver() {
     badge.style.display = 'none';
     if (newRecord) { void badge.offsetWidth; badge.style.display = 'block'; }
     if (!chestStreakReached3) epicMomentBlob = null;
-    console.log("epicMomentBlob:", epicMomentBlob, "chestStreak:", chestStreak);
+    console.log("epicMomentSupported:", epicMomentSupported, "epicMomentBlob:", epicMomentBlob, "chestStreak:", chestStreak);
     const epicBtn = document.getElementById('epicMomentBtn');
-    if (chestStreakReached3 && epicMomentBlob) {
+    if (!epicMomentSupported) {
+      console.log("EPIC MOMENT not available on this device");
+      epicBtn.style.display = 'none';
+      epicBtn.classList.add('hidden');
+    } else if (chestStreakReached3 && epicMomentBlob) {
       epicBtn.style.display = '';
       epicBtn.classList.remove('hidden');
     } else {
       epicBtn.style.display = 'none';
       epicBtn.classList.add('hidden');
+    }
+    const share3btn = document.getElementById('share3pctBtn');
+    if (yupilandiaBlob) {
+      share3btn.style.display = '';
+      share3btn.classList.remove('hidden');
+    } else {
+      share3btn.style.display = 'none';
+      share3btn.classList.add('hidden');
     }
     document.getElementById('gameOverScreen').classList.remove('hidden');
   }, 700);
@@ -6293,110 +6287,10 @@ loop();
   }, 2000);
 })();
 
-// ═══════════════════════════════════════════════
-//  REPLAY RECORDER  — rolling 5-second buffer
-// ═══════════════════════════════════════════════
-const Replay = (() => {
-  const CHUNK_MS = 500;
-  const MAX_CHUNKS = 7; // chunk[0]=EBML header + last 6 data chunks ≈ 3s
-
-  const MIMES = [
-    'video/webm;codecs=vp9',
-    'video/webm;codecs=vp8',
-    'video/webm',
-    'video/mp4'
-  ];
-
-  let recorder = null, chunks = [], mime = '';
-
-  function start(canvasEl) {
-    try {
-      chunks = [];
-      mime = MIMES.find(m => MediaRecorder.isTypeSupported(m)) || '';
-      const stream = canvasEl.captureStream(30);
-      const opts = { videoBitsPerSecond: 2_000_000 };
-      if (mime) opts.mimeType = mime;
-      recorder = new MediaRecorder(stream, opts);
-      recorder.ondataavailable = e => {
-        if (!e.data || e.data.size === 0) return;
-        chunks.push(e.data);
-        // Always keep chunk[0] (EBML/container header) + last MAX_CHUNKS-1 chunks
-        if (chunks.length > MAX_CHUNKS) {
-          chunks = [chunks[0], ...chunks.slice(-(MAX_CHUNKS - 1))];
-        }
-      };
-      recorder.start(CHUNK_MS);
-    } catch (err) {
-      recorder = null;
-    }
-  }
-
-  function stop() {
-    return new Promise(resolve => {
-      if (!recorder || recorder.state === 'inactive') { resolve(null); return; }
-      recorder.addEventListener('stop', () => {
-        const blob = chunks.length
-          ? new Blob(chunks, { type: mime || 'video/webm' })
-          : null;
-        resolve(blob);
-      }, { once: true });
-      recorder.stop();
-    });
-  }
-
-  function reset() {
-    try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch (_) {}
-    recorder = null; chunks = [];
-  }
-
-  return { start, stop, reset };
-})();
-
-let lastClipBlob = null;
-let momentBlob = null, reached8 = false, overlayBlob = null;
+let overlayBlob = null;
 let epicMomentBlob = null, hasEpicMoment = false, chestStreakReached3 = false;
-
-// ═══════════════════════════════════════════════
-//  MOMENT RECORDER  — captures the 3% slow-mo clip
-// ═══════════════════════════════════════════════
-const MomentRecorder = (() => {
-  const MIMES = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'];
-  let recorder = null, chunks = [], mime = '', autoTimer = null;
-
-  function start(canvasEl) {
-    if (recorder && recorder.state !== 'inactive') return;
-    chunks = [];
-    try {
-      mime = MIMES.find(m => MediaRecorder.isTypeSupported(m)) || '';
-      const stream = canvasEl.captureStream(30);
-      const opts = { videoBitsPerSecond: 3_000_000 };
-      if (mime) opts.mimeType = mime;
-      recorder = new MediaRecorder(stream, opts);
-      recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
-      recorder.start(100);
-    } catch(_) { recorder = null; }
-  }
-
-  function stop() {
-    return new Promise(resolve => {
-      if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
-      if (!recorder || recorder.state === 'inactive') { resolve(null); return; }
-      recorder.addEventListener('stop', () => {
-        const blob = chunks.length ? new Blob(chunks, { type: mime || 'video/webm' }) : null;
-        recorder = null; chunks = [];
-        resolve(blob);
-      }, { once: true });
-      recorder.stop();
-    });
-  }
-
-  function capture(canvasEl, ms, cb) {
-    start(canvasEl);
-    autoTimer = setTimeout(() => stop().then(cb), ms);
-  }
-
-  return { capture, stop };
-})();
+const epicMomentSupported = typeof MediaRecorder !== 'undefined';
+let yupilandiaBlob = null;
 
 // ═══════════════════════════════════════════════
 //  EPIC MOMENT RECORDER  — captures chest streak moments
@@ -6434,6 +6328,50 @@ const EpicMomentRecorder = (() => {
 
   function capture(canvasEl, ms, cb) {
     // Stop any in-progress capture before starting a new one
+    stop().then(() => {
+      start(canvasEl);
+      autoTimer = setTimeout(() => stop().then(blob => { if (blob) cb(blob); }), ms);
+    });
+  }
+
+  return { capture, stop };
+})();
+
+// ═══════════════════════════════════════════════
+//  YUPI RECORDER  — captures YUPILANDIA active phase
+// ═══════════════════════════════════════════════
+const YupiRecorder = (() => {
+  const MIMES = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'];
+  let recorder = null, chunks = [], mime = '', autoTimer = null;
+
+  function start(canvasEl) {
+    if (recorder && recorder.state !== 'inactive') return;
+    chunks = [];
+    try {
+      mime = MIMES.find(m => MediaRecorder.isTypeSupported(m)) || '';
+      const stream = canvasEl.captureStream(30);
+      const opts = { videoBitsPerSecond: 3_000_000 };
+      if (mime) opts.mimeType = mime;
+      recorder = new MediaRecorder(stream, opts);
+      recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+      recorder.start(100);
+    } catch(_) { recorder = null; }
+  }
+
+  function stop() {
+    return new Promise(resolve => {
+      if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+      if (!recorder || recorder.state === 'inactive') { resolve(null); return; }
+      recorder.addEventListener('stop', () => {
+        const blob = chunks.length ? new Blob(chunks, { type: mime || 'video/webm' }) : null;
+        recorder = null; chunks = [];
+        resolve(blob);
+      }, { once: true });
+      recorder.stop();
+    });
+  }
+
+  function capture(canvasEl, ms, cb) {
     stop().then(() => {
       start(canvasEl);
       autoTimer = setTimeout(() => stop().then(blob => { if (blob) cb(blob); }), ms);
@@ -6553,17 +6491,6 @@ function composeClip(sourceBlob) {
   });
 }
 
-// ── REPLAY button → show video overlay ──
-document.getElementById('replayBtn').addEventListener('click', e => {
-  e.stopPropagation();
-  if (!lastClipBlob) return;
-  overlayBlob = lastClipBlob;
-  const vid = document.getElementById('replayVideo');
-  vid.src = URL.createObjectURL(overlayBlob);
-  vid.play().catch(() => {});
-  document.getElementById('gameOverScreen').classList.add('hidden');
-  document.getElementById('replayOverlay').classList.remove('hidden');
-});
 
 // ── EPIC MOMENT button → show video overlay ──
 document.getElementById('epicMomentBtn').addEventListener('click', e => {
@@ -6572,6 +6499,7 @@ document.getElementById('epicMomentBtn').addEventListener('click', e => {
   overlayBlob = epicMomentBlob;
   const vid = document.getElementById('replayVideo');
   vid.src = URL.createObjectURL(overlayBlob);
+  vid.load();
   vid.play().catch(() => {});
   document.getElementById('gameOverScreen').classList.add('hidden');
   document.getElementById('replayOverlay').classList.remove('hidden');
@@ -6598,19 +6526,14 @@ document.getElementById('shareTiktokBtn').addEventListener('click', async () => 
   a.click();
 });
 
-// ── WOW TIKTOK MOMENT → composite overlays then show clip ──
-document.getElementById('share3pctBtn').addEventListener('click', async e => {
+// ── WOW TIKTOK MOMENT → play YUPILANDIA clip ──
+document.getElementById('share3pctBtn').addEventListener('click', e => {
   e.stopPropagation();
-  if (!momentBlob) return;
-  const btn = document.getElementById('share3pctBtn');
-  btn.textContent = '⏳ RENDERING...';
-  btn.disabled = true;
-  const composited = await composeClip(momentBlob);
-  btn.textContent = '🎬 WOW TIKTOK MOMENT';
-  btn.disabled = false;
-  overlayBlob = composited;
+  if (!yupilandiaBlob) return;
+  overlayBlob = yupilandiaBlob;
   const vid = document.getElementById('replayVideo');
   vid.src = URL.createObjectURL(overlayBlob);
+  vid.load();
   vid.play().catch(() => {});
   document.getElementById('gameOverScreen').classList.add('hidden');
   document.getElementById('replayOverlay').classList.remove('hidden');
