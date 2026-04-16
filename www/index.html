@@ -911,6 +911,18 @@
   }
   .replay-btn:active { background: var(--neon-pink); color: #020208; transform: scale(0.96); }
 
+  .epic-moment-btn {
+    background: rgba(255,102,0,0.1); border: 2px solid #ff6600;
+    color: #ff6600; font-family: 'Orbitron', monospace;
+    font-size: 13px; font-weight: 900; letter-spacing: 4px;
+    padding: 12px 36px; border-radius: 50px; cursor: pointer;
+    pointer-events: all;
+    box-shadow: 0 0 20px rgba(255,102,0,0.3);
+    animation: btnFloat 3.2s ease-in-out infinite 0.2s;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .epic-moment-btn:active { background: #ff6600; color: #020208; transform: scale(0.96); }
+
   #shareTiktokBtn {
     display: flex; align-items: center; justify-content: center; gap: 9px;
     width: 100%; max-width: 300px;
@@ -1026,6 +1038,7 @@
     <div class="over-coins-earned" id="overCoinsEarned">+0 \u25cf COINS</div>
     <div class="new-best-badge" id="newBestBadge">★ NEW RECORD ★</div>
     <button class="replay-btn" id="replayBtn">▶ REPLAY</button>
+    <button class="epic-moment-btn hidden" id="epicMomentBtn" style="display:none">🔥 EPIC MOMENT</button>
     <button class="revive-btn hidden" id="reviveBtn">📺 WATCH AD TO REVIVE</button>
     <button class="restart-btn" id="restartBtn">PLAY AGAIN</button>
     <button class="share3pct-btn hidden" id="share3pctBtn">🎬 WOW TIKTOK MOMENT</button>
@@ -3337,6 +3350,8 @@ function onChestCollected() {
     spawnParticles(player.x, player.y, '#ff6600', 20, 1.4);
     spawnParticles(player.x, player.y, '#ffee00', 12, 1.0);
     showStreakNotif('TRIPLE CHEST! 🔥', 'triple');
+    hasEpicMoment = true; chestStreakReached3 = true;
+    EpicMomentRecorder.capture(canvas, 3000, blob => { epicMomentBlob = blob; });
   } else if (chestStreak >= 4) {
     streakCoinMult = 4;
     streakCoinTimer = 300;
@@ -3347,6 +3362,7 @@ function onChestCollected() {
     spawnParticles(player.x, player.y, '#ff80ff', 22, 1.6);
     spawnParticles(player.x, player.y, '#ffffff', 15, 1.2);
     showStreakNotif('GODLIKE! 💥', 'godlike');
+    EpicMomentRecorder.capture(canvas, 3000, blob => { epicMomentBlob = blob; });
   }
 }
 
@@ -3625,6 +3641,7 @@ function startGame() {
   document.getElementById('shieldChestHud').classList.add('hidden');
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
   momentBlob=null; reached8=false; MomentRecorder.stop();
+  epicMomentBlob=null; hasEpicMoment=false; chestStreakReached3=false; EpicMomentRecorder.stop();
 
   // Reset YUPILANDIA
   yupilandiaTriggered=false; yupilandiaActive=false; yupilandiaFrozen=false;
@@ -3708,6 +3725,7 @@ function gameOver() {
   document.getElementById('overCoinsEarned').textContent = `+${coinsThisRun + bonus} \u25cf COINS`;
   clipPromise.then(blob => { lastClipBlob = blob; });
   MomentRecorder.stop().then(blob => { if (blob) momentBlob = blob; });
+  EpicMomentRecorder.stop().then(blob => { if (hasEpicMoment && blob) epicMomentBlob = blob; else epicMomentBlob = null; });
   const share3btn = document.getElementById('share3pctBtn');
   share3btn.classList.toggle('hidden', !reached8);
   document.getElementById('reviveBtn').classList.toggle('hidden', reviveUsed);
@@ -3730,6 +3748,16 @@ function gameOver() {
     const badge = document.getElementById('newBestBadge');
     badge.style.display = 'none';
     if (newRecord) { void badge.offsetWidth; badge.style.display = 'block'; }
+    if (!chestStreakReached3) epicMomentBlob = null;
+    console.log("epicMomentBlob:", epicMomentBlob, "chestStreak:", chestStreak);
+    const epicBtn = document.getElementById('epicMomentBtn');
+    if (chestStreakReached3 && epicMomentBlob) {
+      epicBtn.style.display = '';
+      epicBtn.classList.remove('hidden');
+    } else {
+      epicBtn.style.display = 'none';
+      epicBtn.classList.add('hidden');
+    }
     document.getElementById('gameOverScreen').classList.remove('hidden');
   }, 700);
 }
@@ -6270,7 +6298,7 @@ loop();
 // ═══════════════════════════════════════════════
 const Replay = (() => {
   const CHUNK_MS = 500;
-  const MAX_CHUNKS = 11; // chunk[0]=EBML header + last 10 data chunks ≈ 5s
+  const MAX_CHUNKS = 7; // chunk[0]=EBML header + last 6 data chunks ≈ 3s
 
   const MIMES = [
     'video/webm;codecs=vp9',
@@ -6326,6 +6354,7 @@ const Replay = (() => {
 
 let lastClipBlob = null;
 let momentBlob = null, reached8 = false, overlayBlob = null;
+let epicMomentBlob = null, hasEpicMoment = false, chestStreakReached3 = false;
 
 // ═══════════════════════════════════════════════
 //  MOMENT RECORDER  — captures the 3% slow-mo clip
@@ -6364,6 +6393,51 @@ const MomentRecorder = (() => {
   function capture(canvasEl, ms, cb) {
     start(canvasEl);
     autoTimer = setTimeout(() => stop().then(cb), ms);
+  }
+
+  return { capture, stop };
+})();
+
+// ═══════════════════════════════════════════════
+//  EPIC MOMENT RECORDER  — captures chest streak moments
+// ═══════════════════════════════════════════════
+const EpicMomentRecorder = (() => {
+  const MIMES = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'];
+  let recorder = null, chunks = [], mime = '', autoTimer = null;
+
+  function start(canvasEl) {
+    if (recorder && recorder.state !== 'inactive') return;
+    chunks = [];
+    try {
+      mime = MIMES.find(m => MediaRecorder.isTypeSupported(m)) || '';
+      const stream = canvasEl.captureStream(30);
+      const opts = { videoBitsPerSecond: 3_000_000 };
+      if (mime) opts.mimeType = mime;
+      recorder = new MediaRecorder(stream, opts);
+      recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+      recorder.start(100);
+    } catch(_) { recorder = null; }
+  }
+
+  function stop() {
+    return new Promise(resolve => {
+      if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+      if (!recorder || recorder.state === 'inactive') { resolve(null); return; }
+      recorder.addEventListener('stop', () => {
+        const blob = chunks.length ? new Blob(chunks, { type: mime || 'video/webm' }) : null;
+        recorder = null; chunks = [];
+        resolve(blob);
+      }, { once: true });
+      recorder.stop();
+    });
+  }
+
+  function capture(canvasEl, ms, cb) {
+    // Stop any in-progress capture before starting a new one
+    stop().then(() => {
+      start(canvasEl);
+      autoTimer = setTimeout(() => stop().then(blob => { if (blob) cb(blob); }), ms);
+    });
   }
 
   return { capture, stop };
@@ -6484,6 +6558,18 @@ document.getElementById('replayBtn').addEventListener('click', e => {
   e.stopPropagation();
   if (!lastClipBlob) return;
   overlayBlob = lastClipBlob;
+  const vid = document.getElementById('replayVideo');
+  vid.src = URL.createObjectURL(overlayBlob);
+  vid.play().catch(() => {});
+  document.getElementById('gameOverScreen').classList.add('hidden');
+  document.getElementById('replayOverlay').classList.remove('hidden');
+});
+
+// ── EPIC MOMENT button → show video overlay ──
+document.getElementById('epicMomentBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  if (!epicMomentBlob) return;
+  overlayBlob = epicMomentBlob;
   const vid = document.getElementById('replayVideo');
   vid.src = URL.createObjectURL(overlayBlob);
   vid.play().catch(() => {});
