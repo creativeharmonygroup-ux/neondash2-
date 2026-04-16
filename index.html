@@ -2266,6 +2266,50 @@ const AudioEngine = (() => {
     [0, 0.06, 0.14].forEach(dt => playNoise(t + dt, 0.18, 0.30 - dt));
   }
 
+  function playCursedChestMax() {
+    // Same sounds as playCursedChest but routed through a 2x boost node
+    init(); resume();
+    if(!ctx||muted) return;
+    const t = ctx.currentTime;
+    const boost = ctx.createGain();
+    boost.gain.value = 2.0;
+    boost.connect(masterGain);
+
+    // White noise impact
+    const nlen = Math.floor(ctx.sampleRate * 0.08);
+    const nbuf = ctx.createBuffer(1, nlen, ctx.sampleRate);
+    const nd = nbuf.getChannelData(0); for(let i=0;i<nlen;i++) nd[i]=Math.random()*2-1;
+    const nSrc=ctx.createBufferSource(), nFlt=ctx.createBiquadFilter(), nG=ctx.createGain();
+    nFlt.type='bandpass'; nFlt.frequency.value=200; nFlt.Q.value=0.5;
+    nG.gain.setValueAtTime(0.55,t); nG.gain.exponentialRampToValueAtTime(0.001,t+0.08);
+    nSrc.buffer=nbuf; nSrc.connect(nFlt); nFlt.connect(nG); nG.connect(boost);
+    nSrc.start(t); nSrc.stop(t+0.08);
+
+    // Dissonant cluster
+    [[880,831],[1109,1047],[1397,1319]].forEach(([f1,f2],i)=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.type='sawtooth';
+      o.frequency.setValueAtTime(f1,t); o.frequency.linearRampToValueAtTime(f2,t+0.18);
+      g.gain.setValueAtTime(0.22-i*0.04,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.22);
+      o.connect(g); g.connect(boost); o.start(t); o.stop(t+0.25);
+    });
+
+    // Shriek
+    const shriek=ctx.createOscillator(), shriekG=ctx.createGain();
+    shriek.type='sawtooth';
+    shriek.frequency.setValueAtTime(1600,t+0.01); shriek.frequency.exponentialRampToValueAtTime(120,t+0.35);
+    shriekG.gain.setValueAtTime(0,t); shriekG.gain.linearRampToValueAtTime(0.38,t+0.015);
+    shriekG.gain.exponentialRampToValueAtTime(0.001,t+0.38);
+    shriek.connect(shriekG); shriekG.connect(boost); shriek.start(t+0.01); shriek.stop(t+0.40);
+
+    // Sub thud
+    const thud=ctx.createOscillator(), thudG=ctx.createGain();
+    thud.type='sine';
+    thud.frequency.setValueAtTime(120,t); thud.frequency.exponentialRampToValueAtTime(35,t+0.20);
+    thudG.gain.setValueAtTime(0.5,t); thudG.gain.exponentialRampToValueAtTime(0.001,t+0.22);
+    thud.connect(thudG); thudG.connect(boost); thud.start(t); thud.stop(t+0.25);
+  }
+
   function setMusicPhase(p) {} // no-op — single energetic track
 
   // ── YUPILANDIA: 180 BPM BERLIN TECHNO — four-on-the-floor, claps, fast hats ──
@@ -2978,7 +3022,7 @@ const AudioEngine = (() => {
     playNoise(t+0.08, 0.38, 0.18);
   }
 
-  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCoinShield, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic, playShieldActivate, playShieldAbsorb, playShieldImpact, playShieldBreak, playTripleChest, playGodlike, playViolin, playClown, playEpicFail, playFanfare };
+  return { init, resume, setMuted, isMuted, playJump, playScore, playCoin, playCoinShield, playCombo, playSpeedUp, playDeath, playNewRecord, playUnlock, playLocked, playMockLaugh, playTreasure, playLegendary, playNearMiss, playSurprise, playCursedChest, playDevilChest, playSupremeChest, playEpicChest, startMusic, stopMusic, setMusicPhase, startYupiMusic, stopYupiMusic, playYupiEntrance, playHangarOpen, playHangarClose, playShopOpen, startHangarMusic, stopHangarMusic, playMissionAccepted, playMissionAborted, startWorldMusic, stopWorldMusic, playShieldActivate, playShieldAbsorb, playShieldImpact, playShieldBreak, playTripleChest, playGodlike, playViolin, playClown, playEpicFail, playFanfare, playCursedChestMax };
 })();
 
 // iOS Safari: unlock AudioContext on first user touch (required before any sound can play)
@@ -3672,6 +3716,7 @@ function awardCoins(amount, x, y) {
   updateCoinHud();
   popCoin();
   if (shieldOn) AudioEngine.playCoinShield(); else AudioEngine.playCoin();
+  if (yupilandiaActive) AudioEngine.playCursedChestMax();
   if (x !== undefined) showCoinFloat(x, y, amount);
 }
 
