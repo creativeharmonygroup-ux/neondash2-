@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FURIOUS DASH — 12 Mundos. 1 Nave. Infinitas Vidas.</title>
+<title>FURIOUS DASH — 10 Worlds. 1 Ship. Infinite Lives.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Fallback mientras carga la fuente */
+/* Fallback while font loads */
 @font-face {
   font-family: 'Orbitron';
   font-style: normal;
@@ -98,7 +98,7 @@ nav{
 .btn-and{background:rgba(0,255,136,0.08);color:var(--c7);border:2px solid var(--c7);}
 .btn-and:hover{background:var(--c7);color:#020208;}
 
-/* MUNDOS */
+/* WORLDS */
 .mundos-sec{background:#020208;padding:70px 0 0;}
 .mundos-head{text-align:center;padding:0 24px 40px;}
 .mundos-tag{
@@ -138,7 +138,7 @@ nav{
 }
 .card:hover .card-border{opacity:0.6;}
 
-/* El contenido con altura fija para cada elemento */
+/* Fixed height content for each element */
 .card-body{
   position:absolute;inset:0;
   display:flex;flex-direction:column;
@@ -227,12 +227,12 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
 .footer-links a:hover{color:var(--c1);}
 .footer-copy{font-size:9px;color:#4a5568;letter-spacing:1px;}
 
-/* LETRAS INTERACTIVAS */
+/* INTERACTIVE LETTERS */
 .letter{
   display:inline-block;cursor:pointer;
   position:relative;
 }
-/* Cada letra flota a su propio ritmo */
+/* Each letter floats at its own rhythm */
 .n {animation:letterFloat 3.0s ease-in-out infinite;}
 .e {animation:letterFloat 3.4s ease-in-out infinite 0.3s;}
 .o {animation:letterFloat 2.8s ease-in-out infinite 0.6s;}
@@ -247,7 +247,7 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
   50%{transform:translateY(-18px);}
 }
 
-/* Glow pulsante suave */
+/* Soft pulsing glow */
 .n {text-shadow:0 0 40px var(--c1);filter:drop-shadow(0 0 8px var(--c1));}
 .e {text-shadow:0 0 40px var(--c2);filter:drop-shadow(0 0 8px var(--c2));}
 .o {text-shadow:0 0 40px var(--c3);filter:drop-shadow(0 0 8px var(--c3));}
@@ -257,7 +257,7 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
 .s {text-shadow:0 0 40px var(--c11);filter:drop-shadow(0 0 8px var(--c11));}
 .h {text-shadow:0 0 40px var(--c12);filter:drop-shadow(0 0 8px var(--c12));}
 
-/* Hover — sube más y brilla más */
+/* Hover — rises more and shines more */
 .letter:hover{
   filter:brightness(1.5) drop-shadow(0 0 20px currentColor);
   animation-play-state:paused;
@@ -350,7 +350,7 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
 }
 .demo-replay:hover{color:white;}
 
-/* EXPLORARLOS FLOTANTE */
+/* EXPLORETHEM FLOATING */
 .float-word{display:inline-flex;flex-wrap:wrap;justify-content:center;}
 .fl{
   display:inline-block;
@@ -402,11 +402,11 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
 
 <nav>
   <a href="#" class="logo">FURIOUS DASH</a>
-  <a href="#download" class="nav-btn">DESCARGAR</a>
+  <a href="#download" class="nav-btn">DOWNLOAD</a>
 </nav>
 
 <section class="hero">
-  <p class="hero-label">12 MUNDOS · 12 NAVES · INFINITAS PARTIDAS</p>
+  <p class="hero-label">10 WORLDS · 10 SHIPS · INFINITE RUNS</p>
   <h1 class="hero-title"><span class="n letter">N</span><span class="e letter">E</span><span class="o letter">O</span><span class="n2 letter">N</span><br><span class="d letter">D</span><span class="a letter">A</span><span class="s letter">S</span><span class="h letter">H</span></h1>
   <p class="hero-sub">HYPERCASUAL · INFINITE · FREE</p>
   <div class="hero-naves"><span>🚀</span><span>🛸</span><span>🔥</span><span>⭐</span><span>⚡</span><span>👑</span></div>
@@ -419,9 +419,9 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
 <!-- DEMO JUGABLE -->
 <section class="demo-sec reveal">
   <div class="demo-header">
-    <div class="demo-tag">🎮 PRUÉBALO AHORA</div>
-    <h2 class="demo-title">30 SEGUNDOS.<br><em>¿PUEDES CON ELLO?</em></h2>
-    <p class="demo-desc">Demo gratuita — sin descargar nada.</p>
+    <div class="demo-tag">🎮 TRY IT NOW</div>
+    <h2 class="demo-title">30 SECONDS.<br><em>CAN YOU HANDLE IT?</em></h2>
+    <p class="demo-desc">Free demo — no download needed.</p>
   </div>
   <div class="demo-wrap">
     <div class="demo-timer-bar"><div class="demo-timer-fill" id="timerFill"></div></div>
@@ -430,80 +430,84 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
     <div class="demo-start" id="demoStart">
       <div class="demo-start-icon">🚀</div>
       <div class="demo-start-title">FURIOUS DASH</div>
-      <div class="demo-start-sub">60 SEGUNDOS · DEMO GRATUITA<br>TAP PARA VOLAR</div>
-      <button class="demo-start-btn" id="demoStartBtn">⚡ JUGAR AHORA</button>
+      <div class="demo-start-sub">60 SECONDS · FREE DEMO<br>TAP TO FLY</div>
+      <button class="demo-start-btn" id="demoStartBtn">⚡ PLAY NOW</button>
     </div>
     <div class="demo-end" id="demoEnd">
       <div class="demo-end-emoji">🔥</div>
-      <div class="demo-end-title">¿TE HA ENGANCHADO?</div>
-      <div class="demo-end-sub">Descárgalo gratis y desbloquea<br>12 naves · 12 mundos · sin límite de tiempo</div>
+      <div class="demo-end-title">HOOKED?</div>
+      <div class="demo-end-sub">Download free and unlock<br>10 ships · 10 worlds · no time limit</div>
       <div class="demo-end-btns">
         <a href="#" class="demo-end-dl btn-ios">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.37c1.29.07 2.18.74 2.93.8 1.12-.21 2.18-.91 3.39-.84 1.44.12 2.52.7 3.22 1.75-2.96 1.8-2.46 5.77.46 7.2zm-3.31-15.2c.08 2.38-2.11 4.24-4.33 4.01-.29-2.13 1.84-4.13 4.33-4.01z"/></svg>
-          APP STORE — GRATIS
+          APP STORE — FREE
         </a>
         <a href="#" class="demo-end-dl btn-and">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.65.18.96.04l13.34-7.44-2.97-2.97-11.33 10.37zm-1.1-20.1c-.06.2-.08.43-.08.67v19.34c0 .24.02.47.08.67l.08.08 10.83-10.83v-.26L2.16 3.58l-.08.08zM20.54 10.8l-2.96-1.65-3.15 3.15 3.15 3.15 3-1.68c.86-.48.86-1.27-.04-1.97zM4.14.32L17.48 7.8 14.51 10.77 3.18.4C3.5.23 3.86.22 4.14.4z"/></svg>
-          GOOGLE PLAY — GRATIS
+          GOOGLE PLAY — FREE
         </a>
-        <button class="demo-replay" id="demoReplay">↺ VOLVER A JUGAR</button>
+        <button class="demo-replay" id="demoReplay">↺ PLAY AGAIN</button>
       </div>
     </div>
   </div>
 </section>
 
 <section class="mundos-sec">
-    <div class="mundos-tag">🌍 LOS 12 MUNDOS</div>
-    <h2 class="mundos-titulo">CADA NAVE.<br>UN UNIVERSO.</h2>
-    <p class="mundos-desc">Desbloquea naves y entra en mundos únicos.</p>
+    <div class="mundos-tag">🌍 THE 10 WORLDS</div>
+    <h2 class="mundos-titulo">EVERY SHIP.<br>A UNIVERSE.</h2>
+    <p class="mundos-desc">Unlock ships and enter unique worlds.</p>
   </div>
   <div class="grid">
-    <div class="card" style="--cc:var(--c1);--fd:3.0s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🚀</div><div class="card-nombre">DEEP SPACE</div><div class="card-precio">GRATIS</div></div></div>
-    <div class="card" style="--cc:var(--c2);--fd:3.4s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🛸</div><div class="card-nombre">VOID REALM</div><div class="card-precio">● 50</div></div></div>
-    <div class="card" style="--cc:var(--c3);--fd:2.8s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🔥</div><div class="card-nombre">FIRE CORE</div><div class="card-precio">● 80</div></div></div>
-    <div class="card" style="--cc:var(--c4);--fd:3.2s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">👻</div><div class="card-nombre">GHOST PLANE</div><div class="card-precio">● 100</div></div></div>
-    <div class="card" style="--cc:var(--c5);--fd:3.6s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">⭐</div><div class="card-nombre">SOLAR FLARE</div><div class="card-precio">● 150</div></div></div>
-    <div class="card" style="--cc:var(--c6);--fd:2.6s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🌊</div><div class="card-nombre">DEEP ABYSS</div><div class="card-precio">● 200</div></div></div>
-    <div class="card" style="--cc:var(--c7);--fd:3.1s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">⚡</div><div class="card-nombre">STORM ZONE</div><div class="card-precio">● 300</div></div></div>
-    <div class="card" style="--cc:var(--c8);--fd:3.8s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">☠️</div><div class="card-nombre">TOXIC WASTE</div><div class="card-precio">● 350</div></div></div>
-    <div class="card" style="--cc:var(--c9);--fd:2.9s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🌸</div><div class="card-nombre">DREAM FIELD</div><div class="card-precio">● 400</div></div></div>
-    <div class="card" style="--cc:var(--c10);--fd:3.3s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🔱</div><div class="card-nombre">TITAN BELT</div><div class="card-precio">● 500</div></div></div>
-    <div class="card" style="--cc:var(--c11);--fd:3.5s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🌑</div><div class="card-nombre">DARK MATTER</div><div class="card-precio">● 700</div></div></div>
-    <div class="card xl" style="--cc:var(--c12);--fd:4.0s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">👑</div><div class="card-nombre" style="background:linear-gradient(135deg,var(--c1),var(--c5),var(--c12));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">LEGEND REALM</div><div class="card-precio" style="--cc:var(--c12)">● 999 MONEDAS</div></div></div>
+    <div class="card" style="--cc:var(--c1);--fd:3.0s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🏎️</div><div class="card-nombre">TURBO</div><div class="card-precio">FREE</div></div></div>
+    <div class="card" style="--cc:var(--c2);--fd:3.4s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🦕</div><div class="card-nombre">PREHISTORIC</div><div class="card-precio">🪙 5,000</div></div></div>
+    <div class="card" style="--cc:var(--c3);--fd:2.8s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">⚡</div><div class="card-nombre">NITRO</div><div class="card-precio">🪙 10,000</div></div></div>
+    <div class="card" style="--cc:var(--c4);--fd:3.2s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">💎</div><div class="card-nombre">VEYRON</div><div class="card-precio">🪙 18,000</div></div></div>
+    <div class="card" style="--cc:var(--c5);--fd:3.6s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🐂</div><div class="card-nombre">RAGING BULL</div><div class="card-precio">🪙 30,000</div></div></div>
+    <div class="card" style="--cc:var(--c6);--fd:2.6s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🤖</div><div class="card-nombre">MACHINE WAR</div><div class="card-precio">PREMIUM</div></div></div>
+    <div class="card" style="--cc:var(--c7);--fd:3.1s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🔷</div><div class="card-nombre">THE GRID</div><div class="card-precio">PREMIUM</div></div></div>
+    <div class="card" style="--cc:var(--c8);--fd:3.8s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🖤</div><div class="card-nombre">OBSIDIAN</div><div class="card-precio">PREMIUM</div></div></div>
+    <div class="card" style="--cc:var(--c9);--fd:2.9s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🏁</div><div class="card-nombre">SCUDERIA</div><div class="card-precio">PREMIUM</div></div></div>
+    <div class="card xl" style="--cc:var(--c12);--fd:4.0s"><div class="card-bg"></div><div class="card-lines"></div><div class="card-border"></div><div class="card-body"><div class="card-emoji">🔱</div><div class="card-nombre" style="background:linear-gradient(135deg,var(--c1),var(--c5),var(--c12));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">TRIDENTE</div><div class="card-precio">PREMIUM</div></div></div>
   </div>
 </section>
 
 <div class="stats reveal">
-  <div class="stat"><span class="stat-n" style="color:var(--c1)">50K+</span><span class="stat-l">DESCARGAS</span></div>
-  <div class="stat"><span class="stat-n" style="color:var(--c5)">12</span><span class="stat-l">NAVES ÚNICAS</span></div>
-  <div class="stat"><span class="stat-n" style="color:var(--c7)">12</span><span class="stat-l">MUNDOS NEÓN</span></div>
-  <div class="stat"><span class="stat-n" style="color:var(--c12)">4.9★</span><span class="stat-l">VALORACIÓN</span></div>
+  <div class="stat"><span class="stat-n" style="color:var(--c1)">50K+</span><span class="stat-l">DOWNLOADS</span></div>
+  <div class="stat"><span class="stat-n" style="color:var(--c5)">10</span><span class="stat-l">UNIQUE SHIPS</span></div>
+  <div class="stat"><span class="stat-n" style="color:var(--c7)">10</span><span class="stat-l">NEON WORLDS</span></div>
+  <div class="stat"><span class="stat-n" style="color:var(--c12)">4.9★</span><span class="stat-l">RATING</span></div>
 </div>
 
 <section class="features">
-  <h2 class="sec-title reveal">POR QUÉ ES <em>ADICTIVO</em></h2>
-  <div class="feat reveal" style="--ft:var(--c1)"><div class="feat-ico">🎮</div><div><div class="feat-tit">UN SOLO TAP</div><div class="feat-desc">Mecánica perfectamente calibrada. Fácil de aprender, imposible de dominar.</div><span class="feat-tag">CORE GAMEPLAY</span></div></div>
-  <div class="feat reveal" style="--ft:var(--c3)"><div class="feat-ico">🌍</div><div><div class="feat-tit">12 MUNDOS ÚNICOS</div><div class="feat-desc">Cada nave desbloquea un mundo visual distinto con música y partículas propias.</div><span class="feat-tag">WORLDS</span></div></div>
-  <div class="feat reveal" style="--ft:var(--c5)"><div class="feat-ico">💛</div><div><div class="feat-tit">ECONOMÍA DE MONEDAS</div><div class="feat-desc">Recoge monedas en vuelo. Desbloquea naves. Siempre hay un objetivo.</div><span class="feat-tag">PROGRESSION</span></div></div>
-  <div class="feat reveal" style="--ft:var(--c7)"><div class="feat-ico">🔥</div><div><div class="feat-tit">RACHA DIARIA</div><div class="feat-desc">Juega cada día. Mantén tu racha. La adicción tiene nombre.</div><span class="feat-tag">RETENTION</span></div></div>
-  <div class="feat reveal" style="--ft:var(--c9)"><div class="feat-ico">🎵</div><div><div class="feat-tit">AUDIO ÉPICO</div><div class="feat-desc">Música chiptune y efectos de CoD al desbloquear. Ponle los cascos.</div><span class="feat-tag">AUDIO</span></div></div>
-  <div class="feat reveal" style="--ft:var(--c12)"><div class="feat-ico">📊</div><div><div class="feat-tit">COMPARTE EN TIKTOK</div><div class="feat-desc">Genera tu card personalizada con tu nave y stats. Viral desde el día uno.</div><span class="feat-tag">SOCIAL</span></div></div>
+  <h2 class="sec-title reveal">WHY IS IT <em>ADDICTIVE</em></h2>
+  <div class="feat reveal" style="--ft:var(--c1)"><div class="feat-ico">😂</div><div><div class="feat-tit">IT ROASTS YOU WHEN YOU DIE</div><div class="feat-desc">Random death phrases hit different. "EVEN YOUR GRANDMA FLIES BETTER." "0 TALENT DETECTED." You will scream. You will replay.</div><span class="feat-tag">HUMILIATION ENGINE</span></div></div>
+  <div class="feat reveal" style="--ft:var(--c3)"><div class="feat-ico">🌀</div><div><div class="feat-tit">YUPILANDIA — THE CURSED BONUS WORLD</div><div class="feat-desc">Hit the secret trigger and get sucked into YUPILANDIA. Coins rain. Chaos reigns. Cursed sounds blast at full volume. You collect everything — and the game punishes you for it. Absolutely unhinged.</div><span class="feat-tag">SECRET WORLD</span></div></div>
+  <div class="feat reveal" style="--ft:var(--c5)"><div class="feat-ico">🟣</div><div><div class="feat-tit">PURPLE SHIELD = COINS × 2</div><div class="feat-desc">Grab the shield. Every coin doubles. Risk flying closer to barriers. Is the greed worth it? Always.</div><span class="feat-tag">RISK / REWARD</span></div></div>
+  <div class="feat reveal" style="--ft:var(--c7)"><div class="feat-ico">💀</div><div><div class="feat-tit">TRAP CHEST — INSTANT DEATH</div><div class="feat-desc">That glowing chest looks tempting. It kills you instantly. Every. Single. Time. And you'll touch it again anyway.</div><span class="feat-tag">TRAP MECHANIC</span></div></div>
+  <div class="feat reveal" style="--ft:var(--c9)"><div class="feat-ico">🤡</div><div><div class="feat-tit">DEATH STREAK INSULTS</div><div class="feat-desc">Die multiple times in a row and the game calls you out. SKILL ISSUE. LEGENDARY LOSER. The screen flashes. Your pride shatters. You keep playing.</div><span class="feat-tag">PSYCHOLOGICAL WARFARE</span></div></div>
+  <div class="feat reveal" style="--ft:var(--c12)"><div class="feat-ico">🔥</div><div><div class="feat-tit">CHEST STREAK → GODLIKE</div><div class="feat-desc">Chain 3+ chests without dying and the screen erupts. GODLIKE. Screen shake. Neon explosion. And it records it automatically for you to share.</div><span class="feat-tag">EPIC MOMENT</span></div></div>
+  <div class="feat reveal" style="--ft:var(--c2)"><div class="feat-ico">📹</div><div><div class="feat-tit">EPIC MOMENT AUTO-RECORDING</div><div class="feat-desc">Hit a GODLIKE streak? The game already recorded it. Open game over. Tap EPIC MOMENT. Watch your glory. Share it to TikTok before your hands stop shaking.</div><span class="feat-tag">VIRAL CONTENT</span></div></div>
+  <div class="feat reveal" style="--ft:var(--c4)"><div class="feat-ico">📺</div><div><div class="feat-tit">WATCH AN AD. COME BACK FROM THE DEAD.</div><div class="feat-desc">One ad = one second chance. Your best run ever is on the line. You know you're watching it.</div><span class="feat-tag">SECOND CHANCE</span></div></div>
+  <div class="feat reveal" style="--ft:var(--c6)"><div class="feat-ico">⚡</div><div><div class="feat-tit">PROGRESSIVE SPEED SYSTEM</div><div class="feat-desc">The longer you survive, the faster it gets. No ceiling. No mercy. Just raw escalating chaos until you inevitably explode.</div><span class="feat-tag">INFINITE DIFFICULTY</span></div></div>
+  <div class="feat reveal" style="--ft:var(--c8)"><div class="feat-ico">🌍</div><div><div class="feat-tit">10 WORLDS. EACH ONE HARDER.</div><div class="feat-desc">Each world is a new visual universe with its own music, particles, and physics feel. Unlock them all. Flex them all.</div><span class="feat-tag">PROGRESSION</span></div></div>
+  <div class="feat reveal" style="--ft:var(--c10)"><div class="feat-ico">✈️</div><div><div class="feat-tit">OFFLINE. ANYWHERE. NO EXCUSES.</div><div class="feat-desc">No internet required. Plane mode, subway, middle of nowhere. Furious Dash goes everywhere you go.</div><span class="feat-tag">ALWAYS AVAILABLE</span></div></div>
+  <div class="feat reveal" style="--ft:var(--c11)"><div class="feat-ico">💰</div><div><div class="feat-tit">COIN PACKS &amp; PREMIUM WORLDS</div><div class="feat-desc">Grind coins in-game or go fast with packs. Premium worlds are waiting — and they look absolutely insane.</div><span class="feat-tag">MONETIZATION</span></div></div>
 </section>
 
 <section class="reviews">
-  <h2 class="sec-title reveal">LO QUE DICEN<br><em style="font-style:normal;color:var(--c12)">LOS JUGADORES</em></h2>
-  <div class="rev reveal" style="--rc:var(--c1)"><div class="rev-stars">★★★★★</div><p class="rev-txt">"Llevo 3 horas sin poder parar. Mi jefe me ha llamado dos veces. No me arrepiento."</p><div class="rev-autor"><div class="rev-av">🎮</div><div><div class="rev-nom">Carlos M.</div><div class="rev-hnd">@carlosgamer_mx</div></div></div></div>
-  <div class="rev reveal" style="--rc:var(--c3)"><div class="rev-stars">★★★★★</div><p class="rev-txt">"El mundo INFERNO es una locura. Y cuando desbloqueas LEGEND... madre mía. 10/10."</p><div class="rev-autor"><div class="rev-av">🚀</div><div><div class="rev-nom">Ana R.</div><div class="rev-hnd">@ana_plays_es</div></div></div></div>
-  <div class="rev reveal" style="--rc:var(--c5)"><div class="rev-stars">★★★★★</div><p class="rev-txt">"Tengo 47 días de racha. No voy a romperla. Este juego me ha cambiado la vida."</p><div class="rev-autor"><div class="rev-av">⚡</div><div><div class="rev-nom">Diego P.</div><div class="rev-hnd">@diegopro_arg</div></div></div></div>
-  <div class="rev reveal" style="--rc:var(--c12)"><div class="rev-stars">★★★★★</div><p class="rev-txt">"Ahorré 999 monedas para la LEGEND. Cuando vi el mundo rainbow me quedé sin palabras."</p><div class="rev-autor"><div class="rev-av">👑</div><div><div class="rev-nom">Mateo V.</div><div class="rev-hnd">@mateogames_cl</div></div></div></div>
+  <h2 class="sec-title reveal">WHAT<br><em style="font-style:normal;color:var(--c12)">PLAYERS SAY</em></h2>
+  <div class="rev reveal" style="--rc:var(--c1)"><div class="rev-stars">★★★★★</div><p class="rev-txt">"I've been playing for 3 hours and can't stop. My boss called twice. No regrets."</p><div class="rev-autor"><div class="rev-av">🎮</div><div><div class="rev-nom">Carlos M.</div><div class="rev-hnd">@carlosgamer_mx</div></div></div></div>
+  <div class="rev reveal" style="--rc:var(--c3)"><div class="rev-stars">★★★★★</div><p class="rev-txt">"The INFERNO world is insane. And when you unlock LEGEND... oh my god. 10/10."</p><div class="rev-autor"><div class="rev-av">🚀</div><div><div class="rev-nom">Ana R.</div><div class="rev-hnd">@ana_plays_es</div></div></div></div>
+  <div class="rev reveal" style="--rc:var(--c5)"><div class="rev-stars">★★★★★</div><p class="rev-txt">"I have a 47-day streak. I'm not breaking it. This game changed my life."</p><div class="rev-autor"><div class="rev-av">⚡</div><div><div class="rev-nom">Diego P.</div><div class="rev-hnd">@diegopro_arg</div></div></div></div>
+  <div class="rev reveal" style="--rc:var(--c12)"><div class="rev-stars">★★★★★</div><p class="rev-txt">"Saved 999 coins for LEGEND. When I saw the rainbow world I was speechless."</p><div class="rev-autor"><div class="rev-av">👑</div><div><div class="rev-nom">Mateo V.</div><div class="rev-hnd">@mateogames_cl</div></div></div></div>
 </section>
 
 <section class="cta">
   <div class="cta-dots">
     <div class="dot" style="background:var(--c1)"></div><div class="dot" style="background:var(--c2)"></div><div class="dot" style="background:var(--c3)"></div><div class="dot" style="background:var(--c4)"></div><div class="dot" style="background:var(--c5)"></div><div class="dot" style="background:var(--c6)"></div><div class="dot" style="background:var(--c7)"></div><div class="dot" style="background:var(--c8)"></div><div class="dot" style="background:var(--c9)"></div><div class="dot" style="background:var(--c10)"></div><div class="dot" style="background:var(--c11)"></div><div class="dot" style="background:var(--c12)"></div>
   </div>
-  <h2 class="cta-title reveal">¿LISTO PARA<br><span class="float-word"><span class="fl" style="--fd:3.0s;--fc:var(--c1)">E</span><span class="fl" style="--fd:2.7s;--fc:var(--c7)">X</span><span class="fl" style="--fd:3.3s;--fc:var(--c5)">P</span><span class="fl" style="--fd:2.9s;--fc:var(--c3)">L</span><span class="fl" style="--fd:3.5s;--fc:var(--c9)">O</span><span class="fl" style="--fd:2.8s;--fc:var(--c2)">R</span><span class="fl" style="--fd:3.1s;--fc:var(--c12)">A</span><span class="fl" style="--fd:2.6s;--fc:var(--c7)">R</span><span class="fl" style="--fd:3.4s;--fc:var(--c5)">L</span><span class="fl" style="--fd:3.0s;--fc:var(--c1)">O</span><span class="fl" style="--fd:2.8s;--fc:var(--c12)">S</span><span class="fl" style="--fd:3.2s;--fc:var(--c3)">?</span></span></h2>
-  <p class="cta-sub reveal">12 mundos te esperan. Descárgalo gratis.</p>
+  <h2 class="cta-title reveal">READY TO<br><span class="float-word"><span class="fl" style="--fd:3.0s;--fc:var(--c1)">E</span><span class="fl" style="--fd:2.7s;--fc:var(--c7)">X</span><span class="fl" style="--fd:3.3s;--fc:var(--c5)">P</span><span class="fl" style="--fd:2.9s;--fc:var(--c3)">L</span><span class="fl" style="--fd:3.5s;--fc:var(--c9)">O</span><span class="fl" style="--fd:2.8s;--fc:var(--c2)">R</span><span class="fl" style="--fd:3.1s;--fc:var(--c12)">E</span><span class="fl" style="--fd:2.6s;--fc:var(--c7)">T</span><span class="fl" style="--fd:3.4s;--fc:var(--c5)">H</span><span class="fl" style="--fd:3.0s;--fc:var(--c1)">E</span><span class="fl" style="--fd:2.8s;--fc:var(--c12)">M</span><span class="fl" style="--fd:3.2s;--fc:var(--c3)">?</span></span></h2>
+  <p class="cta-sub reveal">10 worlds await. Download it free.</p>
   <div class="cta-btns reveal">
     <a href="#" class="btn btn-ios"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.37c1.29.07 2.18.74 2.93.8 1.12-.21 2.18-.91 3.39-.84 1.44.12 2.52.7 3.22 1.75-2.96 1.8-2.46 5.77.46 7.2zm-3.31-15.2c.08 2.38-2.11 4.24-4.33 4.01-.29-2.13 1.84-4.13 4.33-4.01z"/></svg>APP STORE</a>
     <a href="#" class="btn btn-and"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.65.18.96.04l13.34-7.44-2.97-2.97-11.33 10.37zm-1.1-20.1c-.06.2-.08.43-.08.67v19.34c0 .24.02.47.08.67l.08.08 10.83-10.83v-.26L2.16 3.58l-.08.08zM20.54 10.8l-2.96-1.65-3.15 3.15 3.15 3.15 3-1.68c.86-.48.86-1.27-.04-1.97zM4.14.32L17.48 7.8 14.51 10.77 3.18.4C3.5.23 3.86.22 4.14.4z"/></svg>GOOGLE PLAY</a>
@@ -513,8 +517,8 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
 <footer>
   <div class="footer-logo">FURIOUS DASH</div>
   <div class="footer-dots"><div class="dot" style="background:var(--c1)"></div><div class="dot" style="background:var(--c3)"></div><div class="dot" style="background:var(--c5)"></div><div class="dot" style="background:var(--c7)"></div><div class="dot" style="background:var(--c9)"></div><div class="dot" style="background:var(--c12)"></div></div>
-  <div class="footer-links"><a href="#">Privacidad</a><a href="#">Términos</a><a href="#">Contacto</a><a href="https://tiktok.com" target="_blank">TikTok</a></div>
-  <div class="footer-copy">© 2026 FURIOUS DASH · neondash.juegos</div>
+  <div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a><a href="https://tiktok.com" target="_blank">TikTok</a></div>
+  <div class="footer-copy">© 2026 FURIOUS DASH · furiousdash.juegos</div>
 </footer>
 
 <!-- SHARE CARD OVERLAY -->
@@ -525,14 +529,14 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.19 8.19 0 0 0 4.79 1.52V6.76a4.85 4.85 0 0 1-1.02-.07z"/></svg>
     SHARE TO TIKTOK
   </button>
-  <button class="share-again-btn" id="shareAgainBtn">↺ INTENTAR DE NUEVO</button>
+  <button class="share-again-btn" id="shareAgainBtn">↺ TRY AGAIN</button>
 </div>
 
 <script>
 const obs=new IntersectionObserver(entries=>{entries.forEach((e,i)=>{if(e.isIntersecting)setTimeout(()=>e.target.classList.add('visible'),i*80)});},{threshold:0.1});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
-// ── PARTÍCULAS AL HACER CLICK ──
+// ── CLICK PARTICLES ──
 document.addEventListener('click',e=>{
   const colors=['#00fff0','#ff006e','#ffee00','#bf00ff','#00ff88','#ff4400'];
   for(let i=0;i<10;i++){
@@ -547,7 +551,7 @@ document.addEventListener('click',e=>{
   }
 });
 
-// ── PARALLAX EN EL HERO ──
+// ── HERO PARALLAX ──
 const heroTitle = document.querySelector('.hero-title');
 const heroNaves = document.querySelector('.hero-naves');
 document.addEventListener('mousemove',e=>{
@@ -557,7 +561,7 @@ document.addEventListener('mousemove',e=>{
   if(heroNaves) heroNaves.style.transform=`translate(${x*.8}px,${y*.8}px)`;
 });
 
-// ── CARDS DE MUNDOS — GLOW AL TOCAR EN MÓVIL ──
+// ── WORLD CARDS — GLOW ON MOBILE TOUCH ──
 document.querySelectorAll('.card').forEach(card=>{
   card.addEventListener('touchstart',()=>{
     card.style.transform='scale(1.04)';
@@ -575,7 +579,7 @@ document.querySelectorAll('.card').forEach(card=>{
   },{passive:true});
 });
 
-// ── EASTER EGG — Konami code → lluvia de naves ──
+// ── EASTER EGG — Konami code → ship rain ──
 const konami=[38,38,40,40,37,39,37,39,66,65];
 let konamiIdx=0;
 document.addEventListener('keydown',e=>{
@@ -595,12 +599,12 @@ document.addEventListener('keydown',e=>{
   }
 });
 
-// ── ANIMACIÓN LLUVIA ──
+// ── RAIN ANIMATION ──
 const rainStyle=document.createElement('style');
 rainStyle.textContent='@keyframes rainFall{to{transform:translateY(110vh) rotate(360deg);opacity:0;}}';
 document.head.appendChild(rainStyle);
 
-// ── LETRAS FURIOUS DASH — partículas al tocar ──
+// ── FURIOUS DASH LETTERS — particles on touch ──
 document.querySelectorAll('.letter').forEach(letter => {
   const handleTap = e => {
     e.stopPropagation();
@@ -660,7 +664,7 @@ function startDemo() {
   demoStart.style.display = 'none';
   demoEnd.classList.remove('show');
 
-  // Mini juego inline como blob
+  // Inline mini game as blob
   const gameCode = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#020208;overflow:hidden;touch-action:none}canvas{display:block;width:100vw;height:100vh}</style></head><body><canvas id="c"></canvas><script>
 const c=document.getElementById('c'),g=c.getContext('2d');
 function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
@@ -738,13 +742,13 @@ loop();
 
   gameFrame.srcdoc = gameCode;
 
-  // Mostrar timer
+  // Show timer
   timerNum.style.display = 'block';
   timeLeft = GAME_DURATION;
   timerFill.style.width = '100%';
   timerNum.textContent = formatTime(timeLeft);
 
-  // Iniciar cuenta atrás
+  // Start countdown
   clearInterval(timerInterval);
   timerInterval = setInterval(() => {
     timeLeft--;
@@ -752,7 +756,7 @@ loop();
     timerFill.style.width = pct + '%';
     timerNum.textContent = formatTime(timeLeft);
 
-    // Cambiar color cuando quedan 10 segundos
+    // Change color when 10 seconds left
     if (timeLeft <= 10) {
       timerFill.style.background = 'linear-gradient(to right, var(--c12), var(--c3))';
       timerNum.style.color = 'var(--c12)';
@@ -786,7 +790,7 @@ function resetDemo() {
 demoStartBtn.addEventListener('click', startDemo);
 demoReplay.addEventListener('click', resetDemo);
 
-// Escuchar cuando el jugador muere en el iframe
+// Listen for player death in iframe
 window.addEventListener('message', e => {
   if (!e.data) return;
   if (e.data === 'gameover') { endDemo(); return; }
@@ -799,16 +803,16 @@ window.addEventListener('message', e => {
 
 // ── SHARE CARD ──
 const HUMILIATE = [
-  "CHOCASTE AL PRIMER INTENTO 😂",
-  "¿EN SERIO? NI 3 PUNTOS 💀",
-  "HASTA TU ABUELA VUELA MEJOR",
-  "RÉCORD MUNDIAL DE PENA",
-  "0 TALENTO DETECTADO 🤡",
-  "TU NAVE NO QUIERE VOLAR",
+  "CRASHED ON THE FIRST TRY 😂",
+  "SERIOUSLY? NOT EVEN 3 POINTS 💀",
+  "EVEN YOUR GRANDMA FLIES BETTER",
+  "WORLD RECORD OF SHAME",
+  "0 TALENT DETECTED 🤡",
+  "YOUR SHIP REFUSES TO FLY",
   "GG EZ COPE L + RATIO",
-  "ERES EL JEFE FINAL DEL FRACASO",
-  "ESO NO FUE VOLAR, FUE CAER",
-  "FURIOUS DASH TE RECHAZA 💔"
+  "YOU ARE THE FINAL BOSS OF FAILURE",
+  "THAT WASN'T FLYING, THAT WAS FALLING",
+  "FURIOUS DASH REJECTS YOU 💔"
 ];
 
 function wrapTextCanvas(ctx, text, x, y, maxWidth, lineH) {
@@ -917,14 +921,14 @@ async function showShareCard(score, imgDataUrl) {
   ctx.fillStyle = 'rgba(255,238,0,0.6)';
   ctx.font = '700 14px Orbitron, monospace';
   ctx.letterSpacing = '4px';
-  ctx.fillText('PUNTUACIÓN', W/2, 858);
+  ctx.fillText('SCORE', W/2, 858);
   ctx.letterSpacing = '0px';
 
   // Watermark
   ctx.shadowBlur = 0;
   ctx.fillStyle = 'rgba(0,255,240,0.25)';
   ctx.font = '600 13px Orbitron, monospace';
-  ctx.fillText('neondash.juegos  ·  ¿PUEDES SUPERARME?', W/2, H - 28);
+  ctx.fillText('furiousdash.juegos  ·  CAN YOU BEAT ME?', W/2, H - 28);
 
   document.getElementById('shareOverlay').classList.add('show');
 }
@@ -939,12 +943,12 @@ document.getElementById('shareAgainBtn').addEventListener('click', hideShareCard
 document.getElementById('shareTiktokBtn').addEventListener('click', () => {
   const sc = document.getElementById('shareCanvas');
   sc.toBlob(async blob => {
-    const file = new File([blob], 'furious-dash-muerte.png', {type: 'image/png'});
+    const file = new File([blob], 'furious-dash-death.png', {type: 'image/png'});
     if (navigator.share && navigator.canShare && navigator.canShare({files: [file]})) {
       try {
         await navigator.share({
-          title: '💀 Morí en FURIOUS DASH',
-          text: '¿Puedes superar mi puntuación? Descarga FURIOUS DASH gratis 🚀',
+          title: '💀 I died in FURIOUS DASH',
+          text: 'Can you beat my score? Download FURIOUS DASH for free 🚀',
           files: [file]
         });
         return;
@@ -952,7 +956,7 @@ document.getElementById('shareTiktokBtn').addEventListener('click', () => {
     }
     // Fallback: download the image
     const a = document.createElement('a');
-    a.download = 'furious-dash-muerte.png';
+    a.download = 'furious-dash-death.png';
     a.href = sc.toDataURL('image/png');
     a.click();
   }, 'image/png');
