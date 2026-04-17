@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>FURIOUS DASH — 10 Worlds. 1 Ship. Infinite Lives.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,7 +37,7 @@ html,body{background:#020208;color:#e8f0ff;font-family:'Rajdhani','Segoe UI',san
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  padding:16px 24px;background:rgba(2,2,8,0.96);
+  padding:16px 24px;padding-top:calc(16px + env(safe-area-inset-top));background:rgba(2,2,8,0.96);
   border-bottom:1px solid rgba(0,255,240,0.1);
   backdrop-filter:blur(20px);
 }
@@ -536,7 +536,7 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
 <footer>
   <div class="footer-logo">FURIOUS DASH</div>
   <div class="footer-dots"><div class="dot" style="background:var(--c1)"></div><div class="dot" style="background:var(--c3)"></div><div class="dot" style="background:var(--c5)"></div><div class="dot" style="background:var(--c7)"></div><div class="dot" style="background:var(--c9)"></div><div class="dot" style="background:var(--c12)"></div></div>
-  <div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a><a href="https://tiktok.com" target="_blank">TikTok</a></div>
+  <div class="footer-links"><a href="privacy.html" style="color:var(--c1);text-shadow:0 0 8px var(--c1);">Privacy</a><a href="terms.html">Terms</a><a href="#">Contact</a><a href="https://tiktok.com" target="_blank">TikTok</a></div>
   <div class="footer-copy">© 2026 FURIOUS DASH · furiousdash.juegos</div>
 </footer>
 

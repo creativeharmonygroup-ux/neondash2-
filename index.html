@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>FURIOUS DASH — 10 Worlds. 1 Ship. Infinite Lives.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,7 +37,7 @@ html,body{background:#020208;color:#e8f0ff;font-family:'Rajdhani','Segoe UI',san
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  padding:16px 24px;background:rgba(2,2,8,0.96);
+  padding:16px 24px;padding-top:calc(16px + env(safe-area-inset-top));background:rgba(2,2,8,0.96);
   border-bottom:1px solid rgba(0,255,240,0.1);
   backdrop-filter:blur(20px);
 }

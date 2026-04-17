@@ -1,1 +1,1 @@
-{"appId":"com.neondash.infinite","appName":"Neon Dash","webDir":"www"}
+{"appId":"com.neondash.infinite","appName":"Neon Dash","webDir":"www","server":{"initialPath":"game.html"}}
