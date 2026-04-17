@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — FURIOUS DASH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#020208;color:#e8f0ff;font-family:'Rajdhani','Segoe UI',sans-serif;overflow-x:hidden}
+:root{
+  --c1:#00fff0;--c2:#bf00ff;--c3:#ff4400;--c4:#aaaaff;
+  --c5:#ffee00;--c6:#0066ff;--c7:#00ff88;--c8:#aaff00;
+  --c9:#ff88ff;--c10:#ff8800;--c11:#8800ff;--c12:#ff006e;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px;background:rgba(2,2,8,0.96);
+  border-bottom:1px solid rgba(0,255,240,0.1);
+  backdrop-filter:blur(20px);
+}
+.logo{font-family:'Orbitron','Arial Black',monospace;font-size:16px;font-weight:900;
+  color:white;letter-spacing:4px;text-decoration:none;
+  text-shadow:0 0 20px var(--c1);}
+.nav-btn{
+  background:transparent;border:1.5px solid var(--c1);color:var(--c1);
+  font-family:'Orbitron',monospace;font-size:9px;font-weight:700;
+  letter-spacing:2px;padding:8px 18px;border-radius:50px;
+  text-decoration:none;transition:all 0.2s;
+}
+.nav-btn:hover{background:var(--c1);color:#020208;}
+
+/* PAGE WRAPPER */
+.page{max-width:780px;margin:0 auto;padding:120px 24px 80px;}
+
+/* HEADER */
+.page-header{text-align:center;margin-bottom:60px;}
+.page-label{font-size:9px;letter-spacing:5px;color:rgba(255,255,255,0.3);margin-bottom:16px;}
+.page-title{
+  font-family:'Orbitron',monospace;font-weight:900;
+  font-size:clamp(28px,7vw,52px);line-height:1;
+  color:white;margin-bottom:16px;
+}
+.page-title em{font-style:normal;color:var(--c1);}
+.page-date{font-size:11px;letter-spacing:3px;color:#8899bb;margin-top:12px;}
+.page-divider{
+  width:80px;height:2px;margin:24px auto 0;
+  background:linear-gradient(90deg,var(--c1),var(--c12));
+  border-radius:2px;
+}
+
+/* INTRO BLOCK */
+.intro{
+  padding:28px 32px;margin-bottom:44px;
+  background:#05050f;
+  border:1px solid rgba(0,255,240,0.08);
+  border-radius:10px;
+  font-size:15px;color:#a0b0cc;line-height:1.8;
+}
+.intro strong{color:var(--c1);}
+
+/* SECTIONS */
+.section{
+  margin-bottom:44px;
+  padding:32px;
+  background:#05050f;
+  border:1px solid rgba(0,255,240,0.08);
+  border-left:3px solid var(--accent,var(--c1));
+  border-radius:10px;
+}
+.section-num{
+  font-family:'Orbitron',monospace;font-size:8px;font-weight:700;
+  letter-spacing:3px;color:var(--accent,var(--c1));margin-bottom:8px;
+}
+.section-title{
+  font-family:'Orbitron',monospace;font-size:14px;font-weight:700;
+  letter-spacing:2px;color:white;margin-bottom:18px;
+}
+.section p{
+  font-size:15px;color:#a0b0cc;line-height:1.8;margin-bottom:12px;
+}
+.section p:last-child{margin-bottom:0;}
+.section ul{
+  margin:10px 0 12px 0;padding-left:0;list-style:none;
+}
+.section ul li{
+  font-size:15px;color:#a0b0cc;line-height:1.8;
+  padding:4px 0 4px 20px;position:relative;
+}
+.section ul li::before{
+  content:'▸';position:absolute;left:0;
+  color:var(--accent,var(--c1));font-size:11px;top:6px;
+}
+.highlight{
+  display:inline-block;
+  background:rgba(0,255,240,0.06);
+  border:1px solid rgba(0,255,240,0.15);
+  border-radius:4px;padding:2px 8px;
+  color:var(--c1);font-weight:700;font-size:13px;letter-spacing:1px;
+}
+.tag{
+  display:inline-block;
+  font-size:8px;letter-spacing:2px;font-weight:700;
+  padding:3px 10px;border-radius:50px;
+  border:1px solid var(--accent,var(--c1));
+  color:var(--accent,var(--c1));
+  margin-right:6px;margin-bottom:4px;vertical-align:middle;
+}
+.info-box{
+  margin-top:16px;padding:16px 20px;
+  background:rgba(0,255,240,0.04);
+  border:1px solid rgba(0,255,240,0.15);
+  border-radius:8px;
+}
+.info-box p{color:#7aaabb !important;}
+.info-box a{color:var(--c1);text-decoration:none;font-weight:700;}
+.info-box a:hover{text-decoration:underline;}
+.warning-box{
+  margin-top:16px;padding:16px 20px;
+  background:rgba(255,238,0,0.04);
+  border:1px solid rgba(255,238,0,0.2);
+  border-radius:8px;
+}
+.warning-box p{color:#bbaa60 !important;}
+.warning-box strong{color:var(--c5);}
+
+/* THIRD PARTY TABLE */
+.provider-list{margin-top:16px;}
+.provider{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;
+  padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.provider:last-child{border-bottom:none;}
+.provider-name{
+  font-family:'Orbitron',monospace;font-size:10px;font-weight:700;
+  letter-spacing:2px;color:white;min-width:110px;padding-top:2px;
+}
+.provider-desc{font-size:14px;color:#8899bb;line-height:1.7;flex:1;}
+.provider-desc a{color:var(--c1);text-decoration:none;}
+.provider-desc a:hover{text-decoration:underline;}
+
+/* CONTACT BLOCK */
+.contact-block{
+  text-align:center;padding:40px 24px;
+  background:#05050f;
+  border:1px solid rgba(0,255,240,0.08);
+  border-radius:10px;margin-bottom:44px;
+}
+.contact-block p{font-size:15px;color:#a0b0cc;line-height:1.8;}
+.contact-block a{color:var(--c1);text-decoration:none;font-weight:700;}
+.contact-block a:hover{text-decoration:underline;}
+
+/* FOOTER */
+footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36px 24px;text-align:center;}
+.footer-logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:5px;margin-bottom:14px;background:linear-gradient(135deg,var(--c1),var(--c12));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.footer-dots{display:flex;justify-content:center;gap:6px;margin-bottom:16px;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.footer-links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:12px;}
+.footer-links a{font-size:10px;letter-spacing:2px;color:#8899bb;text-decoration:none;}
+.footer-links a:hover{color:var(--c1);}
+.footer-copy{font-size:9px;color:#4a5568;letter-spacing:1px;}
+
+@media(min-width:600px){
+  nav{padding:18px 50px;}
+  .page{padding:130px 48px 80px;}
+  .section{padding:36px 40px;}
+  .intro{padding:32px 40px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">FURIOUS DASH</a>
+  <a href="game.html" class="nav-btn">PLAY NOW</a>
+</nav>
+
+<div class="page">
+
+  <div class="page-header">
+    <p class="page-label">LEGAL DOCUMENT</p>
+    <h1 class="page-title">PRIVACY <em>POLICY</em></h1>
+    <p class="page-date">LAST UPDATED: APRIL 2026</p>
+    <div class="page-divider"></div>
+  </div>
+
+  <div class="intro">
+    <strong>Furious Dash</strong> ("we," "us," or "our") operates the mobile game <strong>FURIOUS DASH</strong> and the website <strong>furiousdash.com</strong>. This Privacy Policy explains what information we collect, how we use it, and your rights regarding that information. By using FURIOUS DASH, you agree to the practices described in this policy.
+  </div>
+
+  <!-- 1. INFORMATION WE COLLECT -->
+  <div class="section" style="--accent:var(--c1)">
+    <div class="section-num">01 —</div>
+    <div class="section-title">INFORMATION WE COLLECT</div>
+    <p>We collect the following categories of information when you use FURIOUS DASH:</p>
+    <ul>
+      <li><strong>Gameplay data</strong> — scores, session duration, world progression, death count, and in-game events</li>
+      <li><strong>Device information</strong> — device model, operating system version, unique device identifiers, and language settings</li>
+      <li><strong>Crash and performance data</strong> — error logs and diagnostic information to improve stability</li>
+      <li><strong>Advertising identifiers</strong> — IDFA (iOS) or GAID (Android) used for ad personalization, subject to your device permissions</li>
+      <li><strong>Purchase data</strong> — transaction records processed through Apple App Store or Google Play (we do not store payment card details)</li>
+    </ul>
+    <p>We do <strong>not</strong> collect your name, email address, or any account credentials unless you voluntarily contact us.</p>
+  </div>
+
+  <!-- 2. HOW WE USE YOUR DATA -->
+  <div class="section" style="--accent:var(--c7)">
+    <div class="section-num">02 —</div>
+    <div class="section-title">HOW WE USE YOUR DATA</div>
+    <p>The information we collect is used exclusively to:</p>
+    <ul>
+      <li>Operate, maintain, and improve the Game experience</li>
+      <li>Analyze gameplay patterns and fix bugs or performance issues</li>
+      <li>Serve relevant advertisements through our ad partners</li>
+      <li>Process and validate in-app purchases</li>
+      <li>Comply with legal obligations</li>
+    </ul>
+    <p>We do <strong>not</strong> sell, rent, or trade your personal data to third parties for their own marketing purposes.</p>
+  </div>
+
+  <!-- 3. FIREBASE -->
+  <div class="section" style="--accent:var(--c10)">
+    <div class="section-num">03 —</div>
+    <div class="section-title">FIREBASE (GOOGLE)</div>
+    <p>FURIOUS DASH uses <span class="highlight" style="color:var(--c10);border-color:rgba(255,136,0,0.3);background:rgba(255,136,0,0.06)">Firebase</span> services provided by Google LLC to support core functionality:</p>
+    <div class="provider-list">
+      <div class="provider">
+        <div class="provider-name">ANALYTICS</div>
+        <div class="provider-desc">Collects anonymous gameplay events and session data to help us understand how players interact with the Game. Data is aggregated and cannot be used to identify individual users.</div>
+      </div>
+      <div class="provider">
+        <div class="provider-name">CRASHLYTICS</div>
+        <div class="provider-desc">Automatically reports crashes and errors so we can diagnose and fix issues quickly. Reports include device type, OS version, and a stack trace of the crash.</div>
+      </div>
+      <div class="provider">
+        <div class="provider-name">REMOTE CONFIG</div>
+        <div class="provider-desc">Allows us to update certain Game parameters remotely without requiring an app update.</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <p>Firebase data is processed by Google in accordance with Google's Privacy Policy. You can learn more at <a href="https://firebase.google.com/support/privacy" target="_blank">firebase.google.com/support/privacy</a>.</p>
+    </div>
+  </div>
+
+  <!-- 4. ADMOB -->
+  <div class="section" style="--accent:var(--c5)">
+    <div class="section-num">04 —</div>
+    <div class="section-title">ADMOB &amp; ADVERTISING</div>
+    <p>FURIOUS DASH displays advertisements through <span class="highlight" style="color:var(--c5);border-color:rgba(255,238,0,0.3);background:rgba(255,238,0,0.06)">Google AdMob</span>, a mobile advertising platform operated by Google LLC.</p>
+    <p>AdMob may collect and use the following to serve relevant ads:</p>
+    <ul>
+      <li>Advertising identifier (IDFA / GAID)</li>
+      <li>IP address and general location (country/region level)</li>
+      <li>Device type and OS version</li>
+      <li>In-app behavior signals</li>
+    </ul>
+    <p>On iOS, we request App Tracking Transparency (ATT) permission before accessing your IDFA. You may deny this permission and will still receive ads, though they may be less relevant.</p>
+    <p>On Android, you can opt out of personalized ads through your device's Google settings under <strong>Privacy → Ads</strong>.</p>
+    <div class="info-box">
+      <p>AdMob's data practices are governed by Google's Privacy Policy: <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a>. To opt out of interest-based advertising, visit <a href="https://adssettings.google.com" target="_blank">adssettings.google.com</a>.</p>
+    </div>
+  </div>
+
+  <!-- 5. COOKIES -->
+  <div class="section" style="--accent:var(--c4)">
+    <div class="section-num">05 —</div>
+    <div class="section-title">COOKIES &amp; TRACKING TECHNOLOGIES</div>
+    <p>The FURIOUS DASH mobile app does not use browser cookies. However, our website <strong>furiousdash.com</strong> may use the following:</p>
+    <ul>
+      <li><strong>Essential cookies</strong> — required for the website to function correctly</li>
+      <li><strong>Analytics cookies</strong> — used by Google Analytics to measure page visits and user behavior in aggregate</li>
+      <li><strong>Advertising cookies</strong> — used by ad networks to deliver relevant ads on the website</li>
+    </ul>
+    <p>You can control or disable cookies through your browser settings at any time. Disabling cookies may affect certain website functionality.</p>
+    <div class="warning-box">
+      <p><strong>COOKIE CONSENT:</strong> By continuing to use furiousdash.com, you consent to our use of cookies as described above. Where required by law, we will request explicit consent before placing non-essential cookies.</p>
+    </div>
+  </div>
+
+  <!-- 6. IN-APP PURCHASES -->
+  <div class="section" style="--accent:var(--c12)">
+    <div class="section-num">06 —</div>
+    <div class="section-title">IN-APP PURCHASES &amp; PAYMENTS</div>
+    <p>All in-app purchases within FURIOUS DASH are processed exclusively by Apple (App Store) or Google (Google Play). We do not collect, store, or process your payment card details at any point.</p>
+    <p>Purchase records — including the item purchased, transaction ID, and timestamp — may be stored to validate entitlements and resolve disputes.</p>
+    <p>For questions about billing or refunds, please contact Apple Support or Google Play Support directly, as applicable to your platform.</p>
+  </div>
+
+  <!-- 7. CHILDREN'S PRIVACY (COPPA) -->
+  <div class="section" style="--accent:var(--c9)">
+    <div class="section-num">07 —</div>
+    <div class="section-title">CHILDREN'S PRIVACY</div>
+    <p>FURIOUS DASH is rated <span class="highlight" style="color:var(--c9);border-color:rgba(255,136,255,0.3);background:rgba(255,136,255,0.06)">4+</span> and is designed to be enjoyed by players of all ages, including children.</p>
+    <p>We are committed to complying with the <strong>Children's Online Privacy Protection Act (COPPA)</strong> and applicable children's privacy laws worldwide, including the EU's GDPR provisions for minors.</p>
+    <ul>
+      <li>We do <strong>not</strong> knowingly collect personal information from children under 13 without verifiable parental consent</li>
+      <li>We do <strong>not</strong> display behavioral or targeted advertising to users identified as children under 13</li>
+      <li>Advertising shown to child-directed audiences complies with Google AdMob's Families Policy</li>
+      <li>We do not allow children to make in-app purchases without parental authorization</li>
+    </ul>
+    <p>If you are a parent or guardian and believe your child has provided personal information without your consent, please contact us at <strong>privacy@furiousdash.com</strong> and we will promptly delete that information.</p>
+    <div class="info-box">
+      <p>Parents can configure parental controls on their device to restrict in-app purchases and ad tracking. Visit your device's Settings → Screen Time (iOS) or Digital Wellbeing (Android) for more options.</p>
+    </div>
+  </div>
+
+  <!-- 8. GDPR -->
+  <div class="section" style="--accent:var(--c2)">
+    <div class="section-num">08 —</div>
+    <div class="section-title">GDPR — YOUR RIGHTS (EEA &amp; UK)</div>
+    <p>If you are located in the European Economic Area (EEA) or the United Kingdom, you have the following rights under the General Data Protection Regulation (GDPR):</p>
+    <ul>
+      <li><strong>Right of access</strong> — request a copy of the personal data we hold about you</li>
+      <li><strong>Right to rectification</strong> — request correction of inaccurate data</li>
+      <li><strong>Right to erasure</strong> — request deletion of your personal data ("right to be forgotten")</li>
+      <li><strong>Right to restrict processing</strong> — request that we limit how we use your data</li>
+      <li><strong>Right to data portability</strong> — receive your data in a structured, machine-readable format</li>
+      <li><strong>Right to object</strong> — object to processing based on legitimate interests or for direct marketing</li>
+      <li><strong>Right to withdraw consent</strong> — withdraw consent at any time where processing is based on consent</li>
+    </ul>
+    <p>Our legal basis for processing data is <strong>legitimate interest</strong> (analytics, crash reporting, game improvement) and <strong>consent</strong> (personalized advertising, where applicable).</p>
+    <p>To exercise any of these rights, contact us at <strong>privacy@furiousdash.com</strong>. We will respond within 30 days. You also have the right to lodge a complaint with your local data protection authority.</p>
+  </div>
+
+  <!-- 9. DATA RETENTION & SECURITY -->
+  <div class="section" style="--accent:var(--c3)">
+    <div class="section-num">09 —</div>
+    <div class="section-title">DATA RETENTION &amp; SECURITY</div>
+    <p>We retain gameplay and analytics data for as long as necessary to fulfill the purposes described in this policy, typically no longer than <strong>24 months</strong> from the last active session.</p>
+    <p>We implement industry-standard security measures to protect data against unauthorized access, alteration, or destruction. However, no transmission over the internet or electronic storage is 100% secure, and we cannot guarantee absolute security.</p>
+    <p>In the event of a data breach that affects your rights or freedoms, we will notify affected users and relevant authorities as required by applicable law.</p>
+  </div>
+
+  <!-- 10. CHANGES -->
+  <div class="section" style="--accent:var(--c6)">
+    <div class="section-num">10 —</div>
+    <div class="section-title">CHANGES TO THIS POLICY</div>
+    <p>We may update this Privacy Policy from time to time to reflect changes in our practices, technology, or legal requirements. When we do, we will update the "Last Updated" date at the top of this page.</p>
+    <p>Continued use of FURIOUS DASH after any changes constitutes your acceptance of the updated Privacy Policy. We encourage you to review this page periodically.</p>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="contact-block">
+    <p style="font-family:'Orbitron',monospace;font-size:11px;letter-spacing:3px;color:white;margin-bottom:12px;">PRIVACY QUESTIONS?</p>
+    <p>For any questions, data requests, or privacy concerns,<br>please contact our privacy team at:</p>
+    <p style="margin-top:14px;"><a href="mailto:privacy@furiousdash.com">privacy@furiousdash.com</a></p>
+    <p style="margin-top:6px;font-size:13px;">furiousdash.com</p>
+  </div>
+
+</div><!-- /page -->
+
+<footer>
+  <div class="footer-logo">FURIOUS DASH</div>
+  <div class="footer-dots">
+    <div class="dot" style="background:var(--c1)"></div>
+    <div class="dot" style="background:var(--c3)"></div>
+    <div class="dot" style="background:var(--c5)"></div>
+    <div class="dot" style="background:var(--c7)"></div>
+    <div class="dot" style="background:var(--c9)"></div>
+    <div class="dot" style="background:var(--c12)"></div>
+  </div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="privacy.html" style="color:var(--c1);text-shadow:0 0 8px var(--c1);">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="mailto:privacy@furiousdash.com">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 FURIOUS DASH · furiousdash.com · All rights reserved.</div>
+</footer>
+
+</body>
+</html>
