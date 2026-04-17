@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms & Conditions — FURIOUS DASH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#020208;color:#e8f0ff;font-family:'Rajdhani','Segoe UI',sans-serif;overflow-x:hidden}
+:root{
+  --c1:#00fff0;--c2:#bf00ff;--c3:#ff4400;--c4:#aaaaff;
+  --c5:#ffee00;--c6:#0066ff;--c7:#00ff88;--c8:#aaff00;
+  --c9:#ff88ff;--c10:#ff8800;--c11:#8800ff;--c12:#ff006e;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px;background:rgba(2,2,8,0.96);
+  border-bottom:1px solid rgba(0,255,240,0.1);
+  backdrop-filter:blur(20px);
+}
+.logo{font-family:'Orbitron','Arial Black',monospace;font-size:16px;font-weight:900;
+  color:white;letter-spacing:4px;text-decoration:none;
+  text-shadow:0 0 20px var(--c1);}
+.nav-btn{
+  background:transparent;border:1.5px solid var(--c1);color:var(--c1);
+  font-family:'Orbitron',monospace;font-size:9px;font-weight:700;
+  letter-spacing:2px;padding:8px 18px;border-radius:50px;
+  text-decoration:none;transition:all 0.2s;
+}
+.nav-btn:hover{background:var(--c1);color:#020208;}
+
+/* PAGE WRAPPER */
+.page{max-width:780px;margin:0 auto;padding:120px 24px 80px;}
+
+/* HEADER */
+.terms-header{text-align:center;margin-bottom:60px;}
+.terms-label{font-size:9px;letter-spacing:5px;color:rgba(255,255,255,0.3);margin-bottom:16px;}
+.terms-title{
+  font-family:'Orbitron',monospace;font-weight:900;
+  font-size:clamp(28px,7vw,52px);line-height:1;
+  color:white;margin-bottom:16px;
+}
+.terms-title em{font-style:normal;color:var(--c1);}
+.terms-date{font-size:11px;letter-spacing:3px;color:#8899bb;margin-top:12px;}
+.terms-divider{
+  width:80px;height:2px;margin:24px auto 0;
+  background:linear-gradient(90deg,var(--c1),var(--c12));
+  border-radius:2px;
+}
+
+/* SECTIONS */
+.section{
+  margin-bottom:44px;
+  padding:32px;
+  background:#05050f;
+  border:1px solid rgba(0,255,240,0.08);
+  border-left:3px solid var(--accent,var(--c1));
+  border-radius:10px;
+}
+.section-num{
+  font-family:'Orbitron',monospace;font-size:8px;font-weight:700;
+  letter-spacing:3px;color:var(--accent,var(--c1));margin-bottom:8px;
+}
+.section-title{
+  font-family:'Orbitron',monospace;font-size:14px;font-weight:700;
+  letter-spacing:2px;color:white;margin-bottom:18px;
+}
+.section p{
+  font-size:15px;color:#a0b0cc;line-height:1.8;margin-bottom:12px;
+}
+.section p:last-child{margin-bottom:0;}
+.section ul{
+  margin:10px 0 12px 0;padding-left:0;list-style:none;
+}
+.section ul li{
+  font-size:15px;color:#a0b0cc;line-height:1.8;padding:4px 0 4px 20px;
+  position:relative;
+}
+.section ul li::before{
+  content:'▸';position:absolute;left:0;
+  color:var(--accent,var(--c1));font-size:11px;top:6px;
+}
+.highlight{
+  display:inline-block;
+  background:rgba(0,255,240,0.06);
+  border:1px solid rgba(0,255,240,0.15);
+  border-radius:4px;padding:2px 8px;
+  color:var(--c1);font-weight:700;font-size:13px;letter-spacing:1px;
+}
+.warning-box{
+  margin-top:16px;padding:16px 20px;
+  background:rgba(255,0,110,0.06);
+  border:1px solid rgba(255,0,110,0.25);
+  border-radius:8px;
+}
+.warning-box p{color:#cc8899 !important;}
+.warning-box strong{color:var(--c12);}
+
+/* CONTACT BLOCK */
+.contact-block{
+  text-align:center;padding:40px 24px;
+  background:#05050f;
+  border:1px solid rgba(0,255,240,0.08);
+  border-radius:10px;margin-bottom:44px;
+}
+.contact-block p{font-size:15px;color:#a0b0cc;line-height:1.8;}
+.contact-block a{color:var(--c1);text-decoration:none;font-weight:700;}
+.contact-block a:hover{text-decoration:underline;}
+
+/* FOOTER */
+footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36px 24px;text-align:center;}
+.footer-logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:5px;margin-bottom:14px;background:linear-gradient(135deg,var(--c1),var(--c12));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.footer-dots{display:flex;justify-content:center;gap:6px;margin-bottom:16px;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.footer-links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:12px;}
+.footer-links a{font-size:10px;letter-spacing:2px;color:#8899bb;text-decoration:none;}
+.footer-links a:hover{color:var(--c1);}
+.footer-copy{font-size:9px;color:#4a5568;letter-spacing:1px;}
+
+@media(min-width:600px){
+  nav{padding:18px 50px;}
+  .page{padding:130px 48px 80px;}
+  .section{padding:36px 40px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">FURIOUS DASH</a>
+  <a href="game.html" class="nav-btn">PLAY NOW</a>
+</nav>
+
+<div class="page">
+
+  <div class="terms-header">
+    <p class="terms-label">LEGAL DOCUMENT</p>
+    <h1 class="terms-title">TERMS &amp; <em>CONDITIONS</em></h1>
+    <p class="terms-date">LAST UPDATED: APRIL 2026</p>
+    <div class="terms-divider"></div>
+  </div>
+
+  <!-- 1. ACCEPTANCE -->
+  <div class="section" style="--accent:var(--c1)">
+    <div class="section-num">01 —</div>
+    <div class="section-title">ACCEPTANCE OF TERMS</div>
+    <p>By downloading, installing, accessing, or playing <span class="highlight">FURIOUS DASH</span> (the "Game"), you agree to be bound by these Terms and Conditions ("Terms"). If you do not agree to these Terms, do not use the Game.</p>
+    <p>These Terms constitute a legally binding agreement between you and <strong>Furious Dash</strong> ("we," "us," or "our"), the developer and operator of FURIOUS DASH, accessible at <strong>furiousdash.com</strong>.</p>
+    <p>We reserve the right to update these Terms at any time. Continued use of the Game after changes are posted constitutes your acceptance of the revised Terms.</p>
+  </div>
+
+  <!-- 2. ELIGIBILITY / AGE -->
+  <div class="section" style="--accent:var(--c5)">
+    <div class="section-num">02 —</div>
+    <div class="section-title">AGE REQUIREMENT</div>
+    <p>FURIOUS DASH is rated <span class="highlight" style="color:var(--c5);border-color:rgba(255,238,0,0.3);background:rgba(255,238,0,0.06)">4+</span> and is suitable for players of all ages. Players under the age of 13 must have parental or guardian consent before making any in-app purchases.</p>
+    <p>By making a purchase within the Game, you confirm that you are at least 18 years old, or that you have obtained the explicit consent of a parent or legal guardian who agrees to these Terms on your behalf.</p>
+    <p>We encourage parents to use device-level parental controls to manage in-app purchase settings for younger players.</p>
+  </div>
+
+  <!-- 3. LICENSE & USAGE -->
+  <div class="section" style="--accent:var(--c7)">
+    <div class="section-num">03 —</div>
+    <div class="section-title">GAME LICENSE &amp; PERMITTED USE</div>
+    <p>Furious Dash grants you a limited, non-exclusive, non-transferable, revocable license to download and play the Game for your personal, non-commercial entertainment purposes.</p>
+    <p>You agree <strong>not</strong> to:</p>
+    <ul>
+      <li>Copy, modify, distribute, sell, or lease any part of the Game</li>
+      <li>Reverse engineer, decompile, or attempt to extract source code</li>
+      <li>Use cheats, exploits, automation software, bots, or hacks</li>
+      <li>Use the Game for any commercial purpose without written permission</li>
+      <li>Interfere with or disrupt the integrity of the Game or its servers</li>
+      <li>Create derivative works based on the Game without prior authorization</li>
+    </ul>
+    <p>Any violation of these restrictions may result in termination of your license and access to the Game without notice.</p>
+  </div>
+
+  <!-- 4. IN-APP PURCHASES -->
+  <div class="section" style="--accent:var(--c12)">
+    <div class="section-num">04 —</div>
+    <div class="section-title">IN-APP PURCHASES</div>
+    <p>FURIOUS DASH is free to download and play. The Game offers optional in-app purchases, including but not limited to:</p>
+    <ul>
+      <li>Coin packs to unlock worlds and ships faster</li>
+      <li>Premium world unlocks (e.g., MACHINE WAR, THE GRID, OBSIDIAN, SCUDERIA)</li>
+      <li>Any future cosmetic or gameplay items we may introduce</li>
+    </ul>
+    <p>All purchases are processed through the Apple App Store or Google Play Store, subject to their respective terms and billing policies. Furious Dash does not directly process or store payment information.</p>
+    <p>Virtual currency (coins) and in-game items have no real-world monetary value and cannot be exchanged, transferred, or redeemed for cash or other goods outside the Game.</p>
+    <div class="warning-box">
+      <p><strong>NO REFUND POLICY:</strong> All in-app purchases are final and non-refundable. Once a purchase is completed, no refunds will be issued by Furious Dash. If you believe a charge was made in error, you must contact Apple Support or Google Play Support directly, in accordance with their respective refund policies.</p>
+    </div>
+  </div>
+
+  <!-- 5. INTELLECTUAL PROPERTY -->
+  <div class="section" style="--accent:var(--c2)">
+    <div class="section-num">05 —</div>
+    <div class="section-title">INTELLECTUAL PROPERTY</div>
+    <p>All content within FURIOUS DASH — including but not limited to the game name, logo, artwork, graphics, animations, sound effects, music, code, world designs, character designs, and all associated materials — is the exclusive property of <strong>Furious Dash</strong> and is protected by applicable copyright, trademark, and intellectual property laws.</p>
+    <p>You may not reproduce, distribute, display, or create derivative works from any Game content without our prior written consent.</p>
+    <p>Any user-generated content (such as screenshots or recordings shared via the in-game share feature) may be shared publicly at your discretion. By sharing such content, you grant Furious Dash a non-exclusive, royalty-free, worldwide license to use, display, and promote that content in connection with the Game.</p>
+  </div>
+
+  <!-- 6. LIMITATION OF LIABILITY -->
+  <div class="section" style="--accent:var(--c9)">
+    <div class="section-num">06 —</div>
+    <div class="section-title">LIMITATION OF LIABILITY</div>
+    <p>To the maximum extent permitted by applicable law, Furious Dash and its affiliates, directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or related to your use of — or inability to use — the Game.</p>
+    <p>This includes, without limitation:</p>
+    <ul>
+      <li>Loss of in-game progress, coins, or purchased items due to technical issues</li>
+      <li>Device damage or data loss resulting from Game installation or use</li>
+      <li>Interruptions, bugs, or errors within the Game</li>
+      <li>Loss of access to the Game due to account termination or service discontinuation</li>
+    </ul>
+    <p>The Game is provided on an <strong>"as is"</strong> and <strong>"as available"</strong> basis without warranties of any kind, either express or implied, including fitness for a particular purpose or uninterrupted availability.</p>
+    <p>In jurisdictions that do not allow the exclusion of certain warranties or limitations of liability, our liability shall be limited to the fullest extent permitted by law.</p>
+  </div>
+
+  <!-- 7. PRIVACY -->
+  <div class="section" style="--accent:var(--c10)">
+    <div class="section-num">07 —</div>
+    <div class="section-title">PRIVACY</div>
+    <p>Your use of the Game is also governed by our Privacy Policy, which is incorporated into these Terms by reference. By using the Game, you consent to the data practices described in our Privacy Policy.</p>
+    <p>FURIOUS DASH may collect anonymous gameplay data (such as scores, session duration, and device type) to improve the Game experience. We do not sell your personal data to third parties.</p>
+    <p>Ad networks integrated into the Game may collect data in accordance with their own privacy policies, including for the purpose of displaying relevant advertisements.</p>
+  </div>
+
+  <!-- 8. TERMINATION -->
+  <div class="section" style="--accent:var(--c3)">
+    <div class="section-num">08 —</div>
+    <div class="section-title">TERMINATION</div>
+    <p>We reserve the right to suspend or terminate your access to FURIOUS DASH at any time, for any reason, including but not limited to violation of these Terms, fraudulent activity, or abuse of in-app systems — without prior notice or liability.</p>
+    <p>Upon termination, all licenses granted to you under these Terms will immediately cease. Any in-game items or currency associated with your account will be forfeited without compensation.</p>
+  </div>
+
+  <!-- 9. GOVERNING LAW -->
+  <div class="section" style="--accent:var(--c4)">
+    <div class="section-num">09 —</div>
+    <div class="section-title">GOVERNING LAW</div>
+    <p>These Terms shall be governed by and construed in accordance with applicable law. Any disputes arising from these Terms or your use of the Game shall be resolved through good-faith negotiation between the parties.</p>
+    <p>If a dispute cannot be resolved amicably, it shall be submitted to binding arbitration or the competent courts of the jurisdiction in which Furious Dash operates, as determined by us.</p>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="contact-block">
+    <p style="font-family:'Orbitron',monospace;font-size:11px;letter-spacing:3px;color:white;margin-bottom:12px;">QUESTIONS OR CONCERNS?</p>
+    <p>If you have any questions about these Terms and Conditions,<br>please contact us at:</p>
+    <p style="margin-top:14px;"><a href="mailto:legal@furiousdash.com">legal@furiousdash.com</a></p>
+    <p style="margin-top:6px;font-size:13px;">furiousdash.com</p>
+  </div>
+
+</div><!-- /page -->
+
+<footer>
+  <div class="footer-logo">FURIOUS DASH</div>
+  <div class="footer-dots">
+    <div class="dot" style="background:var(--c1)"></div>
+    <div class="dot" style="background:var(--c3)"></div>
+    <div class="dot" style="background:var(--c5)"></div>
+    <div class="dot" style="background:var(--c7)"></div>
+    <div class="dot" style="background:var(--c9)"></div>
+    <div class="dot" style="background:var(--c12)"></div>
+  </div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="#">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="mailto:legal@furiousdash.com">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 FURIOUS DASH · furiousdash.com · All rights reserved.</div>
+</footer>
+
+</body>
+</html>
