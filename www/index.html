@@ -68,7 +68,7 @@ nav{
 .hero-label{font-size:9px;letter-spacing:5px;color:rgba(255,255,255,0.35);margin-bottom:20px;}
 .hero-title{
   font-family:'Orbitron',monospace;font-weight:900;
-  font-size:clamp(70px,20vw,160px);line-height:0.9;margin-bottom:20px;
+  font-size:clamp(44px,14vw,160px);line-height:0.9;margin-bottom:20px;
 }
 .lf{color:var(--c1);text-shadow:0 0 40px var(--c1);}
 .lu{color:var(--c2);text-shadow:0 0 40px var(--c2);}
@@ -536,7 +536,7 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
 <footer>
   <div class="footer-logo">FURIOUS DASH</div>
   <div class="footer-dots"><div class="dot" style="background:var(--c1)"></div><div class="dot" style="background:var(--c3)"></div><div class="dot" style="background:var(--c5)"></div><div class="dot" style="background:var(--c7)"></div><div class="dot" style="background:var(--c9)"></div><div class="dot" style="background:var(--c12)"></div></div>
-  <div class="footer-links"><a href="privacy.html" style="color:var(--c1);text-shadow:0 0 8px var(--c1);">Privacy</a><a href="terms.html">Terms</a><a href="#">Contact</a><a href="https://tiktok.com" target="_blank">TikTok</a></div>
+  <div class="footer-links"><a id="privacyLink" href="#" onclick="window.location.href='privacy.html';return false;" style="color:var(--c1);text-shadow:0 0 8px var(--c1);">Privacy</a><a id="termsLink" href="#" onclick="window.location.href='terms.html';return false;">Terms</a><a href="#">Contact</a><a href="https://tiktok.com" target="_blank">TikTok</a></div>
   <div class="footer-copy">© 2026 FURIOUS DASH · furiousdash.juegos</div>
 </footer>
 
@@ -979,6 +979,16 @@ document.getElementById('shareTiktokBtn').addEventListener('click', () => {
     a.href = sc.toDataURL('image/png');
     a.click();
   }, 'image/png');
+});
+
+// ── FOOTER LINKS — iOS touch fix ──
+document.getElementById('privacyLink').addEventListener('touchend', function(e){
+  e.preventDefault();
+  window.location.href = 'privacy.html';
+});
+document.getElementById('termsLink').addEventListener('touchend', function(e){
+  e.preventDefault();
+  window.location.href = 'terms.html';
 });
 </script>
 </body>
