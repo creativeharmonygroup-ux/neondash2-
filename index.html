@@ -222,6 +222,49 @@ nav{
 .cta-sub{font-size:14px;color:#8899bb;letter-spacing:2px;margin-bottom:40px;position:relative;}
 .cta-btns{display:flex;flex-direction:column;gap:12px;max-width:300px;margin:0 auto;position:relative;}
 
+/* LEGAL MODALS */
+.legal-modal{
+  display:none;position:fixed;inset:0;z-index:999;
+  background:#020208;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.legal-modal.open{display:block;}
+.legal-modal-header{
+  position:sticky;top:0;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top));
+  background:#020208;border-bottom:1px solid rgba(0,255,240,0.12);
+}
+.legal-modal-title{
+  font-family:'Orbitron',monospace;font-size:12px;font-weight:900;
+  letter-spacing:3px;color:var(--c1);text-shadow:0 0 12px var(--c1);
+}
+.legal-modal-close{
+  background:transparent;border:1.5px solid var(--c12);color:var(--c12);
+  font-family:'Orbitron',monospace;font-size:9px;font-weight:700;
+  letter-spacing:2px;padding:7px 14px;border-radius:50px;cursor:pointer;
+}
+.legal-modal-close:active{background:var(--c12);color:#020208;}
+.legal-modal-body{padding:28px 20px 60px;max-width:740px;margin:0 auto;}
+.legal-modal-body h2{
+  font-family:'Orbitron',monospace;font-size:10px;font-weight:700;
+  letter-spacing:3px;color:white;margin:28px 0 10px;
+}
+.legal-modal-body h2:first-child{margin-top:0;}
+.legal-modal-body p{font-size:14px;color:#a0b0cc;line-height:1.8;margin-bottom:10px;}
+.legal-modal-body ul{margin:8px 0 10px;padding-left:0;list-style:none;}
+.legal-modal-body ul li{
+  font-size:14px;color:#a0b0cc;line-height:1.8;
+  padding:3px 0 3px 18px;position:relative;
+}
+.legal-modal-body ul li::before{
+  content:'▸';position:absolute;left:0;color:var(--c1);font-size:10px;top:5px;
+}
+.legal-modal-body .sec-num{
+  font-size:8px;letter-spacing:3px;color:var(--c1);margin-bottom:4px;margin-top:28px;
+}
+.legal-modal-body .sec-num:first-child{margin-top:0;}
+
 /* FOOTER */
 footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36px 24px;text-align:center;}
 .footer-logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:5px;margin-bottom:14px;background:linear-gradient(135deg,var(--c1),var(--c12));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
@@ -536,9 +579,113 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
 <footer>
   <div class="footer-logo">FURIOUS DASH</div>
   <div class="footer-dots"><div class="dot" style="background:var(--c1)"></div><div class="dot" style="background:var(--c3)"></div><div class="dot" style="background:var(--c5)"></div><div class="dot" style="background:var(--c7)"></div><div class="dot" style="background:var(--c9)"></div><div class="dot" style="background:var(--c12)"></div></div>
-  <div class="footer-links"><a id="privacyLink" href="#" onclick="window.location.href='privacy.html';return false;" style="color:var(--c1);text-shadow:0 0 8px var(--c1);">Privacy</a><a id="termsLink" href="#" onclick="window.location.href='terms.html';return false;">Terms</a><a href="#">Contact</a><a href="https://tiktok.com" target="_blank">TikTok</a></div>
+  <div class="footer-links"><a id="privacyLink" href="#" style="color:var(--c1);text-shadow:0 0 8px var(--c1);">Privacy</a><a id="termsLink" href="#">Terms</a><a href="#">Contact</a><a href="https://tiktok.com" target="_blank">TikTok</a></div>
   <div class="footer-copy">© 2026 FURIOUS DASH · furiousdash.juegos</div>
 </footer>
+
+<!-- PRIVACY MODAL -->
+<div id="privacyModal" class="legal-modal">
+  <div class="legal-modal-header">
+    <div class="legal-modal-title">PRIVACY POLICY</div>
+    <button class="legal-modal-close" id="privacyClose">✕ CLOSE</button>
+  </div>
+  <div class="legal-modal-body">
+    <p><strong>Furious Dash</strong> ("we," "us," or "our") operates FURIOUS DASH and furiousdash.com. This Privacy Policy explains what information we collect, how we use it, and your rights. By using FURIOUS DASH, you agree to the practices described here.</p>
+    <div class="sec-num">01 — INFORMATION WE COLLECT</div>
+    <h2>INFORMATION WE COLLECT</h2>
+    <ul>
+      <li><strong>Gameplay data</strong> — scores, session duration, world progression, death count, and in-game events</li>
+      <li><strong>Device information</strong> — device model, OS version, unique device identifiers, and language settings</li>
+      <li><strong>Crash and performance data</strong> — error logs and diagnostics to improve stability</li>
+      <li><strong>Advertising identifiers</strong> — IDFA (iOS) or GAID (Android), subject to your device permissions</li>
+      <li><strong>Purchase data</strong> — transaction records processed through Apple App Store or Google Play</li>
+    </ul>
+    <p>We do <strong>not</strong> collect your name, email, or account credentials unless you voluntarily contact us.</p>
+    <div class="sec-num">02 — HOW WE USE YOUR DATA</div>
+    <h2>HOW WE USE YOUR DATA</h2>
+    <ul>
+      <li>Operate, maintain, and improve the Game experience</li>
+      <li>Analyze gameplay patterns and fix bugs or performance issues</li>
+      <li>Serve relevant advertisements through our ad partners</li>
+      <li>Process and validate in-app purchases</li>
+      <li>Comply with legal obligations</li>
+    </ul>
+    <p>We do <strong>not</strong> sell, rent, or trade your personal data to third parties for their own marketing purposes.</p>
+    <div class="sec-num">03 — FIREBASE (GOOGLE)</div>
+    <h2>FIREBASE (GOOGLE)</h2>
+    <p>FURIOUS DASH uses Firebase services (Analytics, Crashlytics, Remote Config) provided by Google LLC to support core functionality. Firebase data is processed by Google per their Privacy Policy at firebase.google.com/support/privacy.</p>
+    <div class="sec-num">04 — ADMOB &amp; ADVERTISING</div>
+    <h2>ADMOB &amp; ADVERTISING</h2>
+    <p>We display ads through Google AdMob. AdMob may collect advertising identifiers, IP address, device type, and in-app behavior signals. On iOS we request App Tracking Transparency (ATT) permission before accessing your IDFA. You may deny this and still receive ads. On Android, opt out via Settings → Privacy → Ads. Learn more at policies.google.com/privacy.</p>
+    <div class="sec-num">05 — COOKIES</div>
+    <h2>COOKIES</h2>
+    <p>The FURIOUS DASH mobile app does not use browser cookies. The website furiousdash.com may use essential, analytics, and advertising cookies. You can control cookies through your browser settings at any time.</p>
+    <div class="sec-num">06 — IN-APP PURCHASES</div>
+    <h2>IN-APP PURCHASES &amp; PAYMENTS</h2>
+    <p>All in-app purchases are processed exclusively by Apple (App Store) or Google (Google Play). We do not collect, store, or process your payment card details at any point.</p>
+    <div class="sec-num">07 — CHILDREN'S PRIVACY (COPPA)</div>
+    <h2>CHILDREN'S PRIVACY</h2>
+    <p>FURIOUS DASH is rated 4+ and designed for all ages. We comply with COPPA and GDPR provisions for minors. We do not knowingly collect personal information from children under 13 without verifiable parental consent, and we do not display behavioral advertising to users identified as children. Contact privacy@furiousdash.com to request deletion of a child's data.</p>
+    <div class="sec-num">08 — GDPR (EEA &amp; UK)</div>
+    <h2>GDPR — YOUR RIGHTS</h2>
+    <p>If you are in the EEA or UK you have the right to access, rectify, erase, restrict, port, and object to your data. To exercise these rights, contact privacy@furiousdash.com. We will respond within 30 days.</p>
+    <div class="sec-num">09 — DATA RETENTION &amp; SECURITY</div>
+    <h2>DATA RETENTION &amp; SECURITY</h2>
+    <p>We retain gameplay and analytics data for up to 24 months from your last active session. We use industry-standard security measures to protect your data.</p>
+    <div class="sec-num">10 — CHANGES</div>
+    <h2>CHANGES TO THIS POLICY</h2>
+    <p>We may update this Privacy Policy at any time. Continued use of FURIOUS DASH after changes constitutes acceptance of the updated policy.</p>
+    <p style="margin-top:24px;"><strong>Contact:</strong> privacy@furiousdash.com · furiousdash.com</p>
+    <p style="font-size:12px;color:#4a5568;margin-top:8px;">Last updated: April 2026</p>
+  </div>
+</div>
+
+<!-- TERMS MODAL -->
+<div id="termsModal" class="legal-modal">
+  <div class="legal-modal-header">
+    <div class="legal-modal-title">TERMS &amp; CONDITIONS</div>
+    <button class="legal-modal-close" id="termsClose">✕ CLOSE</button>
+  </div>
+  <div class="legal-modal-body">
+    <div class="sec-num">01 — ACCEPTANCE OF TERMS</div>
+    <h2>ACCEPTANCE OF TERMS</h2>
+    <p>By downloading, installing, accessing, or playing FURIOUS DASH (the "Game"), you agree to be bound by these Terms and Conditions. If you do not agree, do not use the Game. These Terms constitute a legally binding agreement between you and <strong>Furious Dash</strong>, accessible at furiousdash.com.</p>
+    <div class="sec-num">02 — AGE REQUIREMENT</div>
+    <h2>AGE REQUIREMENT</h2>
+    <p>FURIOUS DASH is rated <strong>4+</strong> and suitable for players of all ages. Players under 13 must have parental or guardian consent before making any in-app purchases. By purchasing, you confirm you are at least 18, or have obtained parental consent.</p>
+    <div class="sec-num">03 — GAME LICENSE &amp; PERMITTED USE</div>
+    <h2>GAME LICENSE &amp; PERMITTED USE</h2>
+    <p>Furious Dash grants you a limited, non-exclusive, non-transferable, revocable license to play the Game for personal, non-commercial purposes. You agree not to:</p>
+    <ul>
+      <li>Copy, modify, distribute, sell, or lease any part of the Game</li>
+      <li>Reverse engineer, decompile, or attempt to extract source code</li>
+      <li>Use cheats, exploits, automation software, bots, or hacks</li>
+      <li>Use the Game for any commercial purpose without written permission</li>
+      <li>Interfere with or disrupt the integrity of the Game or its servers</li>
+    </ul>
+    <div class="sec-num">04 — IN-APP PURCHASES</div>
+    <h2>IN-APP PURCHASES</h2>
+    <p>FURIOUS DASH is free to play and offers optional in-app purchases including coin packs and premium world unlocks. All purchases are processed through the Apple App Store or Google Play Store. Virtual currency and in-game items have no real-world monetary value.</p>
+    <p><strong>NO REFUND POLICY:</strong> All in-app purchases are final and non-refundable. For billing disputes, contact Apple Support or Google Play Support directly.</p>
+    <div class="sec-num">05 — INTELLECTUAL PROPERTY</div>
+    <h2>INTELLECTUAL PROPERTY</h2>
+    <p>All content within FURIOUS DASH — including the game name, logo, artwork, graphics, animations, sound effects, music, and code — is the exclusive property of Furious Dash and protected by copyright and intellectual property laws. You may not reproduce or create derivative works without our prior written consent.</p>
+    <div class="sec-num">06 — LIMITATION OF LIABILITY</div>
+    <h2>LIMITATION OF LIABILITY</h2>
+    <p>To the maximum extent permitted by law, Furious Dash shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the Game, including loss of in-game progress, device damage, or service interruptions. The Game is provided "as is" without warranties of any kind.</p>
+    <div class="sec-num">07 — PRIVACY</div>
+    <h2>PRIVACY</h2>
+    <p>Your use of the Game is governed by our Privacy Policy. FURIOUS DASH may collect anonymous gameplay data to improve the experience. We do not sell your personal data to third parties.</p>
+    <div class="sec-num">08 — TERMINATION</div>
+    <h2>TERMINATION</h2>
+    <p>We reserve the right to suspend or terminate your access to FURIOUS DASH at any time for violation of these Terms, fraudulent activity, or abuse of in-app systems — without prior notice. Upon termination all licenses cease and in-game items are forfeited.</p>
+    <div class="sec-num">09 — GOVERNING LAW</div>
+    <h2>GOVERNING LAW</h2>
+    <p>These Terms shall be governed by applicable law. Disputes shall be resolved through good-faith negotiation, or if unresolved, submitted to binding arbitration or competent courts of the jurisdiction in which Furious Dash operates.</p>
+    <p style="margin-top:24px;"><strong>Contact:</strong> legal@furiousdash.com · furiousdash.com</p>
+    <p style="font-size:12px;color:#4a5568;margin-top:8px;">Last updated: April 2026</p>
+  </div>
+</div>
 
 <!-- SHARE CARD OVERLAY -->
 <div id="shareOverlay">
@@ -981,15 +1128,17 @@ document.getElementById('shareTiktokBtn').addEventListener('click', () => {
   }, 'image/png');
 });
 
-// ── FOOTER LINKS — iOS touch fix ──
-document.getElementById('privacyLink').addEventListener('touchend', function(e){
-  e.preventDefault();
-  window.location.href = 'privacy.html';
-});
-document.getElementById('termsLink').addEventListener('touchend', function(e){
-  e.preventDefault();
-  window.location.href = 'terms.html';
-});
+// ── LEGAL MODALS ──
+(function(){
+  function openModal(id){ document.getElementById(id).style.display='flex'; document.body.style.overflow='hidden'; }
+  function closeModal(id){ document.getElementById(id).style.display='none'; document.body.style.overflow=''; }
+  ['click','touchend'].forEach(function(ev){
+    document.getElementById('privacyLink').addEventListener(ev,function(e){e.preventDefault();openModal('privacyModal');});
+    document.getElementById('termsLink').addEventListener(ev,function(e){e.preventDefault();openModal('termsModal');});
+    document.getElementById('privacyClose').addEventListener(ev,function(e){e.preventDefault();closeModal('privacyModal');});
+    document.getElementById('termsClose').addEventListener(ev,function(e){e.preventDefault();closeModal('termsModal');});
+  });
+})();
 </script>
 </body>
 </html>
