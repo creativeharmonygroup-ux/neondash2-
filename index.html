@@ -485,7 +485,7 @@ footer{background:#020208;border-top:1px solid rgba(255,255,255,0.05);padding:36
       <div class="demo-start-icon">🚀</div>
       <div class="demo-start-title">FURIOUS DASH</div>
       <div class="demo-start-sub">60 SECONDS · FREE DEMO<br>TAP TO FLY</div>
-      <a href="game.html" class="demo-start-btn">⚡ PLAY NOW</a>
+      <a href="#" id="playNowBtn" class="demo-start-btn">⚡ PLAY NOW</a>
     </div>
     <div class="demo-end" id="demoEnd">
       <div class="demo-end-emoji">🔥</div>
@@ -1127,6 +1127,18 @@ document.getElementById('shareTiktokBtn').addEventListener('click', () => {
     a.click();
   }, 'image/png');
 });
+
+// ── PLAY NOW — device detection ──
+(function(){
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var android = /android/i.test(navigator.userAgent);
+  var appStore = 'https://apps.apple.com/app/furious-dash/id6744942840';
+  var playStore = 'https://play.google.com/store/apps/details?id=com.furiousdash.infinite';
+  var dest = android ? playStore : appStore;
+  var btn = document.getElementById('playNowBtn');
+  btn.addEventListener('click', function(e){ e.preventDefault(); window.open(dest, '_blank'); });
+  btn.addEventListener('touchend', function(e){ e.preventDefault(); window.open(dest, '_blank'); });
+})();
 
 // ── LEGAL MODALS ──
 (function(){
