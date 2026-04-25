@@ -1065,6 +1065,10 @@
     <div class="tap-hint">TAP TO START</div>
     <div class="instructions">TAP / CLICK TO BOOST<br>DODGE THE BARRIERS<br>COLLECT COINS</div>
     <button id="startWorldBtn" style="animation: btnFloat 2.5s ease-in-out infinite; background: linear-gradient(135deg, #ff006e, #bf00ff); color: white; box-shadow: 0 0 20px #ff006e, 0 0 40px #bf00ff; border: none; font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; letter-spacing: 3px; padding: 12px 32px; border-radius: 50px; cursor: pointer; pointer-events: all; margin-top: 18px;">🌌 DIMENSIONS</button>
+    <div style="display:flex;gap:18px;margin-top:auto;padding-bottom:env(safe-area-inset-bottom,12px);">
+      <button id="privacyBtn" style="background:none;border:none;color:rgba(255,255,255,0.28);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;pointer-events:all;padding:8px 4px;">PRIVACY</button>
+      <button id="termsBtn" style="background:none;border:none;color:rgba(255,255,255,0.28);font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;pointer-events:all;padding:8px 4px;">TERMS</button>
+    </div>
   </div>
 
   <!-- GAME OVER -->
@@ -1077,17 +1081,17 @@
     <div class="over-coins-earned" id="overCoinsEarned">+0 \u25cf COINS</div>
     <div class="new-best-badge" id="newBestBadge">★ NEW RECORD ★</div>
     <button class="epic-moment-btn hidden" id="epicMomentBtn" style="display:none">🔥 EPIC MOMENT</button>
-    <button class="revive-btn hidden" id="reviveBtn">📺 WATCH AD TO REVIVE</button>
+    <button class="revive-btn hidden" id="reviveBtn">💰 REVIVE · 50 🪙</button>
     <button class="restart-btn" id="restartBtn">PLAY AGAIN</button>
     <button class="share3pct-btn hidden" id="share3pctBtn">🎬 WOW TIKTOK MOMENT</button>
     <button id="worldBtn" style="animation: btnFloat 2.5s ease-in-out infinite; background: linear-gradient(135deg, #ff006e, #bf00ff); color: white; box-shadow: 0 0 20px #ff006e, 0 0 40px #bf00ff;">🌌 DIMENSIONS</button>
     <button id="coinShopBtn">💰 GET COINS</button>
   </div>
 
-  <!-- AD COUNTDOWN OVERLAY -->
+  <!-- REVIVE COUNTDOWN OVERLAY -->
   <div id="adCountdownOverlay" class="hidden">
-    <div id="adCountdownLabel">📺 AD PLAYING...</div>
-    <div id="adCountdownNum">3</div>
+    <div id="adCountdownLabel">⚡ REVIVING...</div>
+    <div id="adCountdownNum">2</div>
   </div>
 
   <!-- REPLAY OVERLAY -->
@@ -1447,8 +1451,8 @@ function writeCloudSave(s) {
         updateCoinHud();
         document.getElementById('bestDisplay').textContent = 'BEST: ' + save.best;
       })
-      .catch(e => console.warn('[Firebase]', e));
-  } catch(e) { console.warn('[Firebase init]', e); }
+      .catch(() => {});
+  } catch(e) { }
 })();
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -3834,7 +3838,10 @@ function gameOver() {
   document.getElementById('overCoinsEarned').textContent = `+${coinsThisRun + bonus} \u25cf COINS`;
   if (!hasEpicMoment) epicMomentBlob = null;
   YupiRecorder.stop().then(blob => { if (blob) yupilandiaBlob = blob; else yupilandiaBlob = null; });
-  document.getElementById('reviveBtn').classList.toggle('hidden', reviveUsed);
+  const canAffordRevive = save.coins >= REVIVE_COST;
+  const reviveBtnEl = document.getElementById('reviveBtn');
+  reviveBtnEl.classList.toggle('hidden', reviveUsed || !canAffordRevive);
+  reviveBtnEl.textContent = `💰 REVIVE · ${REVIVE_COST} 🪙`;
   const dsEl = document.getElementById('deathStreakMsg');
   dsEl.className = ''; dsEl.style.display = 'none';
   if (deathStreak >= 10) {
@@ -3855,10 +3862,8 @@ function gameOver() {
     badge.style.display = 'none';
     if (newRecord) { void badge.offsetWidth; badge.style.display = 'block'; }
     if (!chestStreakReached3) epicMomentBlob = null;
-    console.log("epicMomentSupported:", epicMomentSupported, "epicMomentBlob:", epicMomentBlob, "chestStreak:", chestStreak);
     const epicBtn = document.getElementById('epicMomentBtn');
     if (!epicMomentSupported) {
-      console.log("EPIC MOMENT not available on this device");
       epicBtn.style.display = 'none';
       epicBtn.classList.add('hidden');
     } else if (chestStreakReached3 && epicMomentBlob) {
@@ -3885,15 +3890,21 @@ function gameOver() {
 // \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 // ── UNIVERSE WORLD SHOP ──────────────────────────────────────────────────────
-function watchAdRevive() {
+const REVIVE_COST = 50;
+
+function coinsRevive() {
   if (reviveUsed) return;
+  if (save.coins < REVIVE_COST) return;
   reviveUsed = true;
+  save.coins -= REVIVE_COST;
+  writeSave(save);
+  updateCoinHud();
   AudioEngine.init(); AudioEngine.resume();
   document.getElementById('gameOverScreen').classList.add('hidden');
   const overlay = document.getElementById('adCountdownOverlay');
   const numEl   = document.getElementById('adCountdownNum');
   overlay.classList.remove('hidden');
-  let count = 3;
+  let count = 2;
   numEl.textContent = count;
   numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = 'countdownPop 0.3s cubic-bezier(0.34,1.56,0.64,1)';
   const tick = setInterval(() => {
@@ -3901,11 +3912,9 @@ function watchAdRevive() {
     if (count <= 0) {
       clearInterval(tick);
       overlay.classList.add('hidden');
-      // ── REVIVE ──
       state = 'playing';
       player.dead = false;
       player.vy = 0;
-      // 3-second timed shield (180 frames at 60fps)
       shieldChestTimer = 180;
       updateShieldChestHud();
       chestStreak = 0; streakCoinMult = 1; streakCoinTimer = 0;
@@ -3923,8 +3932,8 @@ function watchAdRevive() {
 }
 
 const reviveBtn = document.getElementById('reviveBtn');
-reviveBtn.addEventListener('click', e => { e.stopPropagation(); watchAdRevive(); });
-reviveBtn.addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); watchAdRevive(); });
+reviveBtn.addEventListener('click', e => { e.stopPropagation(); coinsRevive(); });
+reviveBtn.addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); coinsRevive(); });
 
 let _worldScrollLastIdx = -1;
 let _coinShopScrollLastIdx = -1;
@@ -6281,7 +6290,6 @@ function loop() {
 
     // Legendary chest milestone check — runs every frame, catches any coin source
     if(!legendaryChest && save.coins >= nextLegendaryCoinThreshold) {
-      console.log(`[LegendaryChest] SPAWN — coins:${save.coins} threshold:${nextLegendaryCoinThreshold}`);
       legendaryChest = { x: canvas.width + 60, y: canvas.height * 0.5, w: 60, h: 50, collected: false, t: 0, spin: 0 };
       nextLegendaryCoinThreshold = Math.floor(save.coins / 100) * 100 + 100;
     }
@@ -6326,7 +6334,6 @@ function loop() {
           const distBot = b.bottomY - (player.y + r);
           const closest = Math.min(distTop, distBot);
           if(closest >= 0) b.minGapDist = Math.min(b.minGapDist, closest);
-          console.log(`[NearMiss] barrier overlap — distTop:${distTop.toFixed(1)} distBot:${distBot.toFixed(1)} closest:${closest.toFixed(1)} minGapDist:${b.minGapDist.toFixed(1)}`);
         }
       }
       if(!b.scored&&b.x+BAR_W<player.x){
@@ -6337,7 +6344,6 @@ function loop() {
         // Near miss: check closest approach recorded during overlap
         if(!nearMissCooldown && !player.dead && b.minGapDist < 40) {
           nearMissCooldown = 50;
-          console.log(`[NearMiss] TRIGGERED — minGapDist:${b.minGapDist.toFixed(1)}`);
           awardCoins(1, player.x, player.y - 28);
           showNearMissFloat();
           flashScreen('#ffee00', 0.3);
@@ -6634,6 +6640,18 @@ document.getElementById('share3pctBtn').addEventListener('touchstart', e => { e.
 document.getElementById('rvPlayAgainBtn').addEventListener('click', e => {
   e.stopPropagation();
   startGame();
+});
+
+// ── PRIVACY / TERMS links ──
+function openLegal(page) {
+  window.open(page, '_blank', 'noopener');
+}
+['privacyBtn','termsBtn'].forEach(id => {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  const page = id === 'privacyBtn' ? 'privacy.html' : 'terms.html';
+  btn.addEventListener('click', e => { e.stopPropagation(); openLegal(page); });
+  btn.addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); openLegal(page); }, { passive: false });
 });
 </script>
 
