@@ -19,7 +19,7 @@
   }
 
   body {
-    background: #020208;
+    background: radial-gradient(ellipse 120% 80% at 50% 0%, rgba(0,30,40,0.5) 0%, #020208 60%);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -33,11 +33,12 @@
     position: relative;
     width: 390px;
     height: 700px;
-    border: 2px solid var(--neon-cyan);
-    box-shadow: 0 0 30px var(--neon-cyan), 0 0 60px rgba(0,255,240,0.2), inset 0 0 30px rgba(0,255,240,0.05);
+    border: 2px solid rgba(0,255,240,0.8);
+    box-shadow: 0 0 40px var(--neon-cyan), 0 0 90px rgba(0,255,240,0.3), 0 0 180px rgba(0,255,240,0.12), inset 0 0 50px rgba(0,255,240,0.08);
     border-radius: 20px;
     overflow: hidden;
     background: var(--bg-dark);
+    animation: wrapperGlow 4s ease-in-out infinite;
   }
 
   canvas { display: block; width: 100%; height: 100%; }
@@ -47,7 +48,8 @@
   #scoreDisplay {
     position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
     font-size: 42px; font-weight: 900; color: white;
-    text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan), 0 0 70px rgba(0,255,240,0.45);
+    filter: drop-shadow(0 0 15px var(--neon-cyan));
     letter-spacing: 4px; transition: transform 0.1s;
   }
   #scoreDisplay.pop { transform: translateX(-50%) scale(1.3); }
@@ -134,12 +136,12 @@
 
   /* ── COIN SHOP BUTTON — game over screen ── */
   #coinShopBtn {
-    background: linear-gradient(135deg, #ffaa00, #ffdd00);
+    background: linear-gradient(135deg, #ffaa00, #ffee00);
     color: #1a0800; font-family: 'Orbitron', monospace;
     font-size: 12px; font-weight: 900; letter-spacing: 2px;
     border: none; border-radius: 50px; padding: 12px 32px;
     cursor: pointer; pointer-events: all;
-    box-shadow: 0 0 20px rgba(255,180,0,0.55), 0 0 40px rgba(255,120,0,0.18);
+    box-shadow: 0 0 28px rgba(255,180,0,0.7), 0 0 60px rgba(255,120,0,0.3), 0 0 0 1px rgba(255,220,0,0.2);
     animation: btnFloat 2.8s ease-in-out infinite;
     transition: transform 0.15s;
   }
@@ -161,7 +163,8 @@
   .coin-shop-title {
     font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 900;
     letter-spacing: 5px; color: #ffcc44;
-    text-shadow: 0 0 18px rgba(255,180,0,0.85), 0 0 40px rgba(255,130,0,0.3);
+    text-shadow: 0 0 18px #ffcc44, 0 0 50px rgba(255,180,0,0.8), 0 0 100px rgba(255,130,0,0.4);
+    filter: drop-shadow(0 0 20px rgba(255,180,0,0.5));
   }
   .coin-shop-close-btn {
     background: transparent; border: 1.5px solid rgba(255,180,0,0.35); color: #ffcc44;
@@ -183,11 +186,12 @@
   .coin-pack-card {
     display: flex; flex-direction: row; align-items: center;
     justify-content: space-between; border-radius: 14px; padding: 16px 18px;
-    border: 1px solid rgba(255,180,0,0.18);
-    background: linear-gradient(120deg, rgba(28,13,0,0.98) 0%, rgba(10,5,0,0.98) 100%);
-    box-shadow: inset 4px 0 0 #ffaa00, 0 0 14px rgba(255,140,0,0.05);
-    cursor: pointer; transition: transform 0.12s;
+    border: 1px solid rgba(255,180,0,0.25);
+    background: linear-gradient(120deg, rgba(30,14,0,0.98) 0%, rgba(12,6,0,0.98) 100%);
+    box-shadow: inset 4px 0 0 #ffaa00, 0 0 20px rgba(255,140,0,0.1), 0 2px 8px rgba(0,0,0,0.4);
+    cursor: pointer; transition: transform 0.12s, box-shadow 0.12s;
   }
+  .coin-pack-card:hover { transform: translateX(3px); box-shadow: inset 4px 0 0 #ffcc00, 0 0 30px rgba(255,180,0,0.2), 0 4px 16px rgba(0,0,0,0.4); }
   .coin-pack-card:active { transform: scale(0.97); }
 
   /* ── PREMIUM CARD ── */
@@ -312,16 +316,17 @@
 
   /* World/Universe button — game over screen */
   #worldBtn {
-    background: transparent; border: 1.5px solid rgba(180,100,255,0.45);
-    color: #b464ff; font-family: 'Orbitron', monospace;
+    background: rgba(180,100,255,0.06); border: 1.5px solid rgba(180,100,255,0.6);
+    color: #d080ff; font-family: 'Orbitron', monospace;
     font-size: 11px; font-weight: 700; letter-spacing: 3px;
     padding: 12px 32px; border-radius: 50px; cursor: pointer;
     pointer-events: all; margin-top: 6px;
-    text-shadow: 0 0 10px rgba(180,100,255,0.6);
-    box-shadow: 0 0 14px rgba(180,100,255,0.20), inset 0 0 10px rgba(180,100,255,0.04);
+    text-shadow: 0 0 12px rgba(180,100,255,0.8), 0 0 28px rgba(180,100,255,0.4);
+    box-shadow: 0 0 20px rgba(180,100,255,0.25), 0 0 40px rgba(180,100,255,0.08), inset 0 1px 0 rgba(180,100,255,0.12);
+    backdrop-filter: blur(8px);
     transition: background 0.15s, transform 0.15s;
   }
-  #worldBtn:active { background: rgba(180,100,255,0.12); transform: scale(0.96); }
+  #worldBtn:active { background: rgba(180,100,255,0.18); transform: scale(0.96); }
 
   /* ── UNIVERSE SCREEN ─────────────────────────────────────────── */
   #worldScreen {
@@ -340,7 +345,8 @@
   .world-title {
     font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 900;
     letter-spacing: 6px; color: #d080ff;
-    text-shadow: 0 0 18px rgba(180,100,255,0.8), 0 0 40px rgba(180,100,255,0.3);
+    text-shadow: 0 0 18px #d080ff, 0 0 50px rgba(180,100,255,0.8), 0 0 100px rgba(180,100,255,0.4);
+    filter: drop-shadow(0 0 20px rgba(180,100,255,0.55));
   }
   .world-close-btn {
     background: transparent; border: 1.5px solid rgba(180,100,255,0.3); color: #d080ff;
@@ -364,11 +370,13 @@
   .world-card {
     display: flex; flex-direction: row; align-items: stretch;
     border-radius: 14px; overflow: hidden; cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.06);
-    background: linear-gradient(120deg, rgba(10,4,22,0.97) 0%, rgba(5,2,14,0.99) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(120deg, rgba(12,5,28,0.98) 0%, rgba(6,2,16,0.99) 100%);
     transition: transform 0.16s, box-shadow 0.16s;
     position: relative; min-height: 82px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.5);
   }
+  .world-card:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(0,0,0,0.6), 0 0 20px rgba(255,255,255,0.05); }
   .world-card:active { transform: scale(0.984); }
 
   .world-card-preview {
@@ -462,12 +470,13 @@
   }
 
   .world-launch-btn {
-    background: transparent; border: 2px solid #b464ff; color: #d080ff;
+    background: rgba(180,100,255,0.08); border: 2px solid rgba(180,100,255,0.75); color: #d080ff;
     font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900;
     letter-spacing: 5px; padding: 13px 48px; border-radius: 50px; cursor: pointer;
     pointer-events: all; margin: 0 16px 18px; flex-shrink: 0;
-    text-shadow: 0 0 10px #b464ff;
-    box-shadow: 0 0 18px rgba(180,100,255,0.35), inset 0 0 14px rgba(180,100,255,0.06);
+    text-shadow: 0 0 12px #b464ff, 0 0 28px rgba(180,100,255,0.5);
+    box-shadow: 0 0 25px rgba(180,100,255,0.4), 0 0 55px rgba(180,100,255,0.15), inset 0 0 20px rgba(180,100,255,0.08), inset 0 1px 0 rgba(180,100,255,0.15);
+    backdrop-filter: blur(10px);
     transition: background 0.15s, transform 0.15s;
     animation: btnPulse 2.4s ease-in-out infinite, btnFloat 3.2s ease-in-out infinite;
   }
@@ -538,12 +547,13 @@
   .screen.hidden { display: none; }
 
   /* \u2500\u2500 START SCREEN \u2500\u2500 */
-  #startScreen { gap: 0; }
+  #startScreen { gap: 0; background: radial-gradient(ellipse 90% 70% at 50% 30%, rgba(0,255,240,0.06) 0%, transparent 65%), radial-gradient(ellipse 60% 50% at 80% 80%, rgba(191,0,255,0.05) 0%, transparent 55%), rgba(6,6,18,0.92); }
   .game-title {
     font-size: 52px; font-weight: 900; color: var(--neon-cyan); letter-spacing: 6px;
-    text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
+    text-shadow: 0 0 20px var(--neon-cyan), 0 0 50px var(--neon-cyan), 0 0 100px rgba(0,255,240,0.4), 0 0 180px rgba(0,255,240,0.15);
     text-align: center; width: 100%;
     animation: titlePulse 2s ease-in-out infinite; margin-bottom: 6px;
+    filter: drop-shadow(0 0 30px var(--neon-cyan));
   }
   .game-title span {
     display: inline-block;
@@ -584,7 +594,8 @@
 
   /* \u2500\u2500 GAME OVER SCREEN \u2500\u2500 */
   #gameOverScreen {
-    gap: 8px; background: rgba(4,2,16,0.96);
+    gap: 8px;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255,0,110,0.08) 0%, transparent 65%), radial-gradient(ellipse 50% 40% at 20% 80%, rgba(191,0,255,0.06) 0%, transparent 55%), rgba(4,2,16,0.97);
   }
   #gameOverScreen::before {
     content: ''; position: absolute; inset: 28px 18px; border-radius: 20px;
@@ -659,12 +670,13 @@
     box-shadow: 0 0 20px rgba(255,238,0,0.7);
   }
   .restart-btn {
-    background: transparent; border: 2px solid var(--neon-cyan); color: var(--neon-cyan);
+    background: rgba(0,255,240,0.06); border: 2px solid rgba(0,255,240,0.7); color: var(--neon-cyan);
     font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 700;
     letter-spacing: 4px; padding: 14px 40px; border-radius: 50px; cursor: pointer;
     pointer-events: all; text-transform: uppercase; margin-bottom: 10px;
-    text-shadow: 0 0 10px var(--neon-cyan);
-    box-shadow: 0 0 16px rgba(0,255,240,0.4), inset 0 0 14px rgba(0,255,240,0.06);
+    text-shadow: 0 0 10px var(--neon-cyan), 0 0 22px var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0,255,240,0.4), 0 0 40px rgba(0,255,240,0.1), inset 0 0 18px rgba(0,255,240,0.08), inset 0 1px 0 rgba(0,255,240,0.15);
+    backdrop-filter: blur(10px);
     animation: btnPulse 2s ease-in-out infinite, btnFloat 2.8s ease-in-out infinite;
     transition: background 0.15s, transform 0.15s;
   }
@@ -674,12 +686,13 @@
   }
   .restart-btn:active { background: var(--neon-cyan); color: black; transform: scale(0.96); animation: none; }
   .revive-btn {
-    background: transparent; border: 2px solid #00ff66; color: #00ff66;
+    background: rgba(0,255,102,0.06); border: 2px solid rgba(0,255,102,0.7); color: #00ff66;
     font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700;
     letter-spacing: 3px; padding: 12px 28px; border-radius: 50px; cursor: pointer;
     pointer-events: all; text-transform: uppercase; margin-bottom: 10px;
-    text-shadow: 0 0 10px #00ff66;
-    box-shadow: 0 0 16px rgba(0,255,102,0.4), inset 0 0 12px rgba(0,255,102,0.06);
+    text-shadow: 0 0 10px #00ff66, 0 0 22px #00ff66;
+    box-shadow: 0 0 20px rgba(0,255,102,0.4), 0 0 40px rgba(0,255,102,0.1), inset 0 0 16px rgba(0,255,102,0.08), inset 0 1px 0 rgba(0,255,102,0.15);
+    backdrop-filter: blur(10px);
     animation: revivePulse 2s ease-in-out infinite, btnFloat 3.2s ease-in-out infinite;
     transition: background 0.15s, transform 0.15s;
   }
@@ -955,12 +968,22 @@
   .splash-furious {
     font-family: 'Orbitron', monospace; font-weight: 900; font-style: italic;
     font-size: clamp(36px, 10vw, 80px); letter-spacing: 2px; line-height: 1;
-    filter: drop-shadow(0 0 18px #ff00cc) drop-shadow(0 0 36px #bf00ff);
+    filter: drop-shadow(0 0 28px #ff00cc) drop-shadow(0 0 55px #bf00ff) drop-shadow(0 0 90px rgba(191,0,255,0.45));
+    animation: splashFuriousPulse 1.4s ease-in-out infinite alternate;
+  }
+  @keyframes splashFuriousPulse {
+    0%   { filter: drop-shadow(0 0 22px #ff00cc) drop-shadow(0 0 44px #bf00ff); }
+    100% { filter: drop-shadow(0 0 38px #ff00cc) drop-shadow(0 0 75px #bf00ff) drop-shadow(0 0 130px rgba(191,0,255,0.5)); }
   }
   .splash-dash {
     font-family: 'Orbitron', monospace; font-weight: 900;
     font-size: clamp(80px, 26vw, 200px); letter-spacing: -4px; line-height: 1;
-    filter: drop-shadow(0 0 24px #ffee00) drop-shadow(0 0 50px #ff00cc);
+    filter: drop-shadow(0 0 35px #ffee00) drop-shadow(0 0 70px #ff00cc) drop-shadow(0 0 130px rgba(255,238,0,0.4));
+    animation: splashDashPulse 1.2s ease-in-out infinite alternate;
+  }
+  @keyframes splashDashPulse {
+    0%   { filter: drop-shadow(0 0 28px #ffee00) drop-shadow(0 0 55px #ff00cc); }
+    100% { filter: drop-shadow(0 0 50px #ffee00) drop-shadow(0 0 95px #ff00cc) drop-shadow(0 0 180px rgba(255,238,0,0.5)); }
   }
   .splash-sep {
     width: 70%; height: 3px; margin: 12px 0;
@@ -968,6 +991,33 @@
     border-radius: 2px;
     filter: drop-shadow(0 0 6px #bf00ff);
   }
+
+  /* WRAPPER GLOW BREATHING */
+  @keyframes wrapperGlow {
+    0%,100% { box-shadow: 0 0 40px var(--neon-cyan), 0 0 90px rgba(0,255,240,0.3), 0 0 180px rgba(0,255,240,0.12), inset 0 0 50px rgba(0,255,240,0.08); }
+    50% { box-shadow: 0 0 65px var(--neon-cyan), 0 0 140px rgba(0,255,240,0.4), 0 0 260px rgba(0,255,240,0.18), inset 0 0 70px rgba(0,255,240,0.12); }
+  }
+
+  /* CRT SCAN LINES */
+  #gameWrapper::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 500;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+  }
+
+  /* TAP HINT GLOW */
+  .tap-hint {
+    color: rgba(0,255,240,0.9);
+    text-shadow: 0 0 14px var(--neon-cyan), 0 0 35px rgba(0,255,240,0.4), 0 0 70px rgba(0,255,240,0.15);
+    letter-spacing: 5px;
+  }
+
+  /* SECTION SEPARATORS */
+  .world-header { border-bottom: 1px solid rgba(180,100,255,0.25); box-shadow: 0 1px 20px rgba(180,100,255,0.06); }
+  .coin-shop-header { border-bottom: 1px solid rgba(255,180,0,0.25); box-shadow: 0 1px 20px rgba(255,180,0,0.06); }
+
+  /* WORLD SCREEN ATMOSPHERE */
+  #worldScreen { background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(80,0,160,0.4) 0%, #03000a 55%); }
+  #coinShopScreen { background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(80,40,0,0.5) 0%, #030200 55%); }
 </style>
 </head>
 <body>
@@ -1042,7 +1092,8 @@
 
   <!-- REPLAY OVERLAY -->
   <div id="replayOverlay" class="screen hidden">
-    <video id="replayVideo" playsinline webkit-playsinline muted autoplay loop></video>
+    <img id="epicMomentImg" style="display:none;max-width:92%;max-height:58vh;border-radius:14px;object-fit:contain;box-shadow:0 0 40px rgba(255,102,0,0.5),0 0 80px rgba(255,102,0,0.2);" alt="Epic Moment">
+    <video id="replayVideo" style="display:none;" playsinline webkit-playsinline muted autoplay loop></video>
     <button id="shareTiktokBtn">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
         <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.19 8.19 0 0 0 4.79 1.52V6.76a4.85 4.85 0 0 1-1.02-.07z"/>
@@ -3383,7 +3434,7 @@ function onChestCollected() {
     spawnParticles(player.x, player.y, '#ffee00', 12, 1.0);
     showStreakNotif('TRIPLE CHEST! 🔥', 'triple');
     hasEpicMoment = true; chestStreakReached3 = true;
-    if (epicMomentSupported) EpicMomentRecorder.capture(canvas, 3000, blob => { epicMomentBlob = blob; });
+    canvas.toBlob(blob => { if (blob) epicMomentBlob = blob; }, 'image/jpeg', 0.92);
   } else if (chestStreak >= 4) {
     streakCoinMult = 4;
     streakCoinTimer = 300;
@@ -3394,7 +3445,7 @@ function onChestCollected() {
     spawnParticles(player.x, player.y, '#ff80ff', 22, 1.6);
     spawnParticles(player.x, player.y, '#ffffff', 15, 1.2);
     showStreakNotif('GODLIKE! 💥', 'godlike');
-    if (epicMomentSupported) EpicMomentRecorder.capture(canvas, 3000, blob => { epicMomentBlob = blob; });
+    canvas.toBlob(blob => { if (blob) epicMomentBlob = blob; }, 'image/jpeg', 0.92);
   }
 }
 
@@ -3697,7 +3748,7 @@ function startGame() {
   reviveUsed=false;
   document.getElementById('shieldChestHud').classList.add('hidden');
   speedMult=1.0; targetSpeedMult=1.0; slowMoMult=1.0; targetSlowMoMult=1.0; scorePhase=-1;
-  epicMomentBlob=null; hasEpicMoment=false; chestStreakReached3=false; EpicMomentRecorder.stop();
+  epicMomentBlob=null; hasEpicMoment=false; chestStreakReached3=false;
   yupilandiaBlob=null; YupiRecorder.stop();
 
   // Reset YUPILANDIA
@@ -3781,7 +3832,7 @@ function gameOver() {
   setTimeout(() => AudioEngine.playMockLaugh(), 400);
   document.getElementById('overBest').textContent = 'BEST: ' + save.best;
   document.getElementById('overCoinsEarned').textContent = `+${coinsThisRun + bonus} \u25cf COINS`;
-  EpicMomentRecorder.stop().then(blob => { if (hasEpicMoment && blob) epicMomentBlob = blob; else epicMomentBlob = null; });
+  if (!hasEpicMoment) epicMomentBlob = null;
   YupiRecorder.stop().then(blob => { if (blob) yupilandiaBlob = blob; else yupilandiaBlob = null; });
   document.getElementById('reviveBtn').classList.toggle('hidden', reviveUsed);
   const dsEl = document.getElementById('deathStreakMsg');
@@ -6319,7 +6370,7 @@ function loop() {
       checkCursedChestCollision();
       checkShieldChestCollection();
       checkSurpriseCollision();
-      if(!yupilandiaActive && !yupilandiaFrozen && checkCollision()){combo=0;gameOver();}
+      if(!yupilandiaActive && !yupilandiaFrozen && checkCollision() && shieldChestTimer===0){combo=0;gameOver();}
       if(yupilandiaActive && (player.y - player.size < 0 || player.y + player.size > canvas.height)){combo=0;gameOver();}
     }
   }
@@ -6362,53 +6413,8 @@ loop();
 
 let overlayBlob = null;
 let epicMomentBlob = null, hasEpicMoment = false, chestStreakReached3 = false;
-const epicMomentSupported = typeof MediaRecorder !== 'undefined';
+const epicMomentSupported = true; // canvas.toBlob works on all platforms including iOS WKWebView
 let yupilandiaBlob = null;
-
-// ═══════════════════════════════════════════════
-//  EPIC MOMENT RECORDER  — captures chest streak moments
-// ═══════════════════════════════════════════════
-const EpicMomentRecorder = (() => {
-  const MIMES = ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'];
-  let recorder = null, chunks = [], mime = '', autoTimer = null;
-
-  function start(canvasEl) {
-    if (recorder && recorder.state !== 'inactive') return;
-    chunks = [];
-    try {
-      mime = MIMES.find(m => MediaRecorder.isTypeSupported(m)) || '';
-      const stream = canvasEl.captureStream(30);
-      const opts = { videoBitsPerSecond: 3_000_000 };
-      if (mime) opts.mimeType = mime;
-      recorder = new MediaRecorder(stream, opts);
-      recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
-      recorder.start(100);
-    } catch(_) { recorder = null; }
-  }
-
-  function stop() {
-    return new Promise(resolve => {
-      if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
-      if (!recorder || recorder.state === 'inactive') { resolve(null); return; }
-      recorder.addEventListener('stop', () => {
-        const blob = chunks.length ? new Blob(chunks, { type: mime || 'video/webm' }) : null;
-        recorder = null; chunks = [];
-        resolve(blob);
-      }, { once: true });
-      recorder.stop();
-    });
-  }
-
-  function capture(canvasEl, ms, cb) {
-    // Stop any in-progress capture before starting a new one
-    stop().then(() => {
-      start(canvasEl);
-      autoTimer = setTimeout(() => stop().then(blob => { if (blob) cb(blob); }), ms);
-    });
-  }
-
-  return { capture, stop };
-})();
 
 // ═══════════════════════════════════════════════
 //  YUPI RECORDER  — captures YUPILANDIA active phase
@@ -6565,23 +6571,31 @@ function composeClip(sourceBlob) {
 }
 
 
-// ── EPIC MOMENT button → show video overlay ──
-document.getElementById('epicMomentBtn').addEventListener('click', e => {
-  e.stopPropagation();
+// ── EPIC MOMENT button → show screenshot overlay ──
+function openEpicMomentOverlay() {
   if (!epicMomentBlob) return;
   overlayBlob = epicMomentBlob;
+  const img = document.getElementById('epicMomentImg');
   const vid = document.getElementById('replayVideo');
-  vid.src = URL.createObjectURL(overlayBlob);
-  vid.load();
-  vid.play().catch(() => {});
+  vid.style.display = 'none';
+  img.style.display = '';
+  img.src = URL.createObjectURL(overlayBlob);
   document.getElementById('gameOverScreen').classList.add('hidden');
   document.getElementById('replayOverlay').classList.remove('hidden');
+}
+document.getElementById('epicMomentBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  openEpicMomentOverlay();
 });
+document.getElementById('epicMomentBtn').addEventListener('touchstart', e => {
+  e.stopPropagation(); e.preventDefault();
+  openEpicMomentOverlay();
+}, { passive: false });
 
 // ── SHARE TO TIKTOK ──
 document.getElementById('shareTiktokBtn').addEventListener('click', async () => {
   if (!overlayBlob) return;
-  const ext = overlayBlob.type.includes('mp4') ? 'mp4' : 'webm';
+  const ext = overlayBlob.type.includes('mp4') ? 'mp4' : overlayBlob.type.includes('webm') ? 'webm' : 'jpg';
   const file = new File([overlayBlob], `neon-dash.${ext}`, { type: overlayBlob.type });
   if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
@@ -6600,17 +6614,21 @@ document.getElementById('shareTiktokBtn').addEventListener('click', async () => 
 });
 
 // ── WOW TIKTOK MOMENT → play YUPILANDIA clip ──
-document.getElementById('share3pctBtn').addEventListener('click', e => {
-  e.stopPropagation();
+function openYupiOverlay() {
   if (!yupilandiaBlob) return;
   overlayBlob = yupilandiaBlob;
+  const img = document.getElementById('epicMomentImg');
   const vid = document.getElementById('replayVideo');
+  img.style.display = 'none';
+  vid.style.display = '';
   vid.src = URL.createObjectURL(overlayBlob);
   vid.load();
   vid.play().catch(() => {});
   document.getElementById('gameOverScreen').classList.add('hidden');
   document.getElementById('replayOverlay').classList.remove('hidden');
-});
+}
+document.getElementById('share3pctBtn').addEventListener('click', e => { e.stopPropagation(); openYupiOverlay(); });
+document.getElementById('share3pctBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); openYupiOverlay(); }, { passive: false });
 
 // ── PLAY AGAIN from replay overlay ──
 document.getElementById('rvPlayAgainBtn').addEventListener('click', e => {
