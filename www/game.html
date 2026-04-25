@@ -3711,10 +3711,11 @@ soundBtn.addEventListener('click', e => {
 });
 
 document.getElementById('worldBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playShopOpen(); openWorldShop(); });
-document.getElementById('worldBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openWorldShop(); }, { passive: false });
+document.getElementById('worldBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playShopOpen(); openWorldShop(); }, { passive: false });
 document.getElementById('startWorldBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playShopOpen(); openWorldShop(); });
 document.getElementById('startWorldBtn').addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.init(); AudioEngine.resume(); openWorldShop(); }, { passive: false });
-document.getElementById('worldCloseBtn').addEventListener('click', e => { e.stopPropagation(); const nm=!AudioEngine.isMuted(); AudioEngine.setMuted(nm); applySoundIcon(nm); document.getElementById('worldCloseBtn').textContent = nm ? '🔇' : '🔊'; });
+document.getElementById('worldCloseBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeWorldShop(); });
+document.getElementById('worldCloseBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeWorldShop(); });
 document.getElementById('worldLaunchBtn').addEventListener('click', e => { e.stopPropagation(); AudioEngine.playHangarClose(); closeWorldShop(); });
 document.getElementById('worldLaunchBtn').addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); AudioEngine.playHangarClose(); closeWorldShop(); });
 
@@ -4022,8 +4023,20 @@ function coinsRevive() {
 }
 
 const reviveBtn = document.getElementById('reviveBtn');
-reviveBtn.addEventListener('click', e => { e.stopPropagation(); admobReady ? watchAdRevive() : coinsRevive(); });
-reviveBtn.addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); admobReady ? watchAdRevive() : coinsRevive(); });
+function handleReviveTap() {
+  if (admobReady && rewardAdLoaded) { watchAdRevive(); return; }
+  if (admobReady && !rewardAdLoaded) {
+    const btn = document.getElementById('reviveBtn');
+    const prev = btn.textContent;
+    btn.textContent = '⏳ AD LOADING…';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 2000);
+    return;
+  }
+  coinsRevive();
+}
+reviveBtn.addEventListener('click', e => { e.stopPropagation(); handleReviveTap(); });
+reviveBtn.addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); handleReviveTap(); });
 
 let _worldScrollLastIdx = -1;
 let _coinShopScrollLastIdx = -1;
@@ -4032,8 +4045,6 @@ function openWorldShop() {
   AudioEngine.init(); AudioEngine.resume();
   AudioEngine.playHangarOpen();
   AudioEngine.startHangarMusic();
-  const worldSoundBtn = document.getElementById('worldCloseBtn');
-  if(worldSoundBtn) worldSoundBtn.textContent = AudioEngine.isMuted() ? '🔇' : '🔊';
   renderWorldShop();
   document.getElementById('worldScreen').classList.remove('hidden');
 }
