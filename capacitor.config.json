@@ -1,1 +1,1 @@
-{"appId":"com.neondash.infinite","appName":"Furious Dash","webDir":"www","server":{"initialPath":"game.html"}}
+{"appId":"com.neondash.infinite","appName":"Furious Dash","webDir":"www","server":{"initialPath":"game.html"},"plugins":{"AdMob":{"appIdIos":"ca-app-pub-3280614327685792~2548724014","initializeForTesting":false}}}

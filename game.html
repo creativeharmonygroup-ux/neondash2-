@@ -1146,6 +1146,12 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
+<!-- capacitor.js provides registerPlugin + WebPlugin needed by admob-plugin.js IIFE.
+     It augments (not replaces) window.Capacitor — the iOS native bridge injected
+     before page load (nativePromise, nativeCallback, PluginHeaders) is preserved. -->
+<script src="capacitor.js"></script>
+<script src="admob-plugin.js"></script>
+
 <script>
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 //  SHIP CATALOGUE \u2014 8 naves \u00fanicas
@@ -1388,14 +1394,14 @@ function loadSave() {
       coins: s.coins || 0,
       best: s.best || 0,
       owned: s.owned || ['classic'],
-      selected: s.selected || 'thegrid',
-      selectedWorld: s.selectedWorld || 'thegrid',
+      selected: s.selected || 'classic',
+      selectedWorld: s.selectedWorld || 'turbo',
       luxuryOwned: s.luxuryOwned || [],
       ownedWorlds: s.ownedWorlds || [],
       shieldCharges: s.shieldCharges || 0,
       premium: s.premium || false
     };
-  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'thegrid', selectedWorld: 'thegrid', luxuryOwned: [], ownedWorlds: [], shieldCharges: 0, premium: false }; }
+  } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'classic', selectedWorld: 'turbo', luxuryOwned: [], ownedWorlds: [], shieldCharges: 0, premium: false }; }
 }
 function writeSave(s) {
   localStorage.setItem('neonDashSave', JSON.stringify(s));
@@ -3133,6 +3139,10 @@ let yupiNegativeTimer = null;
 let yupilandiaRainbowT = 0;
 let yupiVortexT = 0;
 let yupiVortexAnim = null;
+let overlayBlob = null;
+let epicMomentBlob = null, hasEpicMoment = false, chestStreakReached3 = false;
+const epicMomentSupported = true;
+let yupilandiaBlob = null;
 const fluctNotif = document.getElementById('fluctNotif');
 const phaseIndicator = document.getElementById('phaseIndicator');
 let screenShake = { x:0, y:0, power:0 };
@@ -3557,7 +3567,7 @@ function triggerYupilandia() {
                   // BACK TO REALITY
                   backToRealityText.classList.add('show');
                   yupiVortexCanvas.classList.add('show');
-                  animateVortex(true, null); // vortex out effect
+                  animateVortex(false, null); // vortex out effect (false = close/fade out)
                   AudioEngine.stopYupiMusic();
                   stopYupiNegativeSounds();
                   flashScreen('#00fff0', 0.3);
@@ -3838,10 +3848,20 @@ function gameOver() {
   document.getElementById('overCoinsEarned').textContent = `+${coinsThisRun + bonus} \u25cf COINS`;
   if (!hasEpicMoment) epicMomentBlob = null;
   YupiRecorder.stop().then(blob => { if (blob) yupilandiaBlob = blob; else yupilandiaBlob = null; });
-  const canAffordRevive = save.coins >= REVIVE_COST;
   const reviveBtnEl = document.getElementById('reviveBtn');
-  reviveBtnEl.classList.toggle('hidden', reviveUsed || !canAffordRevive);
-  reviveBtnEl.textContent = `💰 REVIVE · ${REVIVE_COST} 🪙`;
+  if (!reviveUsed) {
+    if (admobReady && rewardAdLoaded) {
+      reviveBtnEl.textContent = '📺 WATCH AD TO REVIVE';
+      reviveBtnEl.classList.remove('hidden');
+    } else if (save.coins >= REVIVE_COST) {
+      reviveBtnEl.textContent = `💰 REVIVE · ${REVIVE_COST} 🪙`;
+      reviveBtnEl.classList.remove('hidden');
+    } else {
+      reviveBtnEl.classList.add('hidden');
+    }
+  } else {
+    reviveBtnEl.classList.add('hidden');
+  }
   const dsEl = document.getElementById('deathStreakMsg');
   dsEl.className = ''; dsEl.style.display = 'none';
   if (deathStreak >= 10) {
@@ -3892,13 +3912,49 @@ function gameOver() {
 // ── UNIVERSE WORLD SHOP ──────────────────────────────────────────────────────
 const REVIVE_COST = 50;
 
-function coinsRevive() {
-  if (reviveUsed) return;
-  if (save.coins < REVIVE_COST) return;
+// flip to true before App Store release
+const ADMOB_PROD = false;
+const AD_UNITS = {
+  revive: ADMOB_PROD
+    ? 'ca-app-pub-3280614327685792/4309047762'
+    : 'ca-app-pub-3940256099942544/1712485313'
+};
+
+let admobReady = false;
+let rewardAdLoaded = false;
+
+function getAdMobPlugin() {
+  return window.Capacitor &&
+         window.Capacitor.Plugins &&
+         window.Capacitor.Plugins.AdMob;
+}
+
+async function preloadRewardAd() {
+  const AdMob = getAdMobPlugin();
+  if (!AdMob) return;
+  try {
+    rewardAdLoaded = false;
+    await AdMob.prepareRewardVideoAd({ adId: AD_UNITS.revive });
+    rewardAdLoaded = true;
+  } catch(e) { rewardAdLoaded = false; }
+}
+
+async function initAdMob() {
+  if (!window.Capacitor) return;
+  if (typeof window.Capacitor.isNativePlatform === 'function' && !window.Capacitor.isNativePlatform()) return;
+  const AdMob = getAdMobPlugin();
+  if (!AdMob || typeof AdMob.initialize !== 'function') return;
+  try {
+    await AdMob.initialize();
+    admobReady = true;
+    preloadRewardAd();
+  } catch(e) { /* AdMob unavailable */ }
+}
+
+initAdMob();
+
+function executeRevive() {
   reviveUsed = true;
-  save.coins -= REVIVE_COST;
-  writeSave(save);
-  updateCoinHud();
   AudioEngine.init(); AudioEngine.resume();
   document.getElementById('gameOverScreen').classList.add('hidden');
   const overlay = document.getElementById('adCountdownOverlay');
@@ -3914,7 +3970,9 @@ function coinsRevive() {
       overlay.classList.add('hidden');
       state = 'playing';
       player.dead = false;
+      player.y = canvas.height * 0.5;
       player.vy = 0;
+      player.trail = [];
       shieldChestTimer = 180;
       updateShieldChestHud();
       chestStreak = 0; streakCoinMult = 1; streakCoinTimer = 0;
@@ -3931,9 +3989,41 @@ function coinsRevive() {
   }, 1000);
 }
 
+async function watchAdRevive() {
+  if (reviveUsed) return;
+  if (!admobReady || !rewardAdLoaded) { coinsRevive(); return; }
+  const AdMob = getAdMobPlugin();
+  if (!AdMob) { coinsRevive(); return; }
+  try {
+    let rewardGranted = false;
+    const rewardHandle = await AdMob.addListener('onRewardedVideoAdReward', () => {
+      rewardGranted = true;
+    });
+    const dismissHandle = await AdMob.addListener('onRewardedVideoAdDismissed', () => {
+      rewardHandle.remove();
+      dismissHandle.remove();
+      rewardAdLoaded = false;
+      preloadRewardAd(); // reload for next death
+      if (rewardGranted) executeRevive();
+    });
+    await AdMob.showRewardVideoAd();
+  } catch(e) {
+    coinsRevive();
+  }
+}
+
+function coinsRevive() {
+  if (reviveUsed) return;
+  if (save.coins < REVIVE_COST) return;
+  save.coins -= REVIVE_COST;
+  writeSave(save);
+  updateCoinHud();
+  executeRevive();
+}
+
 const reviveBtn = document.getElementById('reviveBtn');
-reviveBtn.addEventListener('click', e => { e.stopPropagation(); coinsRevive(); });
-reviveBtn.addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); coinsRevive(); });
+reviveBtn.addEventListener('click', e => { e.stopPropagation(); admobReady ? watchAdRevive() : coinsRevive(); });
+reviveBtn.addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); admobReady ? watchAdRevive() : coinsRevive(); });
 
 let _worldScrollLastIdx = -1;
 let _coinShopScrollLastIdx = -1;
@@ -6416,11 +6506,6 @@ loop();
     setTimeout(() => splash.classList.add('hidden'), 650);
   }, 2000);
 })();
-
-let overlayBlob = null;
-let epicMomentBlob = null, hasEpicMoment = false, chestStreakReached3 = false;
-const epicMomentSupported = true; // canvas.toBlob works on all platforms including iOS WKWebView
-let yupilandiaBlob = null;
 
 // ═══════════════════════════════════════════════
 //  YUPI RECORDER  — captures YUPILANDIA active phase
