@@ -415,6 +415,117 @@
     transition: transform 0.12s; white-space: nowrap;
   }
   .badge-buy:active { transform: scale(0.93); }
+
+  /* ═══════════════════════════════════════════════════════
+     PREMIUM WORLD CARDS — gold tier
+  ═══════════════════════════════════════════════════════ */
+  .world-card.premium-card {
+    background: linear-gradient(135deg, #0f0700 0%, #1e0c01 48%, #0b0500 100%);
+    border: 1px solid rgba(255,168,0,0.60);
+    box-shadow:
+      inset 5px 0 0 #ffd700,
+      0 0 22px rgba(255,152,0,0.38),
+      0 0 60px rgba(255,108,0,0.16),
+      inset 0 0 55px rgba(255,140,0,0.07);
+    animation: premiumCardPulse 2.3s ease-in-out infinite;
+  }
+  .world-card.premium-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 55%; height: 100%;
+    background: linear-gradient(
+      108deg,
+      transparent 18%,
+      rgba(255,218,0,0.07) 38%,
+      rgba(255,255,230,0.17) 50%,
+      rgba(255,218,0,0.07) 62%,
+      transparent 82%
+    );
+    animation: premiumShimmer 3.6s ease-in-out infinite;
+    pointer-events: none; z-index: 3;
+  }
+  .world-card.premium-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow:
+      inset 5px 0 0 #ffe033,
+      0 0 38px rgba(255,175,0,0.72),
+      0 0 90px rgba(255,130,0,0.30),
+      inset 0 0 60px rgba(255,150,0,0.13) !important;
+  }
+  .world-card.premium-card .world-card-name {
+    background: linear-gradient(90deg, #fff8e0 25%, #ffd700 70%, #ff9800);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; text-shadow: none !important;
+  }
+  .world-card.premium-card .world-card-desc {
+    color: rgba(255,188,78,0.55);
+  }
+  @keyframes premiumCardPulse {
+    0%,100% {
+      box-shadow: inset 5px 0 0 #ffd700,
+        0 0 22px rgba(255,152,0,0.38), 0 0 60px rgba(255,108,0,0.16),
+        inset 0 0 55px rgba(255,140,0,0.07);
+    }
+    50% {
+      box-shadow: inset 5px 0 0 #ffe033,
+        0 0 38px rgba(255,178,0,0.68), 0 0 88px rgba(255,132,0,0.30),
+        inset 0 0 65px rgba(255,155,0,0.14);
+    }
+  }
+  @keyframes premiumShimmer {
+    0%   { left: -100%; }
+    60%, 100% { left: 185%; }
+  }
+  /* PREMIUM badge */
+  .premium-badge {
+    position: absolute; top: 7px; right: 8px; z-index: 6;
+    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+    color: #1a0500;
+    font-family: 'Orbitron', monospace;
+    font-size: 7px; font-weight: 900; letter-spacing: 1.8px;
+    padding: 3px 9px 3px 7px; border-radius: 4px;
+    box-shadow: 0 0 12px rgba(255,180,0,0.88), 0 0 28px rgba(255,130,0,0.55);
+    animation: premiumBadgePulse 1.9s ease-in-out infinite;
+    white-space: nowrap; pointer-events: none;
+  }
+  @keyframes premiumBadgePulse {
+    0%,100% { box-shadow: 0 0 12px rgba(255,180,0,0.88), 0 0 28px rgba(255,130,0,0.55); }
+    50%     { box-shadow: 0 0 22px rgba(255,202,0,1),    0 0 48px rgba(255,160,0,0.78); }
+  }
+  /* Gold lock overlay for premium */
+  .world-card-lock-overlay.premium-lock {
+    background: linear-gradient(135deg, rgba(18,7,0,0.68), rgba(50,24,0,0.58));
+    font-size: 26px;
+  }
+  /* Floating gold particles */
+  .premium-particle {
+    position: absolute;
+    width: 3px; height: 3px; border-radius: 50%;
+    background: #ffd700;
+    box-shadow: 0 0 5px #ffd700, 0 0 10px #ff9900;
+    pointer-events: none; z-index: 5;
+    animation: goldParticleFloat var(--dur, 2.4s) ease-in-out infinite var(--delay, 0s);
+    opacity: 0;
+  }
+  @keyframes goldParticleFloat {
+    0%   { transform: translate(0,0) scale(0.6); opacity: 0; }
+    15%  { opacity: 1; }
+    80%  { opacity: 0.6; }
+    100% { transform: translate(var(--tx,10px), var(--ty,-22px)) scale(0.1); opacity: 0; }
+  }
+  /* Premium section label */
+  .world-section-label.premium-label {
+    color: #ffd700; font-size: 10px; letter-spacing: 4px;
+    text-shadow: 0 0 14px rgba(255,180,0,0.90), 0 0 36px rgba(255,130,0,0.55);
+    border-top: 1px solid rgba(255,170,0,0.45);
+    padding: 10px 2px 4px;
+    animation: premiumLabelPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes premiumLabelPulse {
+    0%,100% { text-shadow: 0 0 14px rgba(255,180,0,0.90), 0 0 36px rgba(255,130,0,0.55); }
+    50%     { text-shadow: 0 0 24px rgba(255,202,0,1),    0 0 58px rgba(255,150,0,0.82); }
+  }
+
   .world-section-label {
     font-size: 9px; font-weight: 700; letter-spacing: 3px;
     color: #ffaa33; font-family: 'Orbitron', monospace;
@@ -4519,10 +4630,9 @@ function renderWorldShop() {
     const rgb = h2r(accent);
 
     const card = document.createElement('div');
-    card.className = 'world-card' + (sel ? ' world-selected' : '');
-    if (!owned && iapPrice) {
-      card.style.borderColor = 'rgba(255,170,0,0.25)';
-      card.style.boxShadow = 'inset 3px 0 0 rgba(255,140,0,0.35), 0 0 8px rgba(255,120,0,0.08)';
+    card.className = 'world-card' + (sel ? ' world-selected' : '') + (iapPrice ? ' premium-card' : '');
+    if (iapPrice) {
+      // premium-card CSS class handles border, shadow, and background
     } else if (!owned && coinPrice) {
       card.style.borderColor = 'rgba(255,200,0,0.25)';
       card.style.boxShadow = 'inset 3px 0 0 rgba(255,200,0,0.35), 0 0 8px rgba(255,180,0,0.08)';
@@ -4544,11 +4654,29 @@ function renderWorldShop() {
     previewPanel.appendChild(miniCanvas);
     if (!owned && iapPrice) {
       const lockEl = document.createElement('div');
-      lockEl.className = 'world-card-lock-overlay';
-      lockEl.textContent = '🔒';
+      lockEl.className = 'world-card-lock-overlay premium-lock';
+      lockEl.textContent = '💎';
       previewPanel.appendChild(lockEl);
     }
     card.appendChild(previewPanel);
+
+    if (iapPrice) {
+      const premBadge = document.createElement('div');
+      premBadge.className = 'premium-badge';
+      premBadge.textContent = '✦ PREMIUM';
+      card.appendChild(premBadge);
+      [[12,18,0],[30,78,1],[54,10,2],[76,68,3],[90,32,4],[48,90,5]].forEach(([lp,tp,i]) => {
+        const pt = document.createElement('span');
+        pt.className = 'premium-particle';
+        const a = (i/6)*Math.PI*2;
+        pt.style.left = lp+'%'; pt.style.top = tp+'%';
+        pt.style.setProperty('--tx', (Math.cos(a)*16).toFixed(1)+'px');
+        pt.style.setProperty('--ty', (Math.sin(a)*12-10).toFixed(1)+'px');
+        pt.style.setProperty('--dur', (2.0+i*0.38).toFixed(2)+'s');
+        pt.style.setProperty('--delay', (-i*0.42).toFixed(2)+'s');
+        card.appendChild(pt);
+      });
+    }
 
     // Info panel
     const info = document.createElement('div');
@@ -4640,8 +4768,8 @@ function renderWorldShop() {
 
   // ── PAID WORLDS at bottom ────────────────────────────────────────────────
   const sectionLabel = document.createElement('div');
-  sectionLabel.className = 'world-section-label';
-  sectionLabel.textContent = '💎 PREMIUM WORLDS';
+  sectionLabel.className = 'world-section-label premium-label';
+  sectionLabel.textContent = '✦ PREMIUM DIMENSIONS ✦';
   grid.appendChild(sectionLabel);
 
   WORLD_DEFS.filter(wd => wd.iapPrice).forEach(wd => {
