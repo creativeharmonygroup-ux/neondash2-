@@ -3117,6 +3117,8 @@ resize();
 let state = 'start';
 let score = 0, frame = 0, speed = 4.55, combo = 0;
 let coinsThisRun = 0;
+let _barrierStyle = '';
+let _bgGradCache = { top: null, bot: null, grad: null };
 let nearMissCooldown = 0;
 
 // Revive (watch ad) — once per session
@@ -4640,9 +4642,13 @@ function drawBackground() {
   }
 
   const wt = currentWorldTheme();
-  const grad=ctx.createLinearGradient(0,0,0,canvas.height);
-  grad.addColorStop(0, wt.bgTop); grad.addColorStop(1, wt.bgBot);
-  ctx.fillStyle=grad; ctx.fillRect(0,0,canvas.width,canvas.height);
+  _barrierStyle = wt.barrierStyle;
+  if (_bgGradCache.top !== wt.bgTop || _bgGradCache.bot !== wt.bgBot) {
+    _bgGradCache.grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    _bgGradCache.grad.addColorStop(0, wt.bgTop); _bgGradCache.grad.addColorStop(1, wt.bgBot);
+    _bgGradCache.top = wt.bgTop; _bgGradCache.bot = wt.bgBot;
+  }
+  ctx.fillStyle = _bgGradCache.grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const wid = wt.worldId;
 
@@ -4682,17 +4688,17 @@ function drawBackground() {
   if(wid==='thegrid') {
     ctx.shadowBlur=0;
     ctx.font='13px monospace';
-    const matCols=Math.ceil(canvas.width/15);
+    const matCols=Math.ceil(canvas.width/30);
     for(let c=0;c<matCols;c++){
       const spd=1.4+(c%5)*0.45;
       const headY=(frame*spd+c*43)%(canvas.height+160);
-      const len=8+(c%7)*2;
+      const len=5+(c%5);
       for(let i=0;i<len;i++){
         const y=headY-i*14;
         if(y<0||y>canvas.height) continue;
         const alpha=i===0?0.92:(1-i/len)*0.48;
         ctx.fillStyle=i===0?`rgba(190,255,190,${alpha})`:`rgba(0,255,65,${alpha})`;
-        ctx.fillText(String.fromCharCode(0x30A0+((c*13+i*7+Math.floor(frame*0.06))%96)),c*15,y);
+        ctx.fillText(String.fromCharCode(0x30A0+((c*13+i*7+Math.floor(frame*0.03))%96)),c*30,y);
       }
     }
     // Horizontal scan flash every ~90 frames
@@ -4702,7 +4708,7 @@ function drawBackground() {
 
   // ── MACHINE WAR: scanlines + fire glow + circuit grid ────────────────────
   if(wid==='machinewar') {
-    for(let y=0;y<canvas.height;y+=4){ ctx.fillStyle='rgba(0,0,0,0.13)'; ctx.fillRect(0,y,canvas.width,2); }
+    for(let y=0;y<canvas.height;y+=8){ ctx.fillStyle='rgba(0,0,0,0.13)'; ctx.fillRect(0,y,canvas.width,2); }
     const fp=0.12+0.08*Math.sin(frame*0.055);
     const fireG=ctx.createLinearGradient(0,canvas.height*0.66,0,canvas.height);
     fireG.addColorStop(0,'transparent'); fireG.addColorStop(0.55,`rgba(200,15,0,${fp})`); fireG.addColorStop(1,`rgba(255,40,0,${fp+0.14})`);
@@ -5910,7 +5916,7 @@ function checkSurpriseCollision() {
 }
 
 function drawBarrier(b) {
-  const bStyle = currentWorldTheme().barrierStyle;
+  const bStyle = _barrierStyle;
   ctx.shadowBlur=0;
 
   if(bStyle==='bone') {
@@ -6123,11 +6129,12 @@ function drawPlayer() {
   const ship = currentShip();
 
   // Trail
+  const trailRgb = hexToRgb(ship.trailColor);
   player.trail.forEach((t,i)=>{
     const progress=i/player.trail.length;
     const alpha=progress*0.5, size=player.size*progress*0.9;
     ctx.beginPath(); ctx.arc(t.x,t.y,size,0,Math.PI*2);
-    ctx.fillStyle=`rgba(${hexToRgb(ship.trailColor)},${alpha})`; ctx.fill();
+    ctx.fillStyle=`rgba(${trailRgb},${alpha})`; ctx.fill();
   });
 
   ctx.shadowBlur=0;
@@ -6155,42 +6162,11 @@ function drawPlayer() {
   ctx.fillStyle=fg; ctx.beginPath(); ctx.ellipse(0,player.size+flameSize*0.4,player.size*0.28,flameSize,0,0,Math.PI*2); ctx.fill();
   ctx.restore(); ctx.shadowBlur=0;
 
-  // ── Shield bubble (no shadowBlur, static — zero GPU offscreen cost on WKWebView) ──
+  // Shield
   if (save.shieldCharges > 0 || shieldChestTimer > 0) {
-    if (shieldCrackTimer > 0) shieldCrackTimer--;
-    const sR = player.size * 8.0;
-    const crackAlpha = shieldCrackTimer / 45;
-    ctx.save();
-    ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
-    // Outer ring
-    ctx.strokeStyle = 'rgba(191,0,255,0.85)';
-    ctx.lineWidth = 3.5;
-    ctx.beginPath(); ctx.arc(player.x, player.y, sR, 0, Math.PI*2); ctx.stroke();
-    // Inner ring
-    ctx.strokeStyle = 'rgba(220,100,255,0.40)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(player.x, player.y, sR * 0.82, 0, Math.PI*2); ctx.stroke();
-    // Fill
-    ctx.fillStyle = 'rgba(191,0,255,0.08)';
-    ctx.beginPath(); ctx.arc(player.x, player.y, sR, 0, Math.PI*2); ctx.fill();
-    // 🛡️ icon
-    const iconSize = Math.round(sR * 0.55);
-    ctx.font = `${iconSize}px serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('🛡️', player.x + sR * 0.68, player.y);
-    // Crack animation on hit
-    if (crackAlpha > 0) {
-      ctx.strokeStyle = `rgba(220,160,255,${crackAlpha * 0.9})`;
-      ctx.lineWidth = 1.5;
-      [[0, 0.5], [Math.PI*0.45, 0.6], [Math.PI, 0.4], [Math.PI*1.55, 0.7]].forEach(([angle, len]) => {
-        const x1 = player.x + Math.cos(angle) * sR * 0.5;
-        const y1 = player.y + Math.sin(angle) * sR * 0.5;
-        ctx.beginPath(); ctx.moveTo(x1, y1);
-        ctx.lineTo(x1 + Math.cos(angle+0.4)*sR*len, y1 + Math.sin(angle+0.4)*sR*len); ctx.stroke();
-      });
-    }
-    ctx.restore();
+    ctx.strokeStyle = '#bf00ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(player.x, player.y, player.size * 8.0, 0, Math.PI*2); ctx.stroke();
   }
 }
 
@@ -6457,7 +6433,7 @@ function loop() {
       checkCursedChestCollision();
       checkShieldChestCollection();
       checkSurpriseCollision();
-      if(!yupilandiaActive && !yupilandiaFrozen && checkCollision() && shieldChestTimer===0){combo=0;gameOver();}
+      if(!yupilandiaActive && !yupilandiaFrozen && checkCollision()){combo=0;gameOver();}
       if(yupilandiaActive && (player.y - player.size < 0 || player.y + player.size > canvas.height)){combo=0;gameOver();}
     }
   }
