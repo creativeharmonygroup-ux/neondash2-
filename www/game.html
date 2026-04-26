@@ -45,14 +45,7 @@
 
   #ui { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
 
-  #scoreDisplay {
-    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-    font-size: 42px; font-weight: 900; color: white;
-    text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan), 0 0 70px rgba(0,255,240,0.45);
-    filter: drop-shadow(0 0 15px var(--neon-cyan));
-    letter-spacing: 4px; transition: transform 0.1s;
-  }
-  #scoreDisplay.pop { transform: translateX(-50%) scale(1.3); }
+  /* #scoreDisplay defined in VISUAL UPGRADES block below */
 
   #bestDisplay {
     position: absolute; top: 72px; left: 50%; transform: translateX(-50%);
@@ -102,12 +95,7 @@
     animation: floatUpNearMiss 1.4s ease-out forwards;
     white-space: nowrap;
   }
-  @keyframes floatUpNearMiss {
-    0%   { opacity: 0; transform: translateY(0) scale(2.2); }
-    12%  { opacity: 1; transform: translateY(-8px) scale(1.3); }
-    60%  { opacity: 1; transform: translateY(-30px) scale(1.05); }
-    100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
-  }
+  /* @keyframes floatUpNearMiss redefined in VISUAL UPGRADES block */
   .coinFloat.cursedPenalty {
     font-size: 22px;
     font-weight: 900;
@@ -529,13 +517,7 @@
   }
   #coinUnlockPopupNo:active { transform: scale(0.93); }
 
-  #comboDisplay {
-    position: absolute; top: 110px; left: 50%; transform: translateX(-50%);
-    font-size: 13px; font-weight: 700; color: var(--neon-yellow);
-    letter-spacing: 3px; opacity: 0; transition: opacity 0.3s;
-    text-shadow: 0 0 10px var(--neon-yellow);
-  }
-  #comboDisplay.show { opacity: 1; }
+  /* #comboDisplay defined in VISUAL UPGRADES block below */
 
   .screen {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -546,8 +528,7 @@
   }
   .screen.hidden { display: none; }
 
-  /* \u2500\u2500 START SCREEN \u2500\u2500 */
-  #startScreen { gap: 0; background: radial-gradient(ellipse 90% 70% at 50% 30%, rgba(0,255,240,0.06) 0%, transparent 65%), radial-gradient(ellipse 60% 50% at 80% 80%, rgba(191,0,255,0.05) 0%, transparent 55%), rgba(6,6,18,0.92); }
+  /* \u2500\u2500 START SCREEN \u2014 redefined in VISUAL UPGRADES block \u2500\u2500 */
   .game-title {
     font-size: 52px; font-weight: 900; color: var(--neon-cyan); letter-spacing: 6px;
     text-shadow: 0 0 20px var(--neon-cyan), 0 0 50px var(--neon-cyan), 0 0 100px rgba(0,255,240,0.4), 0 0 180px rgba(0,255,240,0.15);
@@ -583,10 +564,7 @@
     letter-spacing: 8px; text-transform: uppercase; margin-bottom: 40px; opacity: 0.9;
   }
   .ship-preview { font-size: 60px; margin-bottom: 30px; animation: float 3s ease-in-out infinite; }
-  .tap-hint {
-    font-family: 'Rajdhani', sans-serif; font-size: 16px; color: white;
-    letter-spacing: 4px; opacity: 0; animation: blink 1.4s ease-in-out infinite; margin-bottom: 40px;
-  }
+  /* .tap-hint redefined in VISUAL UPGRADES block */
   .instructions {
     font-family: 'Rajdhani', sans-serif; font-size: 13px;
     color: rgba(255,255,255,0.4); letter-spacing: 2px; text-align: center; line-height: 2;
@@ -823,6 +801,150 @@
 
   @keyframes coinPop { 0% { transform:scale(1); } 50% { transform:scale(1.5); } 100% { transform:scale(1); } }
 
+  /* ── VISUAL UPGRADES ── */
+
+  /* Score: chromatic aberration pop */
+  #scoreDisplay {
+    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+    font-size: 42px; font-weight: 900; color: white;
+    text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan), 0 0 70px rgba(0,255,240,0.45);
+    filter: drop-shadow(0 0 15px var(--neon-cyan));
+    letter-spacing: 4px; transition: transform 0.1s;
+    background: rgba(0,255,240,0.04); border: 1px solid rgba(0,255,240,0.12);
+    padding: 2px 20px 4px; border-radius: 8px; backdrop-filter: blur(6px);
+  }
+  #scoreDisplay.pop {
+    transform: translateX(-50%) scale(1.4);
+    text-shadow: -3px 0 #ff006e, 3px 0 var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 50px var(--neon-cyan);
+  }
+
+  /* Combo: slam + color progression */
+  #comboDisplay {
+    position: absolute; top: 108px; left: 50%; transform: translateX(-50%) scale(0.8);
+    font-size: 17px; font-weight: 900; letter-spacing: 4px;
+    opacity: 0; transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  #comboDisplay.show {
+    opacity: 1;
+    animation: comboSlam 0.32s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  #comboDisplay.c2  { color:#ffee00; text-shadow:0 0 12px #ffee00,0 0 28px #ff8800; }
+  #comboDisplay.c3  { color:#ff8800; text-shadow:0 0 12px #ff8800,0 0 28px #ff4400; }
+  #comboDisplay.c4  { color:#ff4444; text-shadow:0 0 12px #ff4444,0 0 28px #ff0000; }
+  #comboDisplay.c5  { color:#ff00ff; text-shadow:0 0 14px #ff00ff,0 0 32px #cc00ff; }
+  #comboDisplay.c6plus { color:#fff; text-shadow:0 0 10px #fff,0 0 24px var(--neon-cyan),0 0 50px var(--neon-cyan); }
+  @keyframes comboSlam {
+    0%   { transform: translateX(-50%) scale(2.2) translateY(-8px); opacity:0; }
+    55%  { transform: translateX(-50%) scale(0.94) translateY(0); opacity:1; }
+    75%  { transform: translateX(-50%) scale(1.05); }
+    100% { transform: translateX(-50%) scale(1); opacity:1; }
+  }
+
+  /* Shockwave death ring */
+  .shockwave {
+    position:absolute; border-radius:50%; pointer-events:none; z-index:25;
+    border:3px solid rgba(255,0,110,0.9);
+    width:40px; height:40px; margin-left:-20px; margin-top:-20px;
+    animation: shockwaveExpand 0.65s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  .shockwave.cyan { border-color:rgba(0,255,240,0.9); }
+  @keyframes shockwaveExpand {
+    0%   { transform:scale(0); opacity:1; }
+    40%  { opacity:0.8; }
+    100% { transform:scale(22); opacity:0; }
+  }
+
+  /* Game over entrance */
+  @keyframes gameOverReveal {
+    0%   { opacity:0; transform:scale(1.08); filter:blur(10px); }
+    50%  { opacity:1; filter:blur(1px); }
+    100% { opacity:1; transform:scale(1); filter:blur(0); }
+  }
+  #gameOverScreen:not(.hidden) { animation: gameOverReveal 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+
+  /* Score slam in on game over */
+  @keyframes scoreSlamIn {
+    0%   { transform:scale(3.5) translateY(-15px); opacity:0; filter:blur(6px); }
+    55%  { transform:scale(0.94); filter:blur(0); }
+    75%  { transform:scale(1.04); }
+    100% { transform:scale(1); opacity:1; }
+  }
+  .over-score.slam { animation: scoreSlamIn 0.6s cubic-bezier(0.16,1,0.3,1) both, scoreGlow 1.5s ease-in-out infinite; }
+
+  /* Near-miss: more dramatic scale entrance */
+  @keyframes floatUpNearMiss {
+    0%   { opacity:0; transform:translateY(0) scale(3.8) rotate(-2deg); filter:blur(3px); }
+    14%  { opacity:1; transform:translateY(-8px) scale(1.28) rotate(1deg); filter:blur(0); }
+    60%  { opacity:1; transform:translateY(-32px) scale(1.04); }
+    100% { opacity:0; transform:translateY(-88px) scale(0.78); }
+  }
+
+  /* Start screen: deeper atmosphere */
+  #startScreen {
+    gap:0;
+    background:
+      radial-gradient(ellipse 120% 80% at 50% -10%, rgba(0,255,240,0.09) 0%, transparent 55%),
+      radial-gradient(ellipse 80% 60% at 15% 85%, rgba(191,0,255,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 88% 70%, rgba(255,0,110,0.06) 0%, transparent 45%),
+      rgba(5,5,16,0.96);
+  }
+  /* Subtle aurora sweep behind start screen */
+  #startScreen::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background: linear-gradient(180deg,
+      rgba(0,255,240,0.04) 0%,
+      transparent 30%,
+      transparent 70%,
+      rgba(191,0,255,0.04) 100%);
+    animation: auroraPulse 5s ease-in-out infinite;
+  }
+  @keyframes auroraPulse {
+    0%,100% { opacity:0.6; transform:translateY(0); }
+    50%      { opacity:1; transform:translateY(-8px); }
+  }
+  /* Scan beam sweeping down */
+  #startScreen::after {
+    content:''; position:absolute; left:0; right:0; height:2px; pointer-events:none;
+    background: linear-gradient(90deg, transparent, rgba(0,255,240,0.3), transparent);
+    animation: scanBeam 6s linear infinite;
+  }
+  @keyframes scanBeam {
+    0%   { top: 0%; opacity:0; }
+    5%   { opacity:1; }
+    95%  { opacity:0.6; }
+    100% { top:100%; opacity:0; }
+  }
+
+  /* TAP TO START: more dramatic */
+  .tap-hint {
+    font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; color:white;
+    letter-spacing:6px; opacity:0; animation:tapPulse 1.1s ease-in-out infinite; margin-bottom:40px;
+    text-shadow:0 0 14px var(--neon-cyan),0 0 35px rgba(0,255,240,0.5);
+  }
+  @keyframes tapPulse {
+    0%,100% { opacity:0; transform:scale(0.96); }
+    50%     { opacity:1; transform:scale(1.04); }
+  }
+
+  /* Speed vignette */
+  #speedVignette {
+    position:absolute; inset:0; pointer-events:none; z-index:6;
+    background:radial-gradient(ellipse at center, transparent 38%, rgba(255,100,0,0) 100%);
+    opacity:0; transition:opacity 1.2s;
+  }
+  #speedVignette.on {
+    background:radial-gradient(ellipse at center, transparent 32%, rgba(255,80,0,0.18) 75%, rgba(255,40,0,0.28) 100%);
+    opacity:1;
+  }
+
+  /* Letter wave: bigger bounce */
+  @keyframes letterWave {
+    0%,100% { transform:translateY(0px) scale(1); }
+    40%     { transform:translateY(-16px) scale(1.1); }
+    60%     { transform:translateY(-18px) scale(1.08); }
+  }
+
   /* ── SCORE 15 ACHIEVEMENT OVERLAY ── */
   #achieve15 {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -1051,6 +1173,7 @@
   </div>
 
   <div id="flashOverlay"></div>
+  <div id="speedVignette"></div>
   <div id="speedNotif">⚡ SPEED UP!</div>
   <div id="streakNotif"></div>
   <div id="fluctNotif"></div>
@@ -3238,8 +3361,13 @@ initStars();
 let particles = [];
 function spawnParticles(x,y,color,count=12,energy=1) {
   for(let i=0;i<count;i++) {
-    const angle=(Math.PI*2*i)/count+Math.random()*0.5, spd=(Math.random()*5+2)*energy;
-    particles.push({x,y,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd,life:1,decay:Math.random()*0.03+0.02,r:Math.random()*4+2,color,glow:true});
+    const angle=(Math.PI*2*i)/count+Math.random()*0.8;
+    const spd=(Math.random()*6+2)*energy;
+    const isSpark=Math.random()<0.42;
+    particles.push({x,y,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd,life:1,
+      decay:isSpark?Math.random()*0.04+0.026:Math.random()*0.028+0.016,
+      r:isSpark?Math.random()*1.8+0.7:Math.random()*5+2,
+      color,spark:isSpark});
   }
 }
 
@@ -3308,7 +3436,16 @@ function showSpeedNotif() {
   speedNotifActive = true;
   setTimeout(() => { speedNotif.style.display = 'none'; speedNotifActive = false; }, 2000);
 }
-function showCombo(n) { const el=document.getElementById('comboDisplay'); el.textContent=`x${n} COMBO!`; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200); }
+function showCombo(n) {
+  const el = document.getElementById('comboDisplay');
+  el.textContent = `x${n} COMBO!`;
+  el.className = '';
+  void el.offsetWidth;
+  const tier = n >= 6 ? 'c6plus' : n === 5 ? 'c5' : n === 4 ? 'c4' : n === 3 ? 'c3' : n === 2 ? 'c2' : '';
+  if (tier) el.classList.add(tier);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1200);
+}
 function showAchieve15() {
   const el=document.getElementById('achieve15'); el.classList.add('show');
   flashScreen('#00fff0',0.25); triggerShake(6);
@@ -3850,8 +3987,15 @@ function gameOver() {
   AudioEngine.stopYupiMusic();
   AudioEngine.stopMusic(); AudioEngine.playDeath();
   flashScreen('#ff006e', 0.7); triggerShake(12);
-  spawnParticles(player.x,player.y,'#ff006e',30,1.5);
-  spawnParticles(player.x,player.y,'#ffee00',15,1.2);
+  spawnParticles(player.x, player.y, '#ff006e', 30, 1.5);
+  spawnParticles(player.x, player.y, '#ffee00', 15, 1.2);
+  spawnParticles(player.x, player.y, '#ffffff', 10, 2.0);
+  // Shockwave ring
+  const sw = document.createElement('div');
+  sw.className = 'shockwave';
+  sw.style.cssText = `left:${player.x}px;top:${player.y}px`;
+  document.body.appendChild(sw);
+  setTimeout(() => sw.remove(), 900);
 
   const newRecord = score > save.best;
   if (newRecord) {
@@ -3863,7 +4007,9 @@ function gameOver() {
   const bonus = Math.floor(score / 5);
   if (bonus > 0) awardCoins(bonus);
 
-  document.getElementById('finalScore').textContent = score;
+  const fsEl = document.getElementById('finalScore');
+  fsEl.textContent = score;
+  fsEl.classList.remove('slam'); void fsEl.offsetWidth; fsEl.classList.add('slam');
   const deathPhrase = trapKillPhrase || getDeathPhrase(score);
   trapKillPhrase = null;
   document.getElementById('overPhrase').textContent = deathPhrase;
@@ -6160,14 +6306,22 @@ function drawPlayer() {
   if (player.dead) return;
   const ship = currentShip();
 
-  // Trail
+  // Trail — comet tail with quadratic falloff + bright head glow
   const trailRgb = hexToRgb(ship.trailColor);
-  player.trail.forEach((t,i)=>{
-    const progress=i/player.trail.length;
-    const alpha=progress*0.5, size=player.size*progress*0.9;
-    ctx.beginPath(); ctx.arc(t.x,t.y,size,0,Math.PI*2);
-    ctx.fillStyle=`rgba(${trailRgb},${alpha})`; ctx.fill();
+  const tLen = player.trail.length;
+  player.trail.forEach((t, i) => {
+    const progress = i / tLen;
+    const alpha = progress * progress * 0.72;
+    const size = player.size * (0.15 + progress * 0.85);
+    ctx.beginPath(); ctx.arc(t.x, t.y, size, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(${trailRgb},${alpha})`; ctx.fill();
   });
+  // Bright comet head glow at last trail point
+  if (tLen > 0) {
+    const head = player.trail[tLen - 1];
+    ctx.beginPath(); ctx.arc(head.x, head.y, player.size * 0.55, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(${trailRgb},0.55)`; ctx.fill();
+  }
 
   ctx.shadowBlur=0;
   ctx.save(); ctx.translate(player.x,player.y);
@@ -6204,10 +6358,23 @@ function drawPlayer() {
 
 function drawParticles() {
   particles.forEach(p=>{
-    ctx.globalAlpha=p.life; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);
-    ctx.fillStyle=p.color;  ctx.fill(); ctx.shadowBlur=0;
+    ctx.globalAlpha = p.life;
+    if (p.spark) {
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = p.r;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x - p.vx * 2.5, p.y - p.vy * 2.5);
+      ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI*2);
+      ctx.fillStyle = p.color; ctx.fill();
+    }
+    ctx.shadowBlur = 0;
   });
-  ctx.globalAlpha=1;
+  ctx.globalAlpha = 1;
+  ctx.lineWidth = 1;
 }
 
 // Hex to RGB helper
@@ -6300,6 +6467,10 @@ function loop() {
     speedMult += (targetSpeedMult - speedMult) * 0.05;
     slowMoMult += (targetSlowMoMult - slowMoMult) * 0.04;
     const spd = speed * speedMult * slowMoMult * worldDiffMult();
+
+    // Speed vignette — flares on fast phase
+    const vigEl = document.getElementById('speedVignette');
+    if (vigEl) { if (speedMult > 1.1) vigEl.classList.add('on'); else vigEl.classList.remove('on'); }
 
     stars.forEach(s=>{s.x-=s.speed*(spd/3.5);s.twinkle+=0.05;if(s.x<0){s.x=canvas.width;s.y=Math.random()*canvas.height;}});
     nebula.forEach(n=>{n.x-=n.speed*(spd/3.5);if(n.x+n.r<0){n.x=canvas.width+n.r;n.y=Math.random()*canvas.height;}});
