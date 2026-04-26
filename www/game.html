@@ -398,6 +398,13 @@
     font-family: 'Orbitron', monospace;
   }
 
+  .world-card-price-tag {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px; font-weight: 900; letter-spacing: 0.5px;
+    color: #ffaa33;
+    text-shadow: 0 0 8px rgba(255,160,0,0.55);
+  }
+
   .world-card-lock-overlay {
     position: absolute; inset: 0; z-index: 2;
     display: flex; align-items: center; justify-content: center;
@@ -1599,11 +1606,11 @@ const WORLD_DEFS = [
   { id:'prehistoric',name:'PREHISTORIC', emoji:'🦕',  desc:'Dark jungle · Lava particles · Tribal drums', accent:'#ff6600', bgA:'#071409', bgB:'#0e2210', coinPrice:5000 },
   { id:'nitro',      name:'NITRO',       emoji:'🏎️', desc:'Speed streaks · Tire smoke · Trap beat', accent:'#ff7700', bgA:'#0d0500', bgB:'#1a0a00', coinPrice:10000 },
   { id:'machinewar', name:'MACHINE WAR', emoji:'🤖',  desc:'Dark metal · Fire sparks · Industrial metal', accent:'#cc2200', bgA:'#0c0000', bgB:'#140000', iapPrice:1.99 },
-  { id:'thegrid',    name:'THE GRID',    emoji:'💻',  desc:'Matrix code rain · Glitch barriers · Electronic', accent:'#00ff41', bgA:'#000000', bgB:'#000800', iapPrice:5.99 },
+  { id:'thegrid',    name:'THE GRID',    emoji:'💻',  desc:'Matrix code rain · Glitch barriers · Electronic', accent:'#00ff41', bgA:'#000000', bgB:'#000800', iapPrice:9.99 },
 ];
 
 // Paid world IDs → price, and bundle config
-const PAID_WORLD_IDS = { machinewar:1.99, thegrid:5.99, obsidian:3.99, scuderia:3.99, tridente:4.99 };
+const PAID_WORLD_IDS = { machinewar:1.99, thegrid:9.99, obsidian:3.99, scuderia:3.99, tridente:4.99 };
 const COIN_UNLOCK_WORLDS = { prehistoric:5000, nitro:10000, veyron:18000, ragingbull:30000 };
 const BUNDLE_IDS = ['machinewar','thegrid','obsidian','scuderia','tridente'];
 const BUNDLE_PRICE = 19.99;
@@ -4695,10 +4702,17 @@ function renderWorldShop() {
     descEl.textContent = desc;
     info.appendChild(descEl);
 
+    if (iapPrice) {
+      const priceTag = document.createElement('div');
+      priceTag.className = 'world-card-price-tag';
+      priceTag.textContent = `$${iapPrice.toFixed(2)}`;
+      info.appendChild(priceTag);
+    }
+
     if (!owned && iapPrice) {
       const buyBtn = document.createElement('button');
       buyBtn.className = 'badge-buy';
-      buyBtn.textContent = `UNLOCK — $${iapPrice.toFixed(2)}`;
+      buyBtn.textContent = 'UNLOCK';
       buyBtn.addEventListener('touchstart', e => { e.stopPropagation(); AudioEngine.init(); AudioEngine.resume(); AudioEngine.playLocked(); }, { passive: true });
       buyBtn.addEventListener('click', e => { e.stopPropagation(); purchaseWorld(id); });
       info.appendChild(buyBtn);
