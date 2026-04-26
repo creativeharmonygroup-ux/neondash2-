@@ -3128,6 +3128,7 @@ let score = 0, frame = 0, speed = 4.55, combo = 0;
 let coinsThisRun = 0;
 let _barrierStyle = '';
 let _bgGradCache = { top: null, bot: null, grad: null };
+let _gridOffscreen = null;
 let nearMissCooldown = 0;
 
 // Revive (watch ad) — once per session
@@ -4693,24 +4694,38 @@ function drawBackground() {
     ctx.fillStyle='rgba(8,20,3,0.72)'; ctx.fillRect(0,canvas.height-22,canvas.width,22);
   }
 
-  // ── THE GRID: matrix code rain ──────────────────────────────────────────
+  // ── THE GRID: matrix code rain (offscreen, built once) ──────────────────
   if(wid==='thegrid') {
-    ctx.shadowBlur=0;
-    ctx.font='13px monospace';
-    const matCols=Math.ceil(canvas.width/30);
-    for(let c=0;c<matCols;c++){
-      const spd=1.4+(c%5)*0.45;
-      const headY=(frame*spd+c*43)%(canvas.height+160);
-      const len=5+(c%5);
-      for(let i=0;i<len;i++){
-        const y=headY-i*14;
-        if(y<0||y>canvas.height) continue;
-        const alpha=i===0?0.92:(1-i/len)*0.48;
-        ctx.fillStyle=i===0?`rgba(190,255,190,${alpha})`:`rgba(0,255,65,${alpha})`;
-        ctx.fillText(String.fromCharCode(0x30A0+((c*13+i*7+Math.floor(frame*0.03))%96)),c*30,y);
+    if(!_gridOffscreen || _gridOffscreen.width !== canvas.width) {
+      const W=canvas.width, H=canvas.height, OH=H*3;
+      const oc=document.createElement('canvas'); oc.width=W; oc.height=OH;
+      const g=oc.getContext('2d');
+      g.fillStyle='#000010'; g.fillRect(0,0,W,OH);
+      g.font='13px monospace';
+      const cols=Math.ceil(W/30);
+      for(let c=0;c<cols;c++){
+        const runLen=5+(c%5);
+        const spacing=90+(c%3)*40;
+        for(let startY=(c*23)%spacing; startY<OH; startY+=spacing){
+          for(let i=0;i<runLen;i++){
+            const y=startY+i*14; if(y>=OH) break;
+            const alpha=i===0?0.92:(1-i/runLen)*0.48;
+            g.fillStyle=i===0?`rgba(190,255,190,${alpha})`:`rgba(0,255,65,${alpha})`;
+            g.fillText(String.fromCharCode(0x30A0+((c*13+i*7)%96)),c*30,y);
+          }
+        }
       }
+      _gridOffscreen=oc;
     }
-    // Horizontal scan flash every ~90 frames
+    const OH=_gridOffscreen.height;
+    const oy=(frame*2)%OH;
+    const rem=OH-oy;
+    if(rem>=canvas.height){
+      ctx.drawImage(_gridOffscreen,0,oy,canvas.width,canvas.height,0,0,canvas.width,canvas.height);
+    } else {
+      ctx.drawImage(_gridOffscreen,0,oy,canvas.width,rem,0,0,canvas.width,rem);
+      ctx.drawImage(_gridOffscreen,0,0,canvas.width,canvas.height-rem,0,rem,canvas.width,canvas.height-rem);
+    }
     const scanY=(frame*1.8)%canvas.height;
     ctx.fillStyle='rgba(0,255,65,0.04)'; ctx.fillRect(0,scanY-1,canvas.width,3);
   }
