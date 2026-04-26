@@ -1404,12 +1404,21 @@ function loadSave() {
   } catch { return { coins: 0, best: 0, owned: ['classic'], selected: 'classic', selectedWorld: 'turbo', luxuryOwned: [], ownedWorlds: [], shieldCharges: 0, premium: false }; }
 }
 let _writeSaveTimer = null;
+let _coinsSinceLastSave = 0;
 function writeSave(s) {
   clearTimeout(_writeSaveTimer);
-  _writeSaveTimer = setTimeout(() => {
-    localStorage.setItem('neonDashSave', JSON.stringify(s));
-    writeCloudSave(s);
-  }, 800);
+  _writeSaveTimer = null;
+  _coinsSinceLastSave = 0;
+  localStorage.setItem('neonDashSave', JSON.stringify(s));
+  writeCloudSave(s);
+}
+function writeSaveCoin(s) {
+  _coinsSinceLastSave++;
+  if (_coinsSinceLastSave >= 10) {
+    writeSave(s);
+  } else if (!_writeSaveTimer) {
+    _writeSaveTimer = setTimeout(() => { writeSave(s); }, 5000);
+  }
 }
 
 let save = loadSave();
@@ -3810,7 +3819,7 @@ function awardCoins(amount, x, y) {
   const prevCoins = save.coins;
   save.coins += amount;
   coinsThisRun += amount;
-  writeSave(save);
+  writeSaveCoin(save);
   updateCoinHud();
   popCoin();
   if (shieldOn) AudioEngine.playCoinShield(); else AudioEngine.playCoin();
