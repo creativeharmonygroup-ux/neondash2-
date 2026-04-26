@@ -1018,6 +1018,14 @@
   /* WORLD SCREEN ATMOSPHERE */
   #worldScreen { background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(80,0,160,0.4) 0%, #03000a 55%); }
   #coinShopScreen { background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(80,40,0,0.5) 0%, #030200 55%); }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
 </style>
 </head>
 <body>
@@ -6731,14 +6739,5 @@ function openLegal(page) {
 });
 </script>
 
-<style>
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20% { transform: translateX(-6px); }
-    40% { transform: translateX(6px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
-  }
-</style>
 </body>
 </html>
