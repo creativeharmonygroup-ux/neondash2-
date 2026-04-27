@@ -4667,8 +4667,6 @@ function renderWorldShop() {
     cta.addEventListener('click', e => { e.stopPropagation(); purchaseBundle(); });
     bundleCard.appendChild(cta);
   }
-  grid.appendChild(bundleCard);
-
   // ── CARD BUILDER ─────────────────────────────────────────────────────────
   function makeCard(id, name, emoji, desc, accent, previewData, iapPrice, isLuxury, coinPrice) {
     const owned = isWorldOwned(id);
@@ -4848,6 +4846,8 @@ function renderWorldShop() {
       PAID_WORLD_IDS[ship.id], true
     ));
   });
+
+  grid.appendChild(bundleCard);
 }
 
 function drawWorldPreview(c, wd, selected) {
