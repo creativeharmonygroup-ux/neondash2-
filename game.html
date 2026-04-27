@@ -1630,7 +1630,7 @@ const SHIPS = [
 // ── LUXURY SHIPS ─────────────────────────────────────────────────────────────
 const LUXURY_SHIPS = [
   {
-    id:'obsidian', name:'OBSIDIAN', premiumPrice:2.99,
+    id:'obsidian', name:'OBSIDIAN', premiumPrice:3.99,
     color:'#1e1e1e', trailColor:'#aaaaaa',
     flameColors:['#ffffff','#e0e0e0','#888888','#303030'],
     wingColor:'rgba(150,150,150,0.75)', glowColor:'#cccccc', emoji:'🚀',
@@ -1639,7 +1639,7 @@ const LUXURY_SHIPS = [
     worldTheme:{ bgTop:'#040404', bgBot:'#0c0c0c', nebulaHue:220, nebulaSpread:15, starRgb:'200,200,200', barrierHue:220, barrierSpread:12, grid:'rgba(160,160,160,0.018)', worldId:'obsidian', barrierStyle:'chrome', ambientColor:'#aaaaaa' }
   },
   {
-    id:'scuderia', name:'SCUDERIA', premiumPrice:2.99,
+    id:'scuderia', name:'SCUDERIA', premiumPrice:5.99,
     color:'#cc0000', trailColor:'#ff2200',
     flameColors:['#ffffff','#ffff44','#ff1100','#660000'],
     wingColor:'rgba(200,0,0,0.9)', glowColor:'#ff0000', emoji:'🚀',
@@ -1648,7 +1648,7 @@ const LUXURY_SHIPS = [
     worldTheme:{ bgTop:'#050000', bgBot:'#0e0000', nebulaHue:5, nebulaSpread:8, starRgb:'255,120,60', barrierHue:3, barrierSpread:8, grid:'rgba(200,0,0,0.028)', worldId:'scuderia', barrierStyle:'carbonfiber', ambientColor:'#ff2200' }
   },
   {
-    id:'tridente', name:'TRIDENTE', premiumPrice:3.99,
+    id:'tridente', name:'TRIDENTE', premiumPrice:7.99,
     color:'#002d7a', trailColor:'#4488ff',
     flameColors:['#ffffff','#aaccff','#0055cc','#001050'],
     wingColor:'rgba(0,45,122,0.9)', glowColor:'#3366ff', emoji:'🔱',
@@ -1689,12 +1689,12 @@ const WORLD_DEFS = [
   { id:'auto',       name:'TURBO',       emoji:'✨',  desc:"Black speed track · NOS barriers · Trap beat", accent:'#ff4400', bgA:'#000000', bgB:'#030005' },
   { id:'prehistoric',name:'PREHISTORIC', emoji:'🦕',  desc:'Dark jungle · Lava particles · Tribal drums', accent:'#ff6600', bgA:'#071409', bgB:'#0e2210', coinPrice:5000 },
   { id:'nitro',      name:'NITRO',       emoji:'🏎️', desc:'Speed streaks · Tire smoke · Trap beat', accent:'#ff7700', bgA:'#0d0500', bgB:'#1a0a00', coinPrice:10000 },
-  { id:'machinewar', name:'MACHINE WAR', emoji:'🤖',  desc:'Dark metal · Fire sparks · Industrial metal', accent:'#cc2200', bgA:'#0c0000', bgB:'#140000', iapPrice:1.99 },
+  { id:'machinewar', name:'MACHINE WAR', emoji:'🤖',  desc:'Dark metal · Fire sparks · Industrial metal', accent:'#cc2200', bgA:'#0c0000', bgB:'#140000', iapPrice:9.99 },
   { id:'thegrid',    name:'THE GRID',    emoji:'💻',  desc:'Matrix code rain · Glitch barriers · Electronic', accent:'#00ff41', bgA:'#000000', bgB:'#000800', iapPrice:9.99 },
 ];
 
 // Paid world IDs → price, and bundle config
-const PAID_WORLD_IDS = { machinewar:1.99, thegrid:9.99, obsidian:3.99, scuderia:3.99, tridente:4.99 };
+const PAID_WORLD_IDS = { machinewar:9.99, thegrid:9.99, obsidian:3.99, scuderia:5.99, tridente:7.99 };
 const COIN_UNLOCK_WORLDS = { prehistoric:5000, nitro:10000, veyron:18000, ragingbull:30000 };
 const BUNDLE_IDS = ['machinewar','thegrid','obsidian','scuderia','tridente'];
 const BUNDLE_PRICE = 19.99;
@@ -4687,7 +4687,7 @@ function renderWorldShop() {
 
   const bundleItems = document.createElement('div');
   bundleItems.className = 'world-bundle-items';
-  [['MACHINE WAR','$1.99'],['OBSIDIAN','$3.99'],['SCUDERIA','$3.99'],['TRIDENTE','$4.99'],['THE GRID','$9.99']].forEach(([n,p]) => {
+  [['MACHINE WAR','$9.99'],['OBSIDIAN','$3.99'],['SCUDERIA','$5.99'],['TRIDENTE','$7.99'],['THE GRID','$9.99']].forEach(([n,p]) => {
     const row = document.createElement('div');
     row.className = 'bundle-world-row';
     const nm = document.createElement('span'); nm.className = 'bundle-world-name'; nm.textContent = n;
@@ -4700,13 +4700,13 @@ function renderWorldShop() {
   const priceBlock = document.createElement('div');
   priceBlock.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;';
   const strikeEl = document.createElement('span');
-  strikeEl.textContent = '$24.95';
+  strikeEl.textContent = '$37.95';
   strikeEl.style.cssText = 'text-decoration:line-through;font-size:11px;color:rgba(255,180,80,0.50);letter-spacing:0.5px;';
   const priceEl = document.createElement('span');
   priceEl.textContent = '$19.99';
   priceEl.style.cssText = 'font-size:28px;font-weight:900;color:#ffcc44;font-family:Orbitron,monospace;text-shadow:0 0 14px rgba(255,180,0,0.85),0 0 36px rgba(255,130,0,0.38);letter-spacing:1px;line-height:1;';
   const saveEl = document.createElement('span');
-  saveEl.textContent = 'YOU SAVE $4.96';
+  saveEl.textContent = 'YOU SAVE $17.96';
   saveEl.style.cssText = 'font-size:9px;font-weight:700;letter-spacing:1.5px;color:#ff9933;';
   priceBlock.appendChild(strikeEl); priceBlock.appendChild(priceEl); priceBlock.appendChild(saveEl);
   bundleCard.appendChild(priceBlock);
