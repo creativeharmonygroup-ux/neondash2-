@@ -4641,6 +4641,20 @@ function renderWorldShop() {
   });
   bundleCard.appendChild(bundleItems);
 
+  if (!allBundleOwned) {
+    const priceDisplay = document.createElement('div');
+    priceDisplay.style.cssText = 'display:flex;align-items:baseline;gap:7px;justify-content:center;padding:4px 0 2px;';
+    const strikeDisp = document.createElement('span');
+    strikeDisp.textContent = '$24.95';
+    strikeDisp.style.cssText = 'text-decoration:line-through;font-size:10px;color:rgba(255,180,80,0.45);letter-spacing:0.3px;';
+    const mainDisp = document.createElement('span');
+    mainDisp.textContent = '$19.99';
+    mainDisp.style.cssText = 'font-size:26px;font-weight:900;color:#ffcc44;font-family:Orbitron,monospace;text-shadow:0 0 14px rgba(255,180,0,0.80),0 0 34px rgba(255,130,0,0.35);letter-spacing:1px;line-height:1;';
+    priceDisplay.appendChild(strikeDisp);
+    priceDisplay.appendChild(mainDisp);
+    bundleCard.appendChild(priceDisplay);
+  }
+
   if (allBundleOwned) {
     const ownedLabel = document.createElement('div');
     ownedLabel.className = 'world-bundle-owned';
