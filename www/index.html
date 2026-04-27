@@ -363,7 +363,7 @@
     border: 1px solid rgba(255,255,255,0.08);
     background: linear-gradient(120deg, rgba(12,5,28,0.98) 0%, rgba(6,2,16,0.99) 100%);
     transition: transform 0.16s, box-shadow 0.16s;
-    position: relative; min-height: 82px;
+    position: relative; min-height: 96px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.5);
   }
   .world-card:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(0,0,0,0.6), 0 0 20px rgba(255,255,255,0.05); }
@@ -382,7 +382,7 @@
 
   .world-card-info {
     flex: 1; padding: 12px 14px 10px 12px;
-    display: flex; flex-direction: column; justify-content: center; gap: 5px;
+    display: flex; flex-direction: column; justify-content: flex-start; gap: 5px;
     border-left: 1px solid rgba(255,255,255,0.04); position: relative;
   }
   .world-card-name {
@@ -4670,7 +4670,7 @@ function renderWorldShop() {
     const previewPanel = document.createElement('div');
     previewPanel.className = 'world-card-preview';
     const miniCanvas = document.createElement('canvas');
-    miniCanvas.width = 110; miniCanvas.height = 82;
+    miniCanvas.width = 110; miniCanvas.height = 96;
     miniCanvas.className = 'world-card-canvas';
     drawWorldPreview(miniCanvas, previewData, sel);
     previewPanel.appendChild(miniCanvas);
