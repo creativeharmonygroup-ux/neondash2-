@@ -560,16 +560,30 @@
     background: #160c00;
     box-shadow: 0 0 24px rgba(255,140,0,0.20);
     padding: 16px 16px 14px; gap: 8px;
+    animation: bundleCardGlow 3s ease-in-out infinite;
+  }
+  @keyframes bundleCardGlow {
+    0%,100% { box-shadow: 0 0 24px rgba(255,140,0,0.20); border-color: rgba(255,170,0,0.55); }
+    50%     { box-shadow: 0 0 44px rgba(255,162,0,0.38), 0 0 72px rgba(255,110,0,0.12); border-color: rgba(255,200,0,0.72); }
   }
   .world-bundle-title {
     font-size: 14px; font-weight: 900; letter-spacing: 1.5px; color: #ffcc44;
-    text-shadow: 0 0 14px rgba(255,180,0,0.8);
+    text-shadow: 0 0 14px rgba(255,180,0,0.8), 0 0 32px rgba(255,140,0,0.35);
     font-family: 'Orbitron', monospace; text-align: center;
   }
   .world-bundle-items {
-    font-size: 10px; letter-spacing: 0.2px; color: #ffbb66;
-    text-align: center; line-height: 1.8; white-space: pre-line;
+    width: 100%; padding: 2px 4px;
+    display: flex; flex-direction: column; gap: 0;
   }
+  .bundle-world-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 2px;
+    border-bottom: 1px solid rgba(255,170,0,0.08);
+    font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 0.8px;
+  }
+  .bundle-world-row:last-child { border-bottom: none; }
+  .bundle-world-name { color: rgba(255,196,110,0.75); }
+  .bundle-world-price { color: #ffcc44; font-weight: 700; }
   .world-bundle-savings {
     font-size: 10px; color: #ff9933; letter-spacing: 0.2px; font-weight: 600;
   }
@@ -4617,7 +4631,14 @@ function renderWorldShop() {
 
   const bundleItems = document.createElement('div');
   bundleItems.className = 'world-bundle-items';
-  bundleItems.textContent = 'Machine War $1.99  ·  The Grid $5.99  ·  Obsidian $3.99\nScuderia $3.99  ·  Tridente $4.99';
+  [['MACHINE WAR','$1.99'],['OBSIDIAN','$3.99'],['SCUDERIA','$3.99'],['TRIDENTE','$4.99'],['THE GRID','$9.99']].forEach(([n,p]) => {
+    const row = document.createElement('div');
+    row.className = 'bundle-world-row';
+    const nm = document.createElement('span'); nm.className = 'bundle-world-name'; nm.textContent = n;
+    const pr = document.createElement('span'); pr.className = 'bundle-world-price'; pr.textContent = p;
+    row.appendChild(nm); row.appendChild(pr);
+    bundleItems.appendChild(row);
+  });
   bundleCard.appendChild(bundleItems);
 
   if (allBundleOwned) {
