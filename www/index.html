@@ -5012,11 +5012,17 @@ function drawBackground() {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Rapid strobe flash overlay (every ~8 frames at 60fps ≈ 7.5Hz)
-    const strobe = Math.sin(t * 25) * 0.5 + 0.5; // 0→1 fast oscillation
+    // Safe flash overlay: ~2.6Hz (WCAG 2.3: ≤3 flashes/sec) and ≤25% canvas area
+    const strobe = Math.sin(t * 5) * 0.5 + 0.5;
     if (strobe > 0.82) {
+      const flashW = canvas.width * 0.5;
+      const flashH = canvas.height * 0.5;
       ctx.fillStyle = `rgba(255,255,255,${(strobe - 0.82) * 1.8})`;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(
+        (canvas.width  - flashW) / 2,
+        (canvas.height - flashH) / 2,
+        flashW, flashH
+      );
     }
 
     // Scanline disco grid — thick neon lines cycling hue
