@@ -329,6 +329,7 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 18px 18px 10px; flex-shrink: 0;
     border-bottom: 1px solid rgba(180,100,255,0.15);
+    position: relative; z-index: 10;
   }
   .world-title {
     font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 900;
@@ -352,6 +353,7 @@
   .world-grid {
     width: 100%; padding: 8px 14px; display: flex; flex-direction: column; gap: 9px;
     overflow-y: auto; flex: 1; scrollbar-width: none;
+    overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch;
   }
   .world-grid::-webkit-scrollbar { display: none; }
 
@@ -446,6 +448,7 @@
       0 0 60px rgba(255,108,0,0.16),
       inset 0 0 55px rgba(255,140,0,0.07);
     animation: premiumCardPulse 2.3s ease-in-out infinite;
+    isolation: isolate;
   }
   .world-card.premium-card::before {
     content: '';
