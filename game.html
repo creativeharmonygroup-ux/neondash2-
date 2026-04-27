@@ -1490,7 +1490,7 @@
   <!-- COIN SHOP -->
   <div id="coinShopScreen" class="hidden">
     <div class="coin-shop-header">
-      <div class="coin-shop-title">⬡ NEON VAULT</div>
+      <div class="coin-shop-title">⬡ FURIOUS STORE</div>
       <button class="coin-shop-close-btn" id="coinShopCloseBtn">✕</button>
     </div>
     <div class="coin-shop-subtitle">COINS · SHIELDS · POWER</div>
@@ -4623,7 +4623,7 @@ function openCoinShop() {
   } else {
     const premBtn = document.createElement('button');
     premBtn.className = 'cshop-prem-btn';
-    premBtn.textContent = '$2.99';
+    premBtn.textContent = '$4.99';
     premBtn.addEventListener('click', e => { e.stopPropagation(); purchasePremium(); });
     premCard.appendChild(premBtn);
     premCard.addEventListener('click', () => purchasePremium());
@@ -4736,7 +4736,7 @@ function purchaseCoinPack(id) {
 function purchasePremium() {
   if (save.premium) return;
   // TODO: wire to real IAP (Capacitor Purchases plugin)
-  if (confirm('Buy FURIOUS DASH PREMIUM for $2.99?\nRemoves all ads forever.\n\n(This will trigger the App Store purchase flow)')) {
+  if (confirm('Buy FURIOUS DASH PREMIUM for $4.99?\nRemoves all ads forever.\n\n(This will trigger the App Store purchase flow)')) {
     save.premium = true;
     writeSave(save);
     openCoinShop(); // refresh to show OWNED state
