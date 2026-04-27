@@ -4192,11 +4192,11 @@ function gameOver() {
   spawnParticles(player.x, player.y, '#ff006e', 30, 1.5);
   spawnParticles(player.x, player.y, '#ffee00', 15, 1.2);
   spawnParticles(player.x, player.y, '#ffffff', 10, 2.0);
-  // Shockwave ring
+  // Shockwave ring — appended to #gameWrapper so left/top are canvas-relative
   const sw = document.createElement('div');
   sw.className = 'shockwave';
-  sw.style.cssText = `left:${player.x}px;top:${player.y}px`;
-  document.body.appendChild(sw);
+  sw.style.cssText = `left:${canvas.offsetLeft + player.x}px;top:${canvas.offsetTop + player.y}px`;
+  document.getElementById('gameWrapper').appendChild(sw);
   setTimeout(() => sw.remove(), 900);
 
   const newRecord = score > save.best;
