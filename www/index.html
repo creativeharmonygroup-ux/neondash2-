@@ -4641,26 +4641,26 @@ function renderWorldShop() {
   });
   bundleCard.appendChild(bundleItems);
 
+  const priceBlock = document.createElement('div');
+  priceBlock.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;';
+  const strikeEl = document.createElement('span');
+  strikeEl.textContent = '$24.95';
+  strikeEl.style.cssText = 'text-decoration:line-through;font-size:11px;color:rgba(255,180,80,0.50);letter-spacing:0.5px;';
+  const priceEl = document.createElement('span');
+  priceEl.textContent = '$19.99';
+  priceEl.style.cssText = 'font-size:28px;font-weight:900;color:#ffcc44;font-family:Orbitron,monospace;text-shadow:0 0 14px rgba(255,180,0,0.85),0 0 36px rgba(255,130,0,0.38);letter-spacing:1px;line-height:1;';
+  const saveEl = document.createElement('span');
+  saveEl.textContent = 'YOU SAVE $4.96';
+  saveEl.style.cssText = 'font-size:9px;font-weight:700;letter-spacing:1.5px;color:#ff9933;';
+  priceBlock.appendChild(strikeEl); priceBlock.appendChild(priceEl); priceBlock.appendChild(saveEl);
+  bundleCard.appendChild(priceBlock);
+
   if (allBundleOwned) {
     const ownedLabel = document.createElement('div');
     ownedLabel.className = 'world-bundle-owned';
     ownedLabel.textContent = '✓ ALL WORLDS UNLOCKED';
     bundleCard.appendChild(ownedLabel);
   } else {
-    const priceBlock = document.createElement('div');
-    priceBlock.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;';
-    const strikeEl = document.createElement('span');
-    strikeEl.textContent = '$24.95';
-    strikeEl.style.cssText = 'text-decoration:line-through;font-size:11px;color:rgba(255,180,80,0.50);letter-spacing:0.5px;';
-    const priceEl = document.createElement('span');
-    priceEl.textContent = '$19.99';
-    priceEl.style.cssText = 'font-size:28px;font-weight:900;color:#ffcc44;font-family:Orbitron,monospace;text-shadow:0 0 14px rgba(255,180,0,0.85),0 0 36px rgba(255,130,0,0.38);letter-spacing:1px;line-height:1;';
-    const saveEl = document.createElement('span');
-    saveEl.textContent = 'YOU SAVE $4.96';
-    saveEl.style.cssText = 'font-size:9px;font-weight:700;letter-spacing:1.5px;color:#ff9933;';
-    priceBlock.appendChild(strikeEl); priceBlock.appendChild(priceEl); priceBlock.appendChild(saveEl);
-    bundleCard.appendChild(priceBlock);
-
     const cta = document.createElement('button');
     cta.className = 'world-bundle-cta';
     cta.textContent = 'GET ALL 5';
